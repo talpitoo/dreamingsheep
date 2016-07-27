@@ -1,0 +1,106 @@
+@font-face {
+  font-family: 'lucidicon';
+  src: url('../fonts/lucidicon.eot?-o3dp6k');
+  src: url('../fonts/lucidicon.eot?#iefix-o3dp6k') format('embedded-opentype'), url('../fonts/lucidicon.woff?-o3dp6k') format('woff'), url('../fonts/lucidicon.ttf?-o3dp6k') format('truetype'), url('../fonts/lucidicon.svg?-o3dp6k#lucidicon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^='lucidicon-'],
+[class*=' lucidicon-'] {
+  font-family: 'lucidicon';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  // better Font Rendering
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.lucidicon-pencil:before {
+  content: '\e600';
+}
+
+.lucidicon-smiley:before {
+  content: '\e601';
+}
+
+.lucidicon-laugh:before {
+  content: '\e602';
+}
+
+.lucidicon-sad:before {
+  content: '\e603';
+}
+
+.lucidicon-scarry:before {
+  content: '\e604';
+}
+
+.lucidicon-neutral:before {
+  content: '\e605';
+}
+
+.lucidicon-zzz:before {
+  content: '\e606';
+}
+
+.lucidicon-constellation:before {
+  content: '\e607';
+}
+
+.lucidicon-friends:before {
+  content: '\e608';
+}
+
+.lucidicon-lightning:before {
+  content: '\e60e';
+}
+
+.lucidicon-batteryfull:before {
+  content: '\e60f';
+}
+
+.lucidicon-batteryhalf:before {
+  content: '\e610';
+}
+
+.lucidicon-batteryempty:before {
+  content: '\e611';
+}
+
+.lucidicon-vector:before {
+  content: '\e612';
+}
+
+.lucidicon-wave:before {
+  content: '\e613';
+}
+
+.lucidicon-snow:before {
+  content: '\e614';
+}
+
+.lucidicon-camera:before {
+  content: '\e609';
+}
+
+.lucidicon-alarm:before {
+  content: '\e60a';
+}
+
+.lucidicon-users:before {
+  content: '\e60b';
+}
+
+.lucidicon-tags:before {
+  content: '\e60c';
+}
+
+.lucidicon-link:before {
+  content: '\e60d';
+}

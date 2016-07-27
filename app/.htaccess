@@ -1,0 +1,9 @@
+#compress all text & html:
+AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript text/javascript image/png image/jpeg application/font-woff font/truetype font/opentype image/svg+xml
+# expires in 1 week
+<FilesMatch "\.(ico|jpg|png|js|css|ttf|eot|woff|svg)$">
+Header set Cache-Control "max-age=604800, public"
+</FilesMatch>
+<Files *.html>
+SetOutputFilter DEFLATE
+</Files>
