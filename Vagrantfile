@@ -106,6 +106,5 @@ Vagrant.configure(2) do |config|
   # Install dependencies
   cd shared
   npm install
-  bower install
 SHELL
 end
