@@ -1,19 +1,19 @@
 'use strict';
 
 // angular
-angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']); //'ngSanitize',
-angular.module('dreamingsheepApp').controller('DreamCtrl', function ($scope, $uibModal) {
-// angular.module('dreamingsheepApp').controller('DreamCtrl', function ($scope) {
+angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('DreamCtrl', function ($scope, $uibModal, $timeout) {
+  // navbar collapse
+  $scope.isNavCollapsed = true;
+  $scope.isCollapsed = false;
+  $scope.isSymbolCollapsed = true;
+  $scope.isCollapsedHorizontal = false;
+  $scope.isAdvancedSearchCollapsed = false;
+  $scope.isSaving = false; // dummy loader icon
+
   // symbols
   $scope.availableSymbols = ['levitation', 'cycling', 'mountains', 'flying', 'dog', 'joy', 'apple', 'snake'];
   $scope.multipleSymbols = {};
-  $scope.multipleSymbols.symbols = ['cycling', 'mountains'];
-
-  //related dreams
-  $scope.availableDreams = ['Related dream #7', 'dream #2', 'dream #3'];
-  $scope.multipleDreams = {};
-  $scope.multipleDreams.dreams = ['Related dream #7'];
-
+  $scope.multipleSymbols.symbols = ['symbol #1', 'symbol #2'];
 
   // datepicker
   $scope.today = function () {
@@ -81,7 +81,8 @@ angular.module('dreamingsheepApp').controller('DreamCtrl', function ($scope, $ui
 
     // var modalInstance = $uibModal.open({
     $uibModal.open({
-      templateUrl: 'modalDelete.html',
+      // templateUrl: 'modalDelete.html',
+      templateUrl: 'modal-delete.tmpl.html',
       controller: 'ModalInstanceCtrl',
       size: size,
       resolve: {
@@ -93,21 +94,83 @@ angular.module('dreamingsheepApp').controller('DreamCtrl', function ($scope, $ui
 
   };
 
-  // floating menu
-  $scope.menu = {
-    isopen: false
+  $scope.save = function () {
+    $scope.isSaving = true;
+    $timeout(function() {
+      $scope.isSaving = false;
+    }, 1000);
   };
 
-  $scope.toggleDropdown = function ($event) {
-    $event.preventDefault();
-    $event.stopPropagation();
-    $scope.menu.isopen = !$scope.menu.isopen;
+  $scope.forgotPasswordStep1 = true;
+  $scope.forgotPasswordStep2 = false;
+  $scope.forgotPasswordStep3 = false;
+  $scope.forgotPasswordForward = function () {
+    if ($scope.forgotPasswordStep1) {
+      $scope.forgotPasswordStep1 = false;
+      $scope.forgotPasswordStep2 = true;
+    } else if ($scope.forgotPasswordStep2) {
+      $scope.forgotPasswordStep2 = false;
+      $scope.forgotPasswordStep3 = true;
+    }
   };
 
-  $scope.appendToEl = angular.element(document.querySelector('#dropdown-long-content'));
-
-  // collapsed dream details
-  $scope.isCollapsed = false;
+  $scope.jsonSymbols = [
+    {
+        'name': 'Flying',
+        'occurence': '17',
+        'picture': '',
+        'dreams': ['Dream #1', 'Dream #2', 'Dream #3'],
+        'sleep': 'starry-night',
+        'mood': 'smiley',
+        'recall': 'batteryfull',
+        'type': 'zzz',
+        'isExpanded': false
+    },
+    {
+        'name': 'Floating island',
+        'occurence': '12',
+        'picture': 'http://img01.deviantart.net/e1ed/i/2010/241/5/c/the_floating_island_by_araiko_o-d2xki7p.jpg',
+        'dreams': ['Dream #1', 'Dream #2', 'Dream #3', 'Dream #4', 'Dream #5', 'Dream #6'],
+        'sleep': 'sunset',
+        'mood': 'laugh',
+        'recall': 'batteryhalf',
+        'type': 'eye',
+        'isExpanded': true
+    },
+    {
+        'name': 'Rainbow',
+        'occurence': '9',
+        'picture': '',
+        'dreams': ['Dream #1', 'Dream #2'],
+        'sleep': 'starry-night',
+        'mood': 'laugh',
+        'recall': 'batteryhalf',
+        'type': 'zzz',
+        'isExpanded': false
+    },
+    {
+        'name': 'Dog',
+        'occurence': '8',
+        'picture': '',
+        'dreams': ['Dream #1', 'Dream #2'],
+        'sleep': 'starry-night',
+        'mood': 'laugh',
+        'recall': 'batteryhalf',
+        'type': 'zzz',
+        'isExpanded': false
+    },
+    {
+        'name': 'Friend',
+        'occurence': '4',
+        'picture': '',
+        'dreams': ['Dream #1', 'Dream #2'],
+        'sleep': 'starry-night',
+        'mood': 'laugh',
+        'recall': 'batteryhalf',
+        'type': 'zzz',
+        'isExpanded': false
+    }
+  ];
 
 });
 
@@ -123,149 +186,4 @@ angular.module('dreamingsheepApp').controller('ModalInstanceCtrl', function ($sc
   $scope.cancel = function () {
     $uibModalInstance.dismiss('cancel');
   };
-});
-
-/* helpers */
-var dreamToDelete;
-
-$(function () {
-
-  /* reset password */
-  $('.step2').hide();
-  $('.step3').hide();
-  $('.step1 .btn').on('click', function () {
-    $('.step1').hide();
-    $('.step2').show();
-  });
-  $('.step2 .btn').on('click', function () {
-    $('.step1').hide();
-    $('.step2').hide();
-    $('.step3').show();
-  });
-
-
-  //add dream
-  $('.dream.empty').hide();
-  $('.js-edit').hide();
-  $('.action-add').on('click', function () {
-    //hide and disable previous dream
-    $('.dream:first').addClass('inactive');
-    $('.dream:first .form-control').removeClass('col-sm-10').addClass('col-sm-12').attr('disabled', true);
-    $('.dream:first .form-control').parent().removeClass('col-sm-10').addClass('col-sm-12');
-    $('.js-edit', '.dream:first').show();
-    //close the dummy mockup
-    $('.empty').clone(true).insertAfter('.dream:last').removeClass('empty').fadeIn(function () {});
-  });
-
-  //add symbol
-  $('.symbol.empty').hide();
-  $('.js-add-symbol').on('click', function () {
-    $('.symbol.empty').show();
-  });
-
-  //delete dream
-  $('.js-delete').on('click', function () {
-    dreamToDelete = $(this).parents('.dream');
-    if (dreamToDelete.find('input[type="text"]:nth-child(1)').val() === '') {
-      $('.js-dream-to-delete').html('this dream');
-    } else {
-      $('.js-dream-to-delete').html(dreamToDelete.find('input[type="text"]:nth-child(1)').val());
-    }
-  });
-  $('#confirmation .btn-primary').on('click', function () {
-    dreamToDelete.fadeOut(400, function () {
-      dreamToDelete.remove();
-    });
-  });
-
-  //update dream summary icons
-  $('.js-mood .btn').on('click', function () {
-    var selectedMood = $(this).find('input').val();
-    $(this).closest('.dream').find('.js-summary-mood').removeClass().addClass('js-summary-mood lucidicon lucidicon-' + selectedMood);
-  });
-  $('.js-recall .btn').on('click', function () {
-    var selectedRecall = $(this).find('input').val();
-    switch (selectedRecall) {
-    case 'blurry':
-      selectedRecall = 'batteryempty';
-      break;
-    case 'na':
-      selectedRecall = 'batteryhalf';
-      break;
-    case 'clear':
-      selectedRecall = 'batteryfull';
-      break;
-    }
-    $(this).closest('.dream').find('.js-summary-recall').removeClass().addClass('js-summary-recall lucidicon lucidicon-' + selectedRecall);
-  });
-  $('.js-type .btn').on('click', function () {
-    var selectedType = $(this).find('input').val();
-    switch (selectedType) {
-    case 'regular':
-      selectedType = '';
-      break;
-    case 'lucid':
-      selectedType = 'lightning';
-      break;
-    case 'obe':
-      selectedType = 'users';
-      break;
-    case 'precognition':
-      selectedType = 'camera';
-      break;
-    case 'falseawakening':
-      selectedType = 'alarm';
-      break;
-    }
-    $(this).closest('.dream').find('.js-summary-type').removeClass().addClass('js-summary-type lucidicon lucidicon-' + selectedType);
-  });
-
-  //dummy save to database
-  $('.loader').hide();
-  $('.form-control').on('blur', function () {
-    $('.loader').show(0, function () {
-      $(this).fadeOut(2000);
-    });
-    //localStorage.setItem('contenteditable', this.innerHTML);
-    //
-    //http://www.json.org/js.html
-    //var testObject = { 'one': 1, 'two': 2, 'three': 3 };
-    //// Put the object into storage
-    //localStorage.setItem('testObject', JSON.stringify(testObject));
-    //// Retrieve the object from storage
-    //var retrievedObject = localStorage.getItem('testObject');
-    //console.log('retrievedObject: ', JSON.parse(retrievedObject));
-  });
-
-  //autocomplete
-  //    var addTagCallback = function (tagText, selector) {
-  //        $('.js-autocomplete-symbols').append($('<option></option>').val(tagText).html(tagText));
-  //        $("option:last", selector.form_field).attr('selected', 'selected');
-  //        $('.js-autocomplete-symbols').trigger("liszt:updated");
-  //    };
-  //    $(".dream:first .js-autocomplete-dreams").chosen();
-  //    $(".dream:first .js-autocomplete-symbols").chosen({ addNewElementCallback: addTagCallback, no_results_text: "Create new symbol" });
-
-
-
-  /* advanced search */
-  //    $('.dates input[type="text"]').datepicker({
-  //        prevText: "&laquo;",
-  //        nextText: "&raquo;"
-  //    });
-  //    $(".js-search .js-autocomplete-symbols").chosen();
-  //    $(".js-search-results").hide();
-  //    $(".js-advanced-search").on('click', function () {
-  //        $(".js-search-results").show();
-  //    });
-
-
-
-  /* symbol editor */
-  $('.js-symbol-editor .details').hide();
-  $('table a').on('click', function () {
-    $('.js-symbol-editor .overview').hide();
-    $('.js-symbol-editor .details').show();
-  });
-
 });

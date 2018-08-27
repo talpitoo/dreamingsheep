@@ -1,106 +1,205 @@
 @font-face {
   font-family: 'lucidicon';
-  src: url('../fonts/lucidicon.eot?-o3dp6k');
-  src: url('../fonts/lucidicon.eot?#iefix-o3dp6k') format('embedded-opentype'), url('../fonts/lucidicon.woff?-o3dp6k') format('woff'), url('../fonts/lucidicon.ttf?-o3dp6k') format('truetype'), url('../fonts/lucidicon.svg?-o3dp6k#lucidicon') format('svg');
+  src:
+    url('../fonts/lucidicon.ttf?4vhl77') format('truetype'),
+    url('../fonts/lucidicon.woff?4vhl77') format('woff'),
+    url('../fonts/lucidicon.svg?4vhl77#lucidicon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
 
-[class^='lucidicon-'],
-[class*=' lucidicon-'] {
-  font-family: 'lucidicon';
+[class^="lucidicon-"],
+[class*=" lucidicon-"] {
+  // use !important to prevent issues with browser extensions that change fonts
+  font-family: 'lucidicon' !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
+  font-size: 16px;
   text-transform: none;
   line-height: 1;
+  vertical-align: middle;
 
-  // better Font Rendering
+  // Better font rendering
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .lucidicon-pencil:before {
-  content: '\e600';
+  content: "\e600";
 }
-
 .lucidicon-smiley:before {
-  content: '\e601';
+  content: "\e601";
 }
-
 .lucidicon-laugh:before {
-  content: '\e602';
+  content: "\e602";
 }
-
 .lucidicon-sad:before {
-  content: '\e603';
+  content: "\e603";
 }
-
 .lucidicon-scarry:before {
-  content: '\e604';
+  content: "\e604";
 }
-
 .lucidicon-neutral:before {
-  content: '\e605';
+  content: "\e605";
 }
-
 .lucidicon-zzz:before {
-  content: '\e606';
+  content: "\e606";
 }
-
 .lucidicon-constellation:before {
-  content: '\e607';
+  content: "\e607";
 }
-
 .lucidicon-friends:before {
-  content: '\e608';
+  content: "\e608";
 }
-
-.lucidicon-lightning:before {
-  content: '\e60e';
-}
-
-.lucidicon-batteryfull:before {
-  content: '\e60f';
-}
-
-.lucidicon-batteryhalf:before {
-  content: '\e610';
-}
-
-.lucidicon-batteryempty:before {
-  content: '\e611';
-}
-
-.lucidicon-vector:before {
-  content: '\e612';
-}
-
-.lucidicon-wave:before {
-  content: '\e613';
-}
-
-.lucidicon-snow:before {
-  content: '\e614';
-}
-
-.lucidicon-camera:before {
-  content: '\e609';
-}
-
 .lucidicon-alarm:before {
-  content: '\e60a';
+  content: "\e60a";
 }
-
 .lucidicon-users:before {
-  content: '\e60b';
+  content: "\e60b";
 }
-
 .lucidicon-tags:before {
-  content: '\e60c';
+  content: "\e60c";
 }
-
 .lucidicon-link:before {
-  content: '\e60d';
+  content: "\e60d";
+}
+.lucidicon-batteryfull:before {
+  content: "\e60f";
+}
+.lucidicon-batteryhalf:before {
+  content: "\e610";
+}
+.lucidicon-batteryempty:before {
+  content: "\e611";
+}
+.lucidicon-curve:before {
+  content: "\e612";
+}
+.lucidicon-wormhole-small:before {
+  content: "\e900";
+}
+.lucidicon-tesseract-half:before {
+  content: "\e901";
+}
+.lucidicon-tesseract:before {
+  content: "\e902";
+}
+.lucidicon-penrose-black:before {
+  content: "\e903";
+}
+.lucidicon-square-optical:before {
+  content: "\e904";
+}
+.lucidicon-penrose-thin:before {
+  content: "\e905";
+}
+.lucidicon-tetrahedron:before {
+  content: "\e906";
+}
+.lucidicon-buddha:before {
+  content: "\e907";
+}
+.lucidicon-eye:before {
+  content: "\e908";
+}
+.lucidicon-account:before {
+  content: "\e909";
+}
+.lucidicon-stopwatch:before {
+  content: "\e90a";
+}
+.lucidicon-face:before {
+  content: "\e90b";
+}
+.lucidicon-astral:before {
+  content: "\e90c";
+}
+.lucidicon-hotel:before {
+  content: "\e90d";
+}
+.lucidicon-ouroboros:before {
+  content: "\e90e";
+}
+.lucidicon-off:before {
+  content: "\e90f";
+}
+.lucidicon-settings:before {
+  content: "\e910";
+}
+.lucidicon-mushroom:before {
+  content: "\e911";
+}
+.lucidicon-starry-night:before {
+  content: "\e912";
+}
+.lucidicon-trash:before {
+  content: "\e913";
+}
+.lucidicon-lotus-flower:before {
+  content: "\e914";
+}
+.lucidicon-poker:before {
+  content: "\e915";
+}
+.lucidicon-cannabis:before {
+  content: "\e916";
+}
+.lucidicon-ouroboros-small:before {
+  content: "\e917";
+}
+.lucidicon-leaf:before {
+  content: "\e918";
+}
+.lucidicon-mushroom-small:before {
+  content: "\e919";
+}
+.lucidicon-arrow-left:before {
+  content: "\e91a";
+}
+.lucidicon-arrow-right:before {
+  content: "\e91b";
+}
+.lucidicon-sun:before {
+  content: "\e91c";
+}
+.lucidicon-info:before {
+  content: "\e91d";
+}
+.lucidicon-arrow-down:before {
+  content: "\e91e";
+}
+.lucidicon-arrow-up:before {
+  content: "\e91f";
+}
+.lucidicon-search:before {
+  content: "\e920";
+}
+.lucidicon-cloudy-night:before {
+  content: "\e921";
+}
+.lucidicon-night:before {
+  content: "\e922";
+}
+.lucidicon-coffee:before {
+  content: "\e923";
+}
+.lucidicon-sunset:before {
+  content: "\e924";
+}
+.lucidicon-teapot:before {
+  content: "\e925";
+}
+.lucidicon-buddha-temple:before {
+  content: "\e926";
+}
+.lucidicon-penrose:before {
+  content: "\e927";
+}
+.lucidicon-wormhole:before {
+  content: "\e928";
+}
+.lucidicon-eyes:before {
+  content: "\e929";
 }

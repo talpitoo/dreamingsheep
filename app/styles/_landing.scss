@@ -1,0 +1,154 @@
+body {
+  background: transparent url('../images/background-canvas.jpg') center center no-repeat fixed;
+  background-size: cover;
+}
+
+.sheep {
+  max-width: 100%;
+  height: auto;
+
+  @media (min-width: $screen-md-min) {
+    max-width: none;
+    height: inherit;
+  }
+}
+
+p {
+  margin-top: 0;
+}
+
+.text-dreamingsheep {
+  background: transparent url('../images/title-dreamingsheep.png') center center no-repeat;
+  height: 75px;
+  background-size: contain;
+  margin-top: -25px;
+}
+
+.text-slogan {
+  color: $white;
+  margin-bottom: 50px;
+  font-size: $font-size-large;
+  font-style: italic;
+}
+
+.btn-primary {
+  background: $brand-primary url('../images/button.jpg') center center no-repeat;
+  border-color: $brand-primary;
+}
+
+.panel {
+  margin-bottom: 50px;
+}
+
+.nexus10,
+.nexus5 {
+  width: 800px;
+  height: 600px;
+  background-size: 100% 100%;
+  position: relative;
+  cursor: pointer;
+}
+
+.nexus10 {
+  background: url('../images/nexus10.png') center center no-repeat;
+  background-size: 100% 100%;
+  margin: auto;
+
+  @media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+    // right: -450px;
+  }
+
+  @media (max-width: $screen-xs-max) {
+    position: static;
+    margin: 20px 0;
+  }
+}
+
+.nexus5 {
+  background: url('../images/nexus5.png') center center no-repeat;
+  background-size: 100% 100%;
+}
+
+.screen-tablet {
+  transform: rotateZ(0deg);
+  position: absolute;
+  overflow: hidden;
+  width: 607px;
+  height: 379px;
+  top: 87px;
+  left: 114px;
+}
+
+.portfolio-tablet {
+  width: 607px;
+  height: 1516px;
+  transform: rotateZ(0deg);
+  transition: all 500ms ease 0s;
+
+  .dreams-01 & {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .dreams-02 & {
+    transform: translate3d(0, -379px, 0);
+  }
+
+  .symbols & {
+    transform: translate3d(0, -758px, 0);
+  }
+
+  .stats & {
+    transform: translate3d(0, -1137px, 0);
+  }
+}
+
+.screen-smartphone {
+  transform: rotateZ(0deg);
+  position: absolute;
+  overflow: hidden;
+  width: 178px;
+  height: 316px;
+  top: 216px;
+  left: 27px;
+}
+
+.portfolio-smartphone {
+  width: 712px;
+  height: 316px;
+  transform: rotateZ(0deg);
+  transition: all 500ms ease 0s;
+
+  .dreams-01 & {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .dreams-02 & {
+    transform: translate3d(-178px, 0, 0);
+  }
+
+  .symbols & {
+    transform: translate3d(-356px, 0, 0);
+  }
+
+  .stats & {
+    transform: translate3d(-534px, 0, 0);
+  }
+}
+
+.stripe {
+  position: absolute;
+  transform: rotate(3deg);
+  margin-top: 50px;
+
+  .panel-body {
+    margin-bottom: 15px;
+    height: 450px;
+    overflow: hidden;
+  }
+}
+
+.portfolio-next {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+}

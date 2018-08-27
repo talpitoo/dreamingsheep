@@ -81,27 +81,10 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
 
-  # Install Node.js v0.12
-  curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
-  apt-get update
+  # Install Node.js
+  curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
   sudo apt-get install -y nodejs
   npm install -g npm
-
-  # Install Ruby & Compass
-  # https://gist.github.com/stephou0104/233b5c99884f1d8c8b8b
-  apt-get install -y git zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties
-  apt-get install -y libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
-  gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
-  curl -L https://get.rvm.io | bash -s stable
-  source /usr/local/rvm/scripts/rvm
-  # source /home/vagrant/.rvm/scripts/rvm
-  echo "source /usr/local/rvm/scripts/rvm" >> ~/.bashrc
-  rvm install 2.1.2
-  rvm use 2.1.2 --default
-  gem install compass
-
-  # Install scss-lint
-  gem install scss_lint
 
   # Install Bower
   npm install -g bower
@@ -114,10 +97,6 @@ Vagrant.configure(2) do |config|
   node -v
   echo "npm"
   npm -v
-  echo "ruby"
-  ruby -v
-  echo "compass"
-  compass version
   echo "bower"
   bower -v
 
@@ -127,10 +106,7 @@ Vagrant.configure(2) do |config|
 
   # Install PhantomJS (required for accessibility check)
   npm install phantomjs-prebuilt
-
-  # If a package fails during npm install try adding them here or run the install command again manually
-  npm install gulp-w3cjs
-  npm install node-sass
-  npm install gulp-cssnano
 SHELL
 end
+
+# rvm use 2.1.2 --default

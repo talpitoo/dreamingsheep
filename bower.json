@@ -8,8 +8,8 @@
     "bootstrap-sass": "~3.3.7",
     "jquery": "~2.2.0",
     "modernizr": "~2.8.1",
-    "angular": "~1.4.9",
-    "angular-animate": "~1.4.9",
+    "angular": "~1.6.8",
+    "angular-animate": "~1.6.8",
     "angular-bootstrap": "~1.1.0",
     "ui-select": "angular-ui-select#~0.13.2"
   },

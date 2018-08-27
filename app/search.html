@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en" class="no-js" data-ng-app="dreamingsheepApp">
+
+<head prefix="og: http://ogp.me/ns#">
+  <meta charset="utf-8">
+  <title>Search | dreamingsheep</title>
+  <meta name="description" content="Long time, no sleep?">
+  <meta name="author" content="@talpitoo">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="dreamingsheep" />
+  <meta property="og:description" content="Long time, no sleep?" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="http://dreamingsheep.net/" />
+  <meta property="og:image" content="http://dreamingsheep.net/images/cover1200x630.png?ver=13012016" />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@talpitoo">
+  <meta name="twitter:creator" content="@talpitoo">
+  <meta name="twitter:title" content="dreamingsheep">
+  <meta name="twitter:description" content="Long time, no sleep?">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <meta name="application-name" content="dreamingsheep" />
+  <meta name="msapplication-TileColor" content="#ffffff" />
+  <meta name="msapplication-square70x70logo" content="images/cover70x70.png" />
+  <meta name="msapplication-square150x150logo" content="images/cover150x150.png" />
+  <meta name="msapplication-wide310x150logo" content="images/cover310x150.png" />
+  <meta name="msapplication-square310x310logo" content="images/cover310x310.png" />
+
+  <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-152-precomposed.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-144-precomposed.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-120-precomposed.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114-precomposed.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="images/apple-touch-icon-76-precomposed.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72-precomposed.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="images/apple-touch-icon-60-precomposed.png">
+  <link rel="apple-touch-icon" sizes="57x57" href="images/apple-touch-icon-57-precomposed.png">
+
+  <link rel="icon" sizes="196x196" href="images/cover196x196.png" type="image/png">
+  <link rel="icon" sizes="160x160" href="images/cover160x160.png" type="image/png">
+  <link rel="icon" sizes="96x96" href="images/cover96x96.png" type="image/png">
+  <link rel="icon" sizes="32x32" href="images/cover32x32.png" type="image/png">
+  <link rel="shortcut icon" sizes="16x16" href="favicon.ico" />
+
+  <!-- inline critical css -->
+  <style>
+
+  </style>
+
+  <!-- build:css styles/main.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="/bower_components/ui-select/dist/select.css" />
+  <!-- endbower -->
+  <link rel="stylesheet" href="styles/select2.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+
+  <!-- build:js scripts/vendor/modernizr.js -->
+  <script src="/bower_components/modernizr/modernizr.js"></script>
+  <!-- endbuild -->
+
+  <noscript>
+    <!-- <link rel="stylesheet" href="styles/main.css"> -->
+  </noscript>
+</head>
+
+<body data-ng-controller="DreamCtrl">
+  <noscript>
+    <div class="alert alert-warning">
+      <strong>Warning!</strong> For a better experience, enable JavaScript in your browser.
+    </div>
+  </noscript>
+  <!--[if lt IE 11]>
+      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+  <nav data-ng-include="'nav.tmpl.html'" class="navbar navbar-default navbar-static-top"></nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 col-md-4 col-md-offset-2">
+        <img src="images/sheep-search.png" alt="dreamingsheep with a magnifier" class="sheep"/>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-8 col-md-offset-2">
+        <h1><span class="sr-only">Search</span><img src="images/title-search.png" height="55" alt="Search" aria-hidden="true"></h1>
+        <div class="input-group input-group-lg">
+          <input type="text" class="form-control" placeholder="Search..." aria-label="Search">
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" data-ng-click="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"><span class="hidden-xs">advanced</span><span class="lucidicon lucidicon-arrow-down" data-ng-class="isAdvancedSearchCollapsed ? 'lucidicon-arrow-up' : 'lucidicon-arrow-down'"></span></button>
+            <button class="btn btn-primary" type="button"><span class="glyphicon glyphicon-search"></span><span class="sr-only">Search</span></button>
+          </span>
+        </div>
+        <br>
+        <div class="panel panel-default dream" data-ng-show="isAdvancedSearchCollapsed">
+          <div class="panel-body">
+            <form class="form-horizontal">
+              <fieldset>
+                <legend class="sr-only">Advanced search options</legend>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">sleep</label>
+                    <div class="col-sm-10">
+                      <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-default active">
+                          <input type="radio" name="sleep" value="night">
+                          <span class="lucidicon lucidicon-starry-night"></span>night
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="sleep" value="morning">
+                          <span class="lucidicon lucidicon-sun"></span>morning
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="sleep" value="afternoon">
+                          <span class="lucidicon lucidicon-coffee"></span>afternoon
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="sleep" value="evening">
+                          <span class="lucidicon lucidicon-sunset"></span>evening
+                        </label>
+                      </div>
+                    </div>
+                </div>
+                <div class="form-group js-mood">
+                  <label class="col-sm-2 control-label">mood</label>
+                  <div class="col-sm-10">
+                    <div class="btn-group" data-toggle="buttons">
+                      <label class="btn btn-default">
+                        <input type="radio" name="mood" value="scarry">
+                        <span class="lucidicon lucidicon-scarry"></span><span class="sr-only">scarry</span>
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="mood" value="sad">
+                        <span class="lucidicon lucidicon-sad"></span><span class="sr-only">sad</span>
+                      </label>
+                      <label class="btn btn-default active">
+                        <input type="radio" name="mood" value="neutral">
+                        <span class="lucidicon lucidicon-neutral"></span><span class="sr-only">neutral</span>
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="mood" value="smiley">
+                        <span class="lucidicon lucidicon-smiley"></span><span class="sr-only">smiley</span>
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="mood" value="laugh">
+                        <span class="lucidicon lucidicon-laugh"></span><span class="sr-only">laugh</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group js-recall">
+                  <label class="col-sm-2 control-label">recall</label>
+                  <div class="col-sm-10">
+                    <div class="btn-group" data-toggle="buttons">
+                      <label class="btn btn-default">
+                        <input type="radio" name="recall" value="blurry">
+                        <span class="lucidicon lucidicon-batteryempty"></span>blurry
+                      </label>
+                      <label class="btn btn-default active">
+                        <input type="radio" name="recall" value="na">
+                        <span class="lucidicon lucidicon-batteryhalf"></span>n/a
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="recall" value="clear">
+                        <span class="lucidicon lucidicon-batteryfull"></span>clear
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group js-type">
+                  <label class="col-sm-2 control-label">type</label>
+                  <div class="col-sm-10">
+                    <div class="btn-group js-type" data-toggle="buttons">
+                      <label class="btn btn-default active">
+                        <input type="radio" name="type" value="regular">
+                        <span class="lucidicon lucidicon-zzz"></span>regular
+                      </label>
+                      <label class="btn btn-default js-lucid" style="border-bottom-left-radius: 0;">
+                        <input type="radio" name="type" value="lucid">
+                        <span class="lucidicon lucidicon-eye"></span>lucid
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="type" value="recurring">
+                        <span class="lucidicon lucidicon-ouroboros"></span>recurring
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="type" value="precognition">
+                        <span class="lucidicon lucidicon-poker"></span>precognition
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="type" value="obe">
+                        <span class="lucidicon lucidicon-astral"></span>OBE/astral projection
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="type" value="falseawakening">
+                        <span class="lucidicon lucidicon-alarm"></span>false awakening
+                      </label>
+                      <label class="btn btn-default">
+                        <input type="radio" name="type" value="meditation">
+                        <span class="lucidicon lucidicon-buddha"></span>meditation/daydream
+                      </label>
+                      <label class="btn btn-default" style="border-top-right-radius: 0;">
+                        <input type="radio" name="type" value="psychedelic">
+                        <span class="lucidicon lucidicon-mushroom"></span>psychedelic
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset data-ng-show="isAdvancedSearchCollapsed">
+                <legend class="sr-only">Symbols</legend>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">symbols</label>
+                  <div class="col-sm-10">
+                    <ui-select multiple data-ng-model="multipleSymbols.symbols" theme="select2" tagging="true">
+                      <ui-select-match placeholder="Select symbols...">{{$item}}</ui-select-match>
+                      <ui-select-choices repeat="symbol in availableSymbols | filter:$select.search">
+                        {{symbol}}
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+        <div class="js-search-results">
+          <h2>3 results</h2>
+          <div class="panel panel-default dream inactive" data-ng-include="'search-result01.tmpl.html'"></div>
+          <div class="panel panel-default dream inactive" data-ng-include="'search-result02.tmpl.html'"></div>
+          <div class="panel panel-default dream inactive" data-ng-include="'search-result03.tmpl.html'"></div>
+          <span class="sr-only">Page</span>
+          <ul class="pagination">
+            <li class="disabled"><a href="#"><span class="lucidicon lucidicon-arrow-left"></span><span class="sr-only">Prev</span></a>
+            </li>
+            <li class="active"><a href="#">1 <span class="sr-only">(current)</span></a>
+            </li>
+            <li><a href="#">2</a>
+            </li>
+            <li><a href="#">3</a>
+            </li>
+            <li><a href="#"><span class="lucidicon lucidicon-arrow-right"></span><span class="sr-only">Next</span></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer data-ng-include="'footer.tmpl.html'"></footer>
+
+  <!-- build:js scripts/main.js -->
+  <!-- bower:js -->
+  <script src="/bower_components/jquery/dist/jquery.js"></script>
+  <script src="/bower_components/angular/angular.js"></script>
+  <script src="/bower_components/angular-animate/angular-animate.js"></script>
+  <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="/bower_components/ui-select/dist/select.js"></script>
+  <!-- endbower -->
+  <script src="scripts/main.js"></script>
+  <!-- endbuild -->
+
+</body>
+
+</html>

@@ -2,12 +2,12 @@ import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import del from 'del';
-import scssLint from 'gulp-scss-lint';
+import sassLint from 'gulp-sass-lint';
 import modernizr from 'gulp-modernizr';
 import smoosher from 'gulp-smoosher';
 import w3cjs from 'gulp-w3cjs';
 import a11y from 'gulp-accessibility';
-import webpagetest from 'gulp-webpagetest';
+// import webpagetest from 'gulp-webpagetest';
 // import critical from 'critical';
 import {
   stream as wiredep
@@ -17,21 +17,35 @@ from 'wiredep';
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
-gulp.task('webpagetest', webpagetest({
-  url: 'http://dreamingsheep.net/',
-  key: 'YOUR_WEBPAGETEST_API_KEY',
-  firstViewOnly: true,
-  budget: {
-    SpeedIndex: 1000,
-    visualComplete: 1000
-  }
-}));
+// gulp.task('webpagetest', webpagetest({
+//   url: 'http://dreamingsheep.net/',
+//   key: 'YOUR_WEBPAGETEST_API_KEY',
+//   firstViewOnly: true,
+//   budget: {
+//     SpeedIndex: 1000,
+//     visualComplete: 1000
+//   }
+// }));
 
 gulp.task('styles', () => {
   return gulp.src('app/styles/*.scss')
-    .pipe(scssLint({
-      config: '.scss-lint.yml'
+    // .pipe(scssLint({
+    //   config: '.scss-lint.yml'
+    // }))
+    .pipe(sassLint({
+      // options: {
+      //   formatter: 'stylish',
+      //   'merge-default-rules': false
+      // },
+      // files: {ignore: '**/*.scss'},
+      // rules: {
+      //   'no-ids': 1,
+      //   'no-mergeable-selectors': 0
+      // },
+      configFile: '.sass-lint.yml'
     }))
+    // .pipe(sassLint.format())
+    // .pipe(sassLint.failOnError())
     .pipe($.plumber())
     .pipe($.sourcemaps.init())
     .pipe($.sass.sync({
@@ -82,7 +96,7 @@ const testLintOptions = {
 gulp.task('lint', lint('app/scripts/**/*.js'));
 
 gulp.task('a11y', function() {
-  return gulp.src('app/*.html')
+  return gulp.src(['app/*.html', '!app/*.tmpl.html'])
     .pipe(a11y({
       force: true,
       accessibilityLevel: 'WCAG2AAA',
@@ -98,17 +112,20 @@ gulp.task('a11y', function() {
 });
 
 gulp.task('html', ['styles', 'scripts'], () => {
-  return gulp.src('app/*.html')
+  return gulp.src(['app/*.html', '!app/*.tmpl.html'])
     .pipe($.useref({
       searchPath: ['.tmp', 'app', '.']
     }))
-    .pipe($.if('*.js', $.uglify({mangle: false}))) // if uglify messes up
-    //.pipe($.if('*.js', $.uglify()))
-    .pipe($.if('*.css', $.cssnano()))
-    .pipe($.if('*.html', w3cjs()))
-    .pipe($.if('*.html', $.htmlmin({
-      collapseWhitespace: false
+    // .pipe($.if('**/*.js', $.uglify({mangle: false}))) // if uglify messes up
+    .pipe($.if('**/*.js', $.uglify().on('error', function(e) {
+      console.log(e);
     })))
+    .pipe($.if('**/*.css', $.cssnano()))
+    // TODO FIX THESE
+    // .pipe($.if('**/*.html', w3cjs()))
+    // .pipe($.if('**/*.html', $.htmlmin({
+    //   collapseWhitespace: false
+    // })))
     .pipe(gulp.dest('dist'));
 });
 

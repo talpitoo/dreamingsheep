@@ -1,0 +1,42 @@
+// typography
+
+h1,
+h2,
+h3, {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 40px;
+}
+
+.dream h2 {
+  font-size: 25px;
+}
+
+// .checkbox,
+footer small,
+h1:not(.title-dreamingsheep) {
+  box-decoration-break: clone;
+  display: inline-block;
+  line-height: 2em;
+  padding: .2em 1.5em .2em .5em;
+  background-image: linear-gradient(115deg, rgba($white, .5) calc(100% - 1em), transparent calc(100% - 1em));
+}
+
+.text-slogan {
+  text-align: center;
+  color: $white;
+  font-size: $font-size-large;
+  font-style: italic;
+}
+
+footer small {
+  margin-bottom: 20px;
+}
+
+.text-occurence {
+  color: $gray-light;
+  font-size: 36px;
+  margin: 12px;
+}

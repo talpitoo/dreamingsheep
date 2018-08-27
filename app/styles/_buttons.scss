@@ -1,0 +1,22 @@
+// buttons
+
+.btn-primary,
+.btn-info.active {
+  background: $brand-primary url('../images/button.jpg') center center no-repeat;
+  border-color: $color-primary-border;
+
+  .text-info {
+    color: $white;
+    font-weight: bold;
+  }
+}
+
+.btn-facebook {
+  background-color: $color-facebook;
+  color: $white !important;
+}
+
+.btn-google {
+  background-color: $color-googleplus;
+  color: $white !important;
+}
