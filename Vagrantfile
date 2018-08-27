@@ -83,14 +83,11 @@ Vagrant.configure(2) do |config|
 
   # Install Node.js
   curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-  sudo apt-get install -y nodejs
+  sudo apt-get install -y nodejs git
   npm install -g npm
 
   # Install Bower
   npm install -g bower
-
-  # Install Gulp
-  npm install -g gulp
 
   # Versions
   echo "node"
@@ -100,13 +97,15 @@ Vagrant.configure(2) do |config|
   echo "bower"
   bower -v
 
-  # Install dependencies
-  cd shared
-  npm install
+  # Install Gulp
+  npm install -g gulp
 
   # Install PhantomJS (required for accessibility check)
   npm install phantomjs-prebuilt
+
+  # Install dependencies
+  cd shared
+  npm install
+  bower install
 SHELL
 end
-
-# rvm use 2.1.2 --default

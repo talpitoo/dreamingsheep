@@ -29,19 +29,7 @@ const reload = browserSync.reload;
 
 gulp.task('styles', () => {
   return gulp.src('app/styles/*.scss')
-    // .pipe(scssLint({
-    //   config: '.scss-lint.yml'
-    // }))
     .pipe(sassLint({
-      // options: {
-      //   formatter: 'stylish',
-      //   'merge-default-rules': false
-      // },
-      // files: {ignore: '**/*.scss'},
-      // rules: {
-      //   'no-ids': 1,
-      //   'no-mergeable-selectors': 0
-      // },
       configFile: '.sass-lint.yml'
     }))
     // .pipe(sassLint.format())
@@ -121,11 +109,13 @@ gulp.task('html', ['styles', 'scripts'], () => {
       console.log(e);
     })))
     .pipe($.if('**/*.css', $.cssnano()))
-    // TODO FIX THESE
-    // .pipe($.if('**/*.html', w3cjs()))
-    // .pipe($.if('**/*.html', $.htmlmin({
-    //   collapseWhitespace: false
+    // TODO fix the w3cjs bug
+    // .pipe($.if('**/*.html', w3cjs().on('error', function(e) {
+    //   console.log(e);
     // })))
+    .pipe($.if('**/*.html', $.htmlmin({
+      collapseWhitespace: false
+    })))
     .pipe(gulp.dest('dist'));
 });
 
