@@ -2,7 +2,7 @@
 
 Excerpt from the [dreamingsheep](http://dreamingsheep.net/) template which is used as an example in my graduate thesis _"Automatization in the Web Application Front End Implementation"_.
 
-![dreamingsheep](http://dreamingsheep.net/images/cover1200x630.png "dreamingsheep")
+![dreamingsheep](http://dreamingsheep.net/images/cover1200x630.jpg "dreamingsheep")
 
 
 ## Quick start
