@@ -58,7 +58,15 @@
         2,
         "single"
       ]
+    },
+    "overrides": [
+    {
+      "files": ["jquery.js"],
+      "rules": {
+        "quotes": "off"
+      }
     }
+  ]
   },
   "dependencies": {
     "phantomjs-prebuilt": "^2.1.16"

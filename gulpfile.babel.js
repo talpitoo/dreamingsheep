@@ -100,7 +100,7 @@ gulp.task('a11y', function() {
 });
 
 gulp.task('html', ['styles', 'scripts'], () => {
-  return gulp.src(['app/*.html', '!app/*.tmpl.html'])
+  return gulp.src(['app/*.html', 'app/*.tmpl.html'])
     .pipe($.useref({
       searchPath: ['.tmp', 'app', '.']
     }))
@@ -136,6 +136,11 @@ gulp.task('images', () => {
       })))
     .pipe(gulp.dest('dist/images'));
 });
+
+gulp.task('pages', function() {
+  return gulp.src('app/pages/**/*')
+  .pipe(gulp.dest('dist/pages'))
+})
 
 gulp.task('fonts', () => {
   return gulp.src(require('main-bower-files')('**/*.{eot,svg,ttf,woff,woff2}', function(err) {})
@@ -260,7 +265,7 @@ gulp.task('inline', ['build'], () => {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('build', ['lint', 'modernizr', 'a11y', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'modernizr', 'a11y', 'html', 'images', 'fonts', 'pages', 'extras'], () => {
   return gulp.src('dist/**/*')
   .pipe($.size({
     title: 'build',
