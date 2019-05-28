@@ -12,7 +12,7 @@
     "babel": "^6.23.0",
     "babel-core": "^6.26.3",
     "babel-preset-es2015": "^6.24.1",
-    "browser-sync": "^2.24.7",
+    "browser-sync": "^2.26.5",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-accessibility": "^3.1.1",
@@ -34,10 +34,10 @@
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
     "gulp-useref": "^3.1.5",
-    "gulp-w3cjs": "^1.3.0",
+    "gulp-w3cjs": "^1.3.2",
     "gulp-webpagetest": "^1.1.1",
     "main-bower-files": "^2.13.1",
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.12.0",
     "wiredep": "^4.0.0"
   },
   "eslintConfig": {
@@ -60,13 +60,15 @@
       ]
     },
     "overrides": [
-    {
-      "files": ["jquery.js"],
-      "rules": {
-        "quotes": "off"
+      {
+        "files": [
+          "jquery.js"
+        ],
+        "rules": {
+          "quotes": "off"
+        }
       }
-    }
-  ]
+    ]
   },
   "dependencies": {
     "phantomjs-prebuilt": "^2.1.16"
