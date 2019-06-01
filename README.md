@@ -16,9 +16,9 @@
 * SSH to the newly created virtual machine: `vagrant ssh`.
 * Go to the shared folder: `cd shared`.
 * Pick a task from the [Yeoman generator-webapp documentation](https://github.com/yeoman/generator-webapp) e.g.
-* Run `npm start` to preview and watch for changes
-* Run `npm run build` to build your webapp for production (the generated static website in the `/dist` folder)
-* Run `npm run serve:dist` to preview the production build
+* `npm start` to preview and watch for changes,
+* `npm run build` to build your webapp for production (the generated static website in the `/dist` folder),
+* `npm run serve:dist` to preview the production build.
 * Open [localhost:9000](http://localhost:9000) on your host machine.
 * If anything goes wrong, find help on [Stack Overflow](http://stackoverflow.com/).
 
