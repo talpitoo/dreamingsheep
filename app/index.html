@@ -50,20 +50,20 @@
 
   </style>
 
+  <!-- <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css" type="text/css" /> -->
+  <!-- build:css styles/vendor.css -->
+  <link rel="stylesheet" href="/node_modules/angular-ui-select/select.css" type="text/css" />
+  <link rel="stylesheet" href="styles/select2.css" type="text/css" >
+  <!-- endbuild -->
   <!-- build:css styles/main.css -->
-  <!-- bower:css -->
-  <link rel="stylesheet" href="/bower_components/ui-select/dist/select.css" />
-  <!-- endbower -->
-  <link rel="stylesheet" href="styles/select2.css">
   <link rel="stylesheet" href="styles/main.css">
   <!-- endbuild -->
-
-  <!-- build:js scripts/vendor/modernizr.js -->
-  <script src="/bower_components/modernizr/modernizr.js"></script>
+  <!-- build:js scripts/modernizr.js -->
+  <script src="scripts/modernizr.js"></script>
   <!-- endbuild -->
 
   <noscript>
-    <!-- <link rel="stylesheet" href="styles/main.css"> -->
+    <!-- <link rel="stylesheet" href="sass/main.scss"> -->
   </noscript>
 </head>
 
@@ -80,43 +80,29 @@
   <div data-ng-view></div>
 
   <!-- build:js scripts/main.js -->
-  <!-- bower:js -->
-  <script src="/bower_components/jquery/dist/jquery.js"></script>
-  <!-- <script src="https://d3js.org/d3.v3.min.js"></script> -->
-  <script src="/bower_components/d3/d3.js"></script>
-  <script src="/bower_components/angular/angular.js"></script>
-  <script src="/bower_components/angular-route/angular-route.js"></script>
-  <script src="/bower_components/angular-cookies/angular-cookies.js"></script>
-  <script src="/bower_components/angular-animate/angular-animate.js"></script>
-  <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-  <script src="/bower_components/ui-select/dist/select.js"></script>
-
-  <script src="scripts/app.js"></script>
-  <script src="scripts/app-services/authentication.service.js"></script>
-  <script src="scripts/app-services/flash.service.js"></script>
-
+  <script type="text/javascript" src="/node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="/node_modules/d3/d3.js"></script>
+  <script type="text/javascript" src="/node_modules/angular/angular.js"></script>
+  <script type="text/javascript" src="/node_modules/angular-route/angular-route.js"></script>
+  <script type="text/javascript" src="/node_modules/angular-cookies/angular-cookies.js"></script>
+  <script type="text/javascript" src="/node_modules/angular-animate/angular-animate.js"></script>
+  <script type="text/javascript" src="/node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+  <script type="text/javascript" src="/node_modules/angular-ui-select/select.js"></script>
+  <script type="text/javascript" src="scripts/app.js"></script>
+  <script type="text/javascript" src="scripts/app-services/authentication.service.js"></script>
+  <script type="text/javascript" src="scripts/app-services/flash.service.js"></script>
   <!-- Real user service that uses an api -->
   <!-- <script src="app-services/user.service.js"></script> -->
-
   <!-- Fake user service for demo that uses local storage -->
-  <script src="scripts/app-services/user.service.local-storage.js"></script>
-
-  <!-- Load the chart APIs -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-google-chart/1.0.0-beta.1/ng-google-chart.js"></script> -->
-  <script src="/bower_components/angular-google-chart/ng-google-chart.js"></script>
-  <!-- <script src="https://d3js.org/d3.v3.min.js"></script> -->
-
-  <script src="pages/dreams/dreams.controller.js"></script>
-  <script src="pages/symbols/symbols.controller.js"></script>
-  <script src="pages/stats/stats.controller.js"></script>
-  <script src="pages/search/search.controller.js"></script>
-  <script src="pages/settings/settings.controller.js"></script>
-  <script src="pages/login/login.controller.js"></script>
-  <script src="pages/signup/signup.controller.js"></script>
-
-
-  <!-- endbower -->
-
+  <script type="text/javascript" src="scripts/app-services/user.service.local-storage.js"></script>
+  <script type="text/javascript" src="/node_modules/angular-google-chart/ng-google-chart.js"></script>
+  <script type="text/javascript" src="templates/dreams/dreams.controller.js"></script>
+  <script type="text/javascript" src="templates/symbols/symbols.controller.js"></script>
+  <script type="text/javascript" src="templates/stats/stats.controller.js"></script>
+  <script type="text/javascript" src="templates/search/search.controller.js"></script>
+  <script type="text/javascript" src="templates/settings/settings.controller.js"></script>
+  <script type="text/javascript" src="templates/login/login.controller.js"></script>
+  <script type="text/javascript" src="templates/signup/signup.controller.js"></script>
   <!-- endbuild -->
 
 </body>

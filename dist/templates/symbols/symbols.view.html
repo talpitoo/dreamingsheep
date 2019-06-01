@@ -1,0 +1,76 @@
+<div class="layout">
+  <nav data-ng-include="'../../templates/nav.tmpl.html'" class="navbar navbar-default navbar-static-top"></nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 col-md-4 col-md-offset-2">
+        <img src="images/sheep-symbols.png" alt="dreamingsheep arranging symbols" class="sheep"/>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-8 col-md-offset-2">
+        <h1><span class="sr-only">Symbols</span><img src="images/title-symbols.png" height="55" alt="Symbol" aria-hidden="true"></h1>
+
+        <div data-ng-repeat="item in vm.jsonSymbols">
+          <div class="panel panel-default symbol" data-ng-class="item.isExpanded ? 'symbol-active' : ''">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-sm-8">
+                  <h2>{{item.name}}</h2>
+                  <div data-ng-show="item.isExpanded">
+                    <ul class="list-unstyled">
+                      <li data-ng-repeat="itemDream in item.dreams">
+                        <a href="#!/dreams">{{itemDream}}</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="col-sm-4 text-right">
+                  <span class="text-occurence">{{item.occurence}}</span>
+                  <img src="loader.gif" data-ng-src="{{item.picture}}" alt="picture of the symbol" class="img-thumbnail img-responsive" data-ng-show="item.isExpanded && item.picture">
+                </div>
+              </div>
+            </div>
+            <div class="panel-footer clearfix">
+              <div class="summary pull-left">
+                <span class="lucidicon lucidicon-{{item.sleep}}"></span>
+                <span class="lucidicon lucidicon-{{item.mood}}"></span>
+                <span class="lucidicon lucidicon-{{item.recall}}"></span>
+                <span class="lucidicon lucidicon-{{item.type}}"></span>
+              </div>
+              <button class="btn btn-link" type="button" data-ng-click="item.isExpanded = !item.isExpanded">
+                {{item.isExpanded && 'less' || 'more'}}<span class="lucidicon" data-ng-class="item.isExpanded ? 'lucidicon-arrow-up' : 'lucidicon-arrow-down'"></span>
+              </button>
+              <button class="btn btn-link pull-right" type="button">
+                <span class="lucidicon lucidicon-pencil"></span><span class="sr-only">Edit</span>
+              </button>
+              <button class="btn btn-link pull-right" type="button" data-ng-click="open()" data-toggle="modal">
+                <span class="lucidicon lucidicon-trash"></span><span class="sr-only">Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <span class="sr-only">Page</span>
+        <ul class="pagination">
+          <li class="disabled"><a href="#"><span class="lucidicon lucidicon-arrow-left"></span><span class="sr-only">Prev</span></a>
+          </li>
+          <li class="active"><a href="#">1 <span class="sr-only">(current)</span></a>
+          </li>
+          <li><a href="#">2</a>
+          </li>
+          <li><a href="#">3</a>
+          </li>
+          <li><a href="#"><span class="lucidicon lucidicon-arrow-right"></span><span class="sr-only">Next</span></a>
+          </li>
+        </ul>
+
+        <br>
+        <a class="btn btn-primary pull-right js-add-symbol" href="javascript:">Add symbol</a>
+      </div>
+    </div>
+  </div>
+
+  <footer data-ng-include="'../../templates/footer.tmpl.html'"></footer>
+</div>

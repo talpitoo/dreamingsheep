@@ -1,0 +1,66 @@
+<div class="layout">
+  <nav data-ng-include="'../../templates/nav.tmpl.html'" class="navbar navbar-default navbar-static-top"></nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 col-md-4 col-md-offset-2">
+        <img src="images/sheep-settings.png" alt="dreamingsheep as a mechanican" class="sheep"/>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-8 col-md-offset-2">
+        <h1><span class="sr-only">Settings</span><img src="images/title-settings.png" height="55" alt="Settings" aria-hidden="true"></h1>
+        <form>
+          <div class="panel panel-default dream">
+            <div class="panel-body">
+              <div class="form-horizontal">
+                <fieldset>
+                  <legend class="sr-only">Account settings</legend>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="name">Name</label>
+                    <div class="col-sm-10">
+                      <input type="text" id="name" value="Cooper" class="form-control">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="inputEmail">Email</label>
+                    <div class="col-sm-10">
+                      <input type="text" id="inputEmail" value="meh@dreamingsheep.net" class="form-control">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="inputPassword">Password</label>
+                    <div class="col-sm-10">
+                      <input type="password" id="inputPassword" value="*****" class="form-control">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="inputLanguage">Language</label>
+                    <div class="col-sm-10">
+                      <select class="form-control" id="inputLanguage">
+                        <option>en-US</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+                <fieldset>
+                  <legend class="sr-only">Download your journal</legend>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="name">Download</label>
+                    <div class="col-sm-10">
+                      <p class="form-control-static"><a href="#">Print your entire journal</a></p>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary pull-right" type="submit">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer data-ng-include="'../../templates/footer.tmpl.html'"></footer>
+</div>

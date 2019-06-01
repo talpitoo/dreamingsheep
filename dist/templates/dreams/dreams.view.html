@@ -1,0 +1,211 @@
+<div class="layout">
+  <nav data-ng-include="'../../templates/nav.tmpl.html'" class="navbar navbar-default navbar-static-top"></nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 col-md-4 col-md-offset-2">
+        <img src="images/sheep-dreamingsheep.png" alt="dreamingsheep" class="sheep"/>
+      </div>
+      <div class="col-sm-6 col-md-4">
+        <label class="sr-only">Selected date</label>
+        <div data-uib-datepicker data-ng-model="vm.dt" data-min-date="vm.minDate" data-show-weeks="false" class="datepicker" data-custom-class="vm.getDayClass(date, mode)"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-8 col-md-offset-2">
+        <h1><span class="sr-only">Dreams</span><img src="images/title-dreams.png" height="55" alt="Dreams" aria-hidden="true"></h1>
+
+        <!-- inactive dummy dreams -->
+        <div class="panel panel-default dream" data-ng-include="'../../templates/dreams/dream01.tmpl.html'"></div>
+        <div class="panel panel-default dream" data-ng-include="'../../templates/dreams/dream02.tmpl.html'"></div>
+
+        <div class="panel panel-default dream dream-active">
+          <div class="panel-body">
+            <form class="form-horizontal">
+              <fieldset>
+                <legend class="sr-only">Dream details</legend>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="dream-title">title</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="dream-title" class="form-control input-lg" data-ng-blur='save()'>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="dream-description">description</label>
+                  <div class="col-sm-10">
+                    <textarea class="form-control" id="dream-description" rows="3" data-ng-blur='save()'></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label"></label>
+                  <div class="col-sm-10">
+                    <button type="button" class="btn btn-default btn-block" data-ng-click="isCollapsed = !isCollapsed">
+                      {{isCollapsed && 'less' || 'more'}}<span class="lucidicon" data-ng-class="isCollapsed ? 'lucidicon-arrow-up' : 'lucidicon-arrow-down'"></span>
+                    </button>
+                  </div>
+                </div>
+                <div data-ng-show="isCollapsed">
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">sleep</label>
+                    <div class="col-sm-10">
+                      <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-default active">
+                          <input type="radio" name="sleep" value="night">
+                          <span class="lucidicon lucidicon-starry-night"></span>night
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="sleep" value="morning">
+                          <span class="lucidicon lucidicon-sun"></span>morning
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="sleep" value="afternoon">
+                          <span class="lucidicon lucidicon-coffee"></span>afternoon
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="sleep" value="evening">
+                          <span class="lucidicon lucidicon-sunset"></span>evening
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group js-mood">
+                    <label class="col-sm-2 control-label">mood</label>
+                    <div class="col-sm-10">
+                      <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-default">
+                          <input type="radio" name="mood" value="scarry">
+                          <span class="lucidicon lucidicon-scarry"></span><span class="sr-only">scarry</span>
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="mood" value="sad">
+                          <span class="lucidicon lucidicon-sad"></span><span class="sr-only">sad</span>
+                        </label>
+                        <label class="btn btn-default active">
+                          <input type="radio" name="mood" value="neutral">
+                          <span class="lucidicon lucidicon-neutral"></span><span class="sr-only">neutral</span>
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="mood" value="smiley">
+                          <span class="lucidicon lucidicon-smiley"></span><span class="sr-only">smiley</span>
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="mood" value="laugh">
+                          <span class="lucidicon lucidicon-laugh"></span><span class="sr-only">laugh</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group js-recall">
+                    <label class="col-sm-2 control-label">recall</label>
+                    <div class="col-sm-10">
+                      <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-default">
+                          <input type="radio" name="recall" value="blurry">
+                          <span class="lucidicon lucidicon-batteryempty"></span>blurry
+                        </label>
+                        <label class="btn btn-default active">
+                          <input type="radio" name="recall" value="na">
+                          <span class="lucidicon lucidicon-batteryhalf"></span>n/a
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="recall" value="clear">
+                          <span class="lucidicon lucidicon-batteryfull"></span>clear
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group js-type">
+                    <label class="col-sm-2 control-label">type</label>
+                    <div class="col-sm-10">
+                      <div class="btn-group js-type" data-toggle="buttons">
+                        <label class="btn btn-default active">
+                          <input type="radio" name="type" value="regular">
+                          <span class="lucidicon lucidicon-zzz"></span>regular
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="recurring">
+                          <span class="lucidicon lucidicon-ouroboros"></span>recurring
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="precognition">
+                          <span class="lucidicon lucidicon-poker"></span>precognition
+                        </label>
+                        <label class="btn btn-default js-lucid">
+                          <input type="radio" name="type" value="lucid">
+                          <span class="lucidicon lucidicon-eye"></span>lucid
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="multidimensional">
+                          <span class="lucidicon lucidicon-wormhole"></span>multi-dimensional
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="obe">
+                          <span class="lucidicon lucidicon-astral"></span>OBE/astral projection
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="sleep-paralysis">
+                          <span class="lucidicon lucidicon-eyes"></span>sleep paralysis
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="falseawakening">
+                          <span class="lucidicon lucidicon-alarm"></span>false awakening
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="meditation">
+                          <span class="lucidicon lucidicon-buddha"></span>meditation/daydream
+                        </label>
+                        <label class="btn btn-default">
+                          <input type="radio" name="type" value="psychedelic">
+                          <span class="lucidicon lucidicon-mushroom"></span>psychedelic
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset data-ng-show="isCollapsed">
+                <legend class="sr-only">Symbols</legend>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">symbols</label>
+                  <div class="col-sm-10">
+                    <ui-select multiple data-ng-model="multipleSymbols.symbols" theme="select2" tagging="true">
+                      <ui-select-match placeholder="Select symbols..." class="ui-select-match">{{$item}}</ui-select-match>
+                      <ui-select-choices repeat="symbol in availableSymbols | filter:$select.search" class="ui-select-choices">
+                        {{symbol}}
+                      </ui-select-choices>
+                    </ui-select>
+                    <span class="help-block"><span class="lucidicon lucidicon-info"></span> link existing symbol or enter new
+                    </span>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+          <div class="panel-footer clearfix">
+            <div class="summary pull-left">
+              <span class="js-summary-sleep lucidicon lucidicon-starry-night"></span>
+              <span class="js-summary-mood lucidicon lucidicon-neutral"></span>
+              <span class="js-summary-recall lucidicon lucidicon-batteryhalf"></span>
+              <span class="js-summary-type lucidicon lucidicon-zzz"></span>
+              <span class="sr-only">Symbols:</span><span class="js-summary-symbols lucidicon lucidicon-tags"></span> <a href="#!/symbols">symbol #1</a>, <a href="#!/symbols">symbol #2</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-default dream" data-ng-include="'../../templates/dreams/dream04.tmpl.html'"></div>
+
+        <button class="btn btn-primary pull-right" type="submit">Add dream</button>
+      </div>
+    </div>
+  </div>
+  <!-- /container -->
+
+  <!-- <h3>All registered users:</h3>
+  <ul>
+      <li ng-repeat="user in vm.allUsers">
+          {{user.username}} - <a ng-click="vm.deleteUser(user.id)">Delete</a>
+      </li>
+  </ul> -->
+
+  <footer data-ng-include="'../../templates/footer.tmpl.html'"></footer>
+</div>

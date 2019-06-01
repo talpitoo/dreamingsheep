@@ -13,49 +13,49 @@
 
             .when('/dreams', {
                 controller: 'DreamsController',
-                templateUrl: 'pages/dreams/dreams.view.html',
+                templateUrl: 'templates/dreams/dreams.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/symbols', {
                 controller: 'SymbolsController',
-                templateUrl: 'pages/symbols/symbols.view.html',
+                templateUrl: 'templates/symbols/symbols.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/stats', {
                 controller: 'StatsController',
-                templateUrl: 'pages/stats/stats.view.html',
+                templateUrl: 'templates/stats/stats.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/search', {
                 controller: 'SearchController',
-                templateUrl: 'pages/search/search.view.html',
+                templateUrl: 'templates/search/search.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/settings', {
                 controller: 'SettingsController',
-                templateUrl: 'pages/settings/settings.view.html',
+                templateUrl: 'templates/settings/settings.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/faq', {
                 controller: 'FaqController',
-                templateUrl: 'pages/faq/faq.view.html',
+                templateUrl: 'templates/faq/faq.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/login', {
                 controller: 'LoginController',
-                templateUrl: 'pages/login/login.view.html',
+                templateUrl: 'templates/login/login.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/signup', {
                 controller: 'SignupController',
-                templateUrl: 'pages/signup/signup.view.html',
+                templateUrl: 'templates/signup/signup.view.html',
                 controllerAs: 'vm'
             })
 

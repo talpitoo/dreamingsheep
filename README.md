@@ -1,6 +1,6 @@
 # [dreamingsheep](http://dreamingsheep.net/)
 
-Excerpt from the [dreamingsheep](http://dreamingsheep.net/) template which is used as an example in my graduate thesis _"Automatization in the Web Application Front End Implementation"_.
+[dreamingsheep](http://dreamingsheep.net/) template.
 
 ![dreamingsheep](http://dreamingsheep.net/images/cover1200x630.jpg "dreamingsheep")
 
@@ -11,13 +11,14 @@ Excerpt from the [dreamingsheep](http://dreamingsheep.net/) template which is us
 * Install [Vagrant](https://www.vagrantup.com/).
 * Clone the repo: `git clone https://github.com/talpitoo/dreamingsheep.git`.
 * Go to the newly created folder: `cd dreamingsheep`.
+* Switch to the develop branch: `git checkout develop`.
 * Start Vagrant: `vagrant up`.
 * SSH to the newly created virtual machine: `vagrant ssh`.
 * Go to the shared folder: `cd shared`.
-* Install project dependencies: `bower install`.
-* Build: `gulp`.
-* Find the generated website in the `/dist` folder.
-* Watch your changes: `gulp serve`.
+* Pick a task from the [Yeoman generator-webapp documentation](https://github.com/yeoman/generator-webapp) e.g.
+* Run `npm start` to preview and watch for changes
+* Run `npm run build` to build your webapp for production (the generated static website in the `/dist` folder)
+* Run `npm run serve:dist` to preview the production build
 * Open [localhost:9000](http://localhost:9000) on your host machine.
 * If anything goes wrong, find help on [Stack Overflow](http://stackoverflow.com/).
 

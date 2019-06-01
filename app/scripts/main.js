@@ -1,7 +1,9 @@
-'use strict';
+console.log('\'Allo \'Allo!');
 
 // angular
 angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('DreamCtrl', function ($scope, $uibModal, $timeout) {
+   'use strict';
+
   // navbar collapse
   $scope.isNavCollapsed = true;
   $scope.isCollapsed = false;

@@ -83,25 +83,11 @@ Vagrant.configure(2) do |config|
 
   # Install Node.js
   curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-  sudo apt-get install -y nodejs git
+  sudo apt-get install -y nodejs
   npm install -g npm
 
-  # Install Bower
-  npm install -g bower
-
-  # Versions
-  echo "node"
-  node -v
-  echo "npm"
-  npm -v
-  echo "bower"
-  bower -v
-
-  # Install Gulp
-  npm install -g gulp
-
-  # Install PhantomJS (required for accessibility check)
-  npm install phantomjs-prebuilt
+  # Install GulpJS
+  npm install --global gulp-cli
 
   # Install dependencies
   cd shared
