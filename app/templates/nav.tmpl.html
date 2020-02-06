@@ -14,7 +14,7 @@
       <ul class="nav navbar-nav">
         <li><a href="/"><img alt="dreamingsheep" src="images/title-dreamingsheep.png" width="216" height="50" class="text-dreamingsheep"></a></li>
       </ul>
-      <ul class="nav navbar-nav navbar-right">
+      <ul class="nav navbar-nav navbar-right" ng-show="globals.currentUser">
         <!-- <li><a href="#"><span class="lucidicon lucidicon-search"></span><span class="text-uppercase visible-xs-inline-block"> Search</span></a></li> -->
         <li>
           <form class="input-group input-group-search" data-ng-submit="vm.submitSearch(vm.searchInput)">
@@ -42,12 +42,10 @@
           </ul>
         </li>
       </ul>
-      <!-- <form class="navbar-form navbar-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search">
-        </div>
-        <button type="submit" class="btn btn-default"><span class="lucidicon lucidicon-search"></span> Submit</button>
-      </form> -->
+
+      <ul class="nav navbar-nav navbar-right" ng-show="!globals.currentUser">
+        <li><a href="#!/login" class="text-uppercase">Log in</a></li>
+      </ul>
     </div>
     <!--/.nav-collapse -->
   </div>
