@@ -132,11 +132,18 @@ img {
 }
 
 .btn-group {
+  display: flex;
+  flex-wrap: wrap;
+
+  .lucidicon {
+    font-size: 20px;
+  }
+
   > .btn {
     margin-top: -1px;
     min-width: 96px;
     min-height: 64px;
-    padding: 16px;
+    padding: 10px; // because of the search page (10px 15px;)
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -148,6 +155,20 @@ img {
 
     &:last-child {
       border-top-right-radius: 0;
+    }
+  }
+
+  &-twoline {
+    > .btn {
+      min-height: 94px;
+
+      @media (min-width: $screen-md-min) {
+        flex-grow: 1;
+      }
+
+      @media (min-width: $screen-lg-min) {
+        flex-grow: unset;
+      }
     }
   }
 }

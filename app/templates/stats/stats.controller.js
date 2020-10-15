@@ -190,33 +190,33 @@
                 {v: 14}
             ]},
             {c: [
-                {v: 'OBE/astral projection'},
+                {v: 'sleep paralysis'},
                 {v: 2},
             ]},
-            {c: [
-                {v: 'precognition'},
-                {v: 1},
-            ]},
-            {c: [
-                {v: 'false awakening'},
-                {v: 1},
-            ]},
-            {c: [
-                {v: 'recurring'},
-                {v: 2},
-            ]},
-            {c: [
-                {v: 'multi-dimensional'},
-                {v: 2},
-            ]},
-            {c: [
-                {v: 'meditation/daydream'},
-                {v: 6},
-            ]},
-            {c: [
-                {v: 'psychedelic'},
-                {v: 4},
-            ]}
+            // {c: [
+            //     {v: 'precognition'},
+            //     {v: 1},
+            // ]},
+            // {c: [
+            //     {v: 'false awakening'},
+            //     {v: 1},
+            // ]},
+            // {c: [
+            //     {v: 'recurring'},
+            //     {v: 2},
+            // ]},
+            // {c: [
+            //     {v: 'multi-dimensional'},
+            //     {v: 2},
+            // ]},
+            // {c: [
+            //     {v: 'meditation/daydream'},
+            //     {v: 6},
+            // ]},
+            // {c: [
+            //     {v: 'psychedelic'},
+            //     {v: 4},
+            // ]}
         ]};
         vm.chartType.options = {
           //pieSliceText: 'label',
