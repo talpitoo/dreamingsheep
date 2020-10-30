@@ -46,23 +46,23 @@
                 </div>
                 <div data-ng-show="isCollapsed">
                   <div class="form-group">
-                    <label class="col-sm-2 control-label">sleep</label>
+                    <label class="col-sm-2 control-label">time</label>
                     <div class="col-sm-10">
                       <div class="btn-group" data-toggle="buttons">
                         <label class="btn btn-default active">
-                          <input type="radio" name="sleep" value="night">
+                          <input type="radio" name="time" value="night">
                           <span class="lucidicon lucidicon-starry-night"></span>night
                         </label>
                         <label class="btn btn-default">
-                          <input type="radio" name="sleep" value="morning">
+                          <input type="radio" name="time" value="morning">
                           <span class="lucidicon lucidicon-sun"></span>morning
                         </label>
                         <label class="btn btn-default">
-                          <input type="radio" name="sleep" value="afternoon">
+                          <input type="radio" name="time" value="afternoon">
                           <span class="lucidicon lucidicon-coffee"></span>afternoon
                         </label>
                         <label class="btn btn-default">
-                          <input type="radio" name="sleep" value="evening">
+                          <input type="radio" name="time" value="evening">
                           <span class="lucidicon lucidicon-sunset"></span>evening
                         </label>
                       </div>
@@ -145,11 +145,11 @@
                     <label class="col-sm-2 control-label">theme(s)</label>
                     <div class="col-sm-10">
                       <div class="btn-group btn-group-twoline" data-toggle="buttons">
-                        <label class="btn btn-default">
+                        <label class="btn btn-default active">
                           <input type="radio" name="type" value="obe">
                           <span class="lucidicon lucidicon-astral"></span>OBE/astral<br>projection
                         </label>
-                        <label class="btn btn-default">
+                        <label class="btn btn-default active">
                           <input type="radio" name="type" value="falseawakening">
                           <span class="lucidicon lucidicon-alarm"></span>false<br>awakening
                         </label>
@@ -161,9 +161,9 @@
                           <input type="radio" name="type" value="precognition">
                           <span class="lucidicon lucidicon-poker"></span>precognition
                         </label>
-                        <label class="btn btn-default">
-                          <input type="radio" name="type" value="multidimensional">
-                          <span class="lucidicon lucidicon-wormhole"></span>multi-<br>dimensional
+                        <label class="btn btn-default active">
+                          <input type="radio" name="type" value="transcendental">
+                          <span class="lucidicon lucidicon-wormhole"></span>trans-<br>cendental
                         </label>
                       </div>
                     </div>
@@ -176,13 +176,13 @@
                   <label class="col-sm-2 control-label">symbols</label>
                   <div class="col-sm-10">
                     <ui-select multiple data-ng-model="multipleSymbols.symbols" theme="select2" tagging="true">
-                      <ui-select-match placeholder="Select symbols..." class="ui-select-match">{{$item}}</ui-select-match>
+                      <ui-select-match placeholder="Select from existing symbols or create new..." class="ui-select-match">{{$item}}</ui-select-match>
                       <ui-select-choices repeat="symbol in availableSymbols | filter:$select.search" class="ui-select-choices">
                         {{symbol}}
                       </ui-select-choices>
                     </ui-select>
-                    <span class="help-block"><span class="lucidicon lucidicon-info"></span> link existing symbol or enter new
-                    </span>
+                    <!-- <span class="help-block"><span class="lucidicon lucidicon-info"></span> link existing symbol or enter new
+                    </span> -->
                   </div>
                 </div>
               </fieldset>
@@ -190,7 +190,7 @@
           </div>
           <div class="panel-footer clearfix">
             <div class="summary pull-left">
-              <span class="js-summary-sleep lucidicon lucidicon-starry-night"></span>
+              <span class="js-summary-time lucidicon lucidicon-starry-night"></span>
               <span class="js-summary-mood lucidicon lucidicon-neutral"></span>
               <span class="js-summary-recall lucidicon lucidicon-batteryhalf"></span>
               <span class="js-summary-type lucidicon lucidicon-zzz"></span>

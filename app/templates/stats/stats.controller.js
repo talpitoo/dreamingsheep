@@ -209,14 +209,14 @@
             //     {v: 'multi-dimensional'},
             //     {v: 2},
             // ]},
-            // {c: [
-            //     {v: 'meditation/daydream'},
-            //     {v: 6},
-            // ]},
-            // {c: [
-            //     {v: 'psychedelic'},
-            //     {v: 4},
-            // ]}
+            {c: [
+                {v: 'meditation/daydream'},
+                {v: 6},
+            ]},
+            {c: [
+                {v: 'psychedelic'},
+                {v: 4},
+            ]}
         ]};
         vm.chartType.options = {
           //pieSliceText: 'label',
@@ -224,7 +224,7 @@
           //pieStartAngle: 60,
           //sliceVisibilityThreshold: .05,
           // colors:['#AA3939','#801515', '#AA6C39', '#804515', '#226666', '#0D4D4D', '#2D882D', '#116611'],
-          colors: ['#9400d3', '#4b0082', '#0000ff', '#00ff00', '#ffff00', '#ff7f00', '#ff0000', '#c70039'],
+          colors: ['#9400d3', '#4b0082', '#0000ff', '#ff7f00', '#c70039'],
           slices: {
             0: {offset: 0.2}
           }
