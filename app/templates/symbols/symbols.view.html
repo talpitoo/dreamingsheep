@@ -9,7 +9,7 @@
     </div>
     <div class="row">
       <div class="col-sm-12 col-md-8 col-md-offset-2">
-        <h1><span class="sr-only">Symbols</span><img src="images/title-symbols.png" height="55" alt="Symbol" aria-hidden="true"></h1>
+        <h1><span class="sr-only">Themes</span><img src="images/title-symbols.png" height="55" alt="Symbol" aria-hidden="true"></h1>
 
         <div data-ng-repeat="item in vm.jsonSymbols">
           <div class="panel panel-default symbol" data-ng-class="item.isExpanded ? 'symbol-active' : ''">
@@ -45,7 +45,7 @@
               <button class="btn btn-link pull-right" type="button">
                 <span class="lucidicon lucidicon-pencil"></span><span class="sr-only">Edit</span>
               </button>
-              <button class="btn btn-link pull-right" type="button" data-ng-click="open()" data-toggle="modal">
+              <button class="btn btn-link pull-right" type="button" data-ng-click="vm.open()">
                 <span class="lucidicon lucidicon-trash"></span><span class="sr-only">Delete</span>
               </button>
             </div>

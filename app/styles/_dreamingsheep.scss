@@ -1,3 +1,5 @@
+$lucidicon-size: 25px;
+
 body {
   background: transparent url('../images/background-canvas.jpg') center center no-repeat fixed;
   background-size: cover;
@@ -7,8 +9,9 @@ footer {
   padding-top: 20px;
   margin-top: 20px;
 
-  .list-inline {
+  .stripe-dashed {
     margin-top: 80px;
+    margin-bottom: 20px;
   }
 }
 
@@ -107,6 +110,12 @@ img {
 .datepicker {
   margin-bottom: 40px;
 
+  .has-dreams {
+    button {
+      background-color: lightgray;
+    }
+  }
+
   table {
     margin: auto;
     // width: 60%;
@@ -136,12 +145,17 @@ img {
   flex-wrap: wrap;
 
   .lucidicon {
-    font-size: 20px;
+    font-size: $lucidicon-size;
+  }
+
+  svg {
+    width: $lucidicon-size;
+    height: $lucidicon-size;
   }
 
   > .btn {
     margin-top: -1px;
-    min-width: 96px;
+    min-width: 100px;
     min-height: 64px;
     padding: 10px; // because of the search page (10px 15px;)
     display: flex;

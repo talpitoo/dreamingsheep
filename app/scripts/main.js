@@ -12,7 +12,7 @@ angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('Dr
   $scope.isSymbolCollapsed = true;
   $scope.isCollapsedHorizontal = false;
   $scope.isAdvancedSearchCollapsed = false;
-  $scope.isSaving = false; // dummy loader icon
+  // $scope.isSaving = false; // dummy loader icon
 
   // symbols
   // $scope.availableSymbols = ['levitation', 'cycling', 'mountains', 'flying', 'dog', 'joy', 'apple', 'snake'];
@@ -87,6 +87,7 @@ angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('Dr
     $uibModal.open({
       // templateUrl: 'modalDelete.html',
       templateUrl: 'modal-delete.tmpl.html',
+      //'../../templates/modal-delete.tmpl.html'
       controller: 'ModalInstanceCtrl',
       size: size,
       resolve: {
@@ -98,12 +99,12 @@ angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('Dr
 
   };
 
-  $scope.save = function () {
-    $scope.isSaving = true;
-    $timeout(function() {
-      $scope.isSaving = false;
-    }, 1000);
-  };
+  // $scope.save = function () {
+  //   $scope.isSaving = true;
+  //   $timeout(function() {
+  //     $scope.isSaving = false;
+  //   }, 1000);
+  // };
 
   // $scope.forgotPasswordStep1 = true;
   // $scope.forgotPasswordStep2 = false;

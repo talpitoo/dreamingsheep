@@ -3,10 +3,20 @@
 
     angular
         .module('app')
-        .controller('SymbolsController', SymbolsController);
+        .controller('SymbolsController', SymbolsController)
+        // Please note that $modalInstance represents a modal window (instance) dependency.
+        // It is not the same as the $uibModal service used above.
+        .controller('ModalInstanceCtrl', function ($scope, $uibModalInstance) {
+          $scope.ok = function () {
+            $uibModalInstance.close();
+          };
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+          };
+        });
 
-    SymbolsController.$inject = ['$location', 'AuthenticationService', 'FlashService'];
-    function SymbolsController($location, AuthenticationService, FlashService) {
+    SymbolsController.$inject = ['$location', 'AuthenticationService', 'FlashService', '$uibModal'];
+    function SymbolsController($location, AuthenticationService, FlashService, $uibModal) {
         var vm = this;
 
         vm.isActive = function (viewLocation) {
@@ -17,6 +27,20 @@
         vm.searchInput = "";
         vm.submitSearch = function(searchObject) {
           $location.path("/search");
+        };
+
+        // modal
+        vm.open = function (size) {
+          $uibModal.open({
+            templateUrl: '../../templates/modal-delete-symbol.tmpl.html',
+            controller: 'ModalInstanceCtrl',
+            size: size,
+            resolve: {
+              items: function () {
+                // return vm.items;
+              }
+            }
+          });
         };
 
         vm.jsonSymbols = [
