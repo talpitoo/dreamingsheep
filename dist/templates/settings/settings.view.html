@@ -42,6 +42,13 @@
                       </select>
                     </div>
                   </div>
+                  <div class="form-group js-theme">
+                    <label class="col-sm-2 control-label">Choose predefined symbols (themes, characters, setting, etc.)</label>
+                    <div class="col-sm-10">
+                      <input type="checkbox" id="predefined-symbols" name="scales" checked> <label class="" for="predefined-symbols">Select all</label>
+                      <div data-ng-include="'../../templates/list-symbols.tmpl.html'"></div>
+                    </div>
+                  </div>
                 </fieldset>
                 <fieldset>
                   <legend class="sr-only">Download your journal</legend>

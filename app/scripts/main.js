@@ -81,23 +81,23 @@ angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('Dr
   // };
 
   // modal
-  $scope.open = function (size) {
-
-    // var modalInstance = $uibModal.open({
-    $uibModal.open({
-      // templateUrl: 'modalDelete.html',
-      templateUrl: 'modal-delete.tmpl.html',
-      //'../../templates/modal-delete.tmpl.html'
-      controller: 'ModalInstanceCtrl',
-      size: size,
-      resolve: {
-        items: function () {
-          return $scope.items;
-        }
-      }
-    });
-
-  };
+  // $scope.open = function (size) {
+  //
+  //   // var modalInstance = $uibModal.open({
+  //   $uibModal.open({
+  //     // templateUrl: 'modalDelete.html',
+  //     templateUrl: 'modal-delete.tmpl.html',
+  //     //'../../templates/modal-delete.tmpl.html'
+  //     controller: 'ModalInstanceCtrl',
+  //     size: size,
+  //     resolve: {
+  //       items: function () {
+  //         return $scope.items;
+  //       }
+  //     }
+  //   });
+  //
+  // };
 
   // $scope.save = function () {
   //   $scope.isSaving = true;
@@ -182,13 +182,13 @@ angular.module('dreamingsheepApp', ['ui.bootstrap', 'ui.select']).controller('Dr
 // Please note that $modalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-angular.module('dreamingsheepApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance) {
-
-  $scope.ok = function () {
-    $uibModalInstance.close();
-  };
-
-  $scope.cancel = function () {
-    $uibModalInstance.dismiss('cancel');
-  };
-});
+// angular.module('dreamingsheepApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance) {
+//
+//   $scope.ok = function () {
+//     $uibModalInstance.close();
+//   };
+//
+//   $scope.cancel = function () {
+//     $uibModalInstance.dismiss('cancel');
+//   };
+// });

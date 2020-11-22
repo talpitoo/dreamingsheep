@@ -31,6 +31,31 @@
           }, 1000);
         };
 
+        // symbols
+        vm.availableSymbols = [
+          {"name":"OBE/astral projection","icon":"astral"},
+          {"name":"false alarm","icon":"alarm"},
+          {"name":"false memory","icon":"brain"},
+          {"name":"inception/A ⊆ B","icon":"top"},
+          {"name":"recurring","icon":"ouroboros"},
+          {"name":"nightmare","icon":"scream"},
+          {"name":"intuition/precognition","icon":"poker"},
+          {"name":"spacetime","icon":"wormhole"},
+        ];
+        vm.multipleSymbols = {};
+        vm.multipleSymbols.symbols = [
+          {"name":"OBE/astral projection","icon":"astral"},
+          {"name":"false alarm","icon":"alarm"},
+          {"name":"false memory","icon":"brain"},
+        ]
+        vm.tagTransform = function (newTag) {
+          var item = {
+              name: newTag,
+              icon: 'price-tag',
+          };
+          return item;
+        };
+
         // search
         vm.searchInput = "";
         vm.submitSearch = function(searchObject) {
