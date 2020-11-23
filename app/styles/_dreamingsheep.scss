@@ -146,8 +146,8 @@ img {
 .ui-select-match-item {
   margin-top: -1px;
   min-width: $btn-icon-width;
-  min-height: 64px;
-  padding: 10px; // because of the search page (10px 15px;)
+  min-height: 77px;
+  padding: 15px 10px; // because of the search page (10px 15px;)
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -181,6 +181,11 @@ img {
   display: flex;
   flex-wrap: wrap;
 
+  &::after {
+    content: '';
+    flex-grow: 1000000000;
+  }
+
   .lucidicon {
     font-size: $lucidicon-size;
   }
@@ -199,6 +204,10 @@ img {
     justify-content: center;
     flex-direction: column;
 
+    // @media (min-width: $screen-sm-min) {
+      flex-grow: 1;
+    // }
+
     &:first-child {
       margin-left: -1px;
       border-bottom-left-radius: 0;
@@ -206,20 +215,6 @@ img {
 
     &:last-child {
       border-top-right-radius: 0;
-    }
-  }
-
-  &-twoline {
-    > .btn {
-      // min-height: 94px;
-
-      @media (min-width: $screen-md-min) {
-        flex-grow: 1;
-      }
-
-      // @media (min-width: $screen-lg-min) {
-      //   flex-grow: unset;
-      // }
     }
   }
 }
