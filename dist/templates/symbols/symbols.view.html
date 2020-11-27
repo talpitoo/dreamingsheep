@@ -14,22 +14,52 @@
         <div data-ng-repeat="item in vm.jsonSymbols">
           <div class="panel panel-default symbol" data-ng-class="item.isExpanded ? 'symbol-active' : ''">
             <div class="panel-body">
-              <div class="row">
-                <div class="col-sm-8">
-                  <h2>{{item.name}}</h2>
-                  <div data-ng-show="item.isExpanded">
-                    <ul class="list-unstyled">
-                      <li data-ng-repeat="itemDream in item.dreams">
-                        <a href="#!/dreams">{{itemDream}}</a>
-                      </li>
-                    </ul>
-                  </div>
+              <div class="row" data-ng-show="!item.isExpanded">
+                <div class="col-sm-10">
+                  <h2><span class="lucidicon lucidicon-{{item.icon}}"></span> {{item.name}}</h2>
                 </div>
-
-                <div class="col-sm-4 text-right">
+                <div class="col-sm-2 text-right">
                   <span class="text-occurence">{{item.occurence}}</span>
-                  <img src="loader.gif" data-ng-src="{{item.picture}}" alt="picture of the symbol" class="img-thumbnail img-responsive" data-ng-show="item.isExpanded && item.picture">
                 </div>
+              </div>
+              <div data-ng-show="item.isExpanded">
+                <form class="form-horizontal">
+                  <fieldset>
+                    <legend class="sr-only">Symbol details</legend>
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label" for="symbol-title">name</label>
+                      <div class="col-sm-10">
+                        <input data-ng-show="!item.predefined" type="text" id="symbol-name" class="form-control input-lg" data-ng-blur='vm.save()' ng-model="item.name">
+                        <input data-ng-show="item.predefined" disabled type="text" id="symbol-name" class="form-control input-lg" data-ng-blur='vm.save()' ng-model="item.name">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label" for="symbol-description">description</label>
+                      <div class="col-sm-10">
+                        <textarea class="form-control" data-ng-show="!item.predefined" id="symbol-description" rows="3" data-ng-blur='vm.save()'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras faucibus, odio quis porta finibus.</textarea>
+                        <textarea class="form-control" data-ng-show="item.predefined" disabled id="symbol-description" rows="3" data-ng-blur='vm.save()'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras faucibus, odio quis porta finibus.</textarea>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label" for="symbol-img-url">image URL</label>
+                      <div class="col-sm-10">
+                        <img src="loader.gif" data-ng-src="{{item.picture}}" data-ng-show="item.picture" alt="picture of the symbol" class="img-thumbnail img-responsive" style="max-width: 66%;">
+                        <span class="lucidicon lucidicon-{{item.icon}}" style="font-size: 100px;" data-ng-show="item.predefined || !item.picture"></span>
+                        <input type="text" id="symbol-img-url" class="form-control" data-ng-blur='vm.save()' ng-model="item.picture" data-ng-show="!item.predefined">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label" for="symbol-description">{{item.occurence}} occurences</label>
+                      <div class="col-sm-10">
+                        <ul class="list-inline">
+                          <li data-ng-repeat="itemDream in item.dreams">
+                            <a href="#!/dreams">{{itemDream}}</a>,
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </fieldset>
+                </form>
               </div>
             </div>
             <div class="panel-footer clearfix">
@@ -39,10 +69,10 @@
                 <span class="lucidicon lucidicon-{{item.recall}}"></span>
                 <span class="lucidicon lucidicon-{{item.type}}"></span>
               </div>
-              <button class="btn btn-link" type="button" data-ng-click="item.isExpanded = !item.isExpanded">
+              <!-- <button class="btn btn-link" type="button" data-ng-click="item.isExpanded = !item.isExpanded">
                 {{item.isExpanded && 'less' || 'more'}}<span class="lucidicon" data-ng-class="item.isExpanded ? 'lucidicon-arrow-up' : 'lucidicon-arrow-down'"></span>
-              </button>
-              <button class="btn btn-link pull-right" type="button">
+              </button> -->
+              <button class="btn btn-link pull-right" type="button" data-ng-click="item.isExpanded = !item.isExpanded">
                 <span class="lucidicon lucidicon-pencil"></span><span class="sr-only">Edit</span>
               </button>
               <button class="btn btn-link pull-right" type="button" data-ng-click="vm.open()">

@@ -187,7 +187,11 @@
             ]},
             {c: [
                 {v: 'regular'},
-                {v: 14}
+                {v: 34}
+            ]},
+            {c: [
+                {v: 'hypnosis'},
+                {v: 1}
             ]},
             {c: [
                 {v: 'sleep paralysis'},
@@ -224,7 +228,7 @@
           //pieStartAngle: 60,
           //sliceVisibilityThreshold: .05,
           // colors:['#AA3939','#801515', '#AA6C39', '#804515', '#226666', '#0D4D4D', '#2D882D', '#116611'],
-          colors: ['#9400d3', '#4b0082', '#0000ff', '#ff7f00', '#c70039'],
+          colors: ['#350029', '#62004C', '#7E0C65', '#8A4A7C', '#B44A9D', '#D459B9'],
           slices: {
             0: {offset: 0.2}
           }

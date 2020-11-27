@@ -45,10 +45,11 @@
 
         vm.jsonSymbols = [
           {
-              'name': 'Flying',
+              'name': 'flying',
+              'icon': 'superhero',
+              'predefined': true,
               'occurence': '17',
-              'picture': '',
-              'dreams': ['Dream #1', 'Dream #2', 'Dream #3'],
+              'dreams': ['Dream #1', 'Dream #2', 'Dream #3', 'Dream #4', 'Dream #5', 'Dream #6', 'Dream #7', 'Dream #8', 'Dream #9', 'Dream #10', 'Dream #11', 'Dream #12', 'Dream #13', 'Dream #14', 'Dream #15', 'Dream #16', 'Dream #17'],
               'sleep': 'starry-night',
               'mood': 'laugh',
               'recall': 'batteryfull',
@@ -57,9 +58,11 @@
           },
           {
               'name': 'Floating island',
+              'icon': 'tag',
+              'predefined': false,
               'occurence': '12',
               'picture': 'http://img01.deviantart.net/e1ed/i/2010/241/5/c/the_floating_island_by_araiko_o-d2xki7p.jpg',
-              'dreams': ['Dream #1', 'Dream #2', 'Dream #3', 'Dream #4', 'Dream #5', 'Dream #6'],
+              'dreams': ['Dream #1', 'Dream #2', 'Dream #3', 'Dream #4', 'Dream #5', 'Dream #6', 'Once upon a time in Gondoland', 'Big Muzzy', '2001 dream odyssey', 'Dream #10', 'Dream #11', 'Dream #12'],
               'sleep': 'sunset',
               'mood': 'smiley',
               'recall': 'batteryhalf',
@@ -67,7 +70,9 @@
               'isExpanded': true
           },
           {
-              'name': 'Rainbow',
+              'name': 'My symbol #3',
+              'icon': 'tag',
+              'predefined': false,
               'occurence': '9',
               'picture': '',
               'dreams': ['Dream #1', 'Dream #2'],
@@ -78,8 +83,10 @@
               'isExpanded': false
           },
           {
-              'name': 'Dog',
-              'occurence': '8',
+              'name': 'rainbow/hologram',
+              'icon': 'rainbow',
+              'predefined': true,
+              'occurence': '7',
               'picture': '',
               'dreams': ['Dream #1', 'Dream #2'],
               'sleep': 'starry-night',
@@ -89,7 +96,9 @@
               'isExpanded': false
           },
           {
-              'name': 'Friend',
+              'name': 'friend',
+              'icon': 'friends',
+              'predefined': true,
               'occurence': '4',
               'picture': '',
               'dreams': ['Dream #1', 'Dream #2'],
@@ -98,26 +107,38 @@
               'recall': 'batteryhalf',
               'type': 'zzz',
               'isExpanded': false
-          }
+          },
+          {
+              'name': 'My symbol #1',
+              'icon': 'tag',
+              'predefined': false,
+              'occurence': '1',
+              'picture': '',
+              'dreams': ['Dream #1', 'Dream #2'],
+              'sleep': 'starry-night',
+              'mood': 'laugh',
+              'recall': 'batteryhalf',
+              'type': 'zzz',
+              'isExpanded': false
+          },
+          {
+              'name': 'My symbol #2',
+              'icon': 'tag',
+              'predefined': false,
+              'occurence': '1',
+              'picture': '',
+              'dreams': ['Dream #1', 'Dream #2'],
+              'sleep': 'starry-night',
+              'mood': 'laugh',
+              'recall': 'batteryhalf',
+              'type': 'zzz',
+              'isExpanded': false
+          },
         ];
 
         (function initController() {
-            // reset login status
-            // AuthenticationService.ClearCredentials();
+            
         })();
-
-        // function login() {
-        //     vm.dataLoading = true;
-        //     AuthenticationService.Login(vm.username, vm.password, function (response) {
-        //         if (response.success) {
-        //             AuthenticationService.SetCredentials(vm.username, vm.password);
-        //             $location.path('/');
-        //         } else {
-        //             FlashService.Error(response.message);
-        //             vm.dataLoading = false;
-        //         }
-        //     });
-        // };
     }
 
 })();
