@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --------------------------------------
+
+model User {
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  username          String   @unique
+  email             String   @unique
+  hashedPassword    String
+  verified          Boolean  @default(false)
+  role              Role     @default(USER)
+  trackSleepingTime Boolean  @default(false)
+
+  tokens   Token[]
+  sessions Session[]
+
+  otp Otp? @relation("Otp")
+
+  // relatedSymbols Symbol[] @relation("RelatedSymbols")
+  relatedSymbols Symbol[]
+  ownSymbols     Symbol[] @relation("OwnSymbols")
+
+  dreams Dream[] @relation("Dreams")
+
+  sleepingTimes SleepingTime[]
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id], name: "Otp", onDelete: Cascade)
+  userId    Int?     @unique
+  code      String
+  createdAt DateTime @default(now()) @db.Timestamptz
+}
+
+model Session {
+  id                 Int       @id @default(autoincrement())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  expiresAt          DateTime?
+  handle             String    @unique
+  hashedSessionToken String?
+  antiCSRFToken      String?
+  publicData         String?
+  privateData        String?
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+model Token {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  hashedToken String
+  type        TokenType
+  expiresAt   DateTime
+  sentTo      String?
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  @@unique([hashedToken, type])
+}
+
+model Symbol {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  code        String   @unique
+  name        String
+  description String?
+  picture     String?
+  icon        String?
+  builtIn     Boolean
+
+  author   User? @relation(fields: [authorId], references: [id], name: "OwnSymbols", onDelete: Cascade)
+  authorId Int?
+
+  // relatedTo   User? @relation(fields: [relatedToId], references: [id], name: "RelatedSymbols")
+  // relatedToId Int?
+  relatedTo User[]
+
+  dreams Dream[]
+}
+
+model Dream {
+  id          Int        @id @default(autoincrement())
+  dreamAt     DateTime
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  title       String
+  description String
+  notes       String?
+  type        DreamType  @default(REGULAR)
+  time        DreamTime  @default(NIGHT)
+  recall      RecallTime @default(N_A)
+  mood        Int
+  favorite    Boolean    @default(false)
+  public      Boolean?
+
+  symbols Symbol[]
+
+  user   User? @relation(fields: [userId], references: [id], name: "Dreams", onDelete: Cascade)
+  userId Int?
+}
+
+model SleepingTime {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  sleepingAt DateTime
+  bedtime    DateTime?
+  wakeUpTime DateTime?
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+enum RecallTime {
+  BLURRY
+  N_A
+  CLEAR
+}
+
+enum DreamTime {
+  NIGHT
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+enum DreamType {
+  REGULAR
+  LUCID
+  SLEEP_PARALYSIS
+  HYPNOSIS
+  DAYDREAM
+  PSYCHEDELIC
+  MEDITATION
+  OTHER
+}
+
+// NOTE: It's highly recommended to use an enum for the token type
+//       but enums only work in Postgres.
+//       See: https://blitzjs.com/docs/database-overview#switch-to-postgresql
+enum TokenType {
+  RESET_PASSWORD
+  VERIFY_USER
+}
+
+enum Role {
+  USER
+  ADMIN
+  DEMO
+}

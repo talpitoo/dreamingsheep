@@ -1,0 +1,39 @@
+stages:
+  - deploy
+
+before_script:
+  - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+
+deploy:
+  stage: deploy
+  script:
+    - |
+      ssh $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+        source ~/.nvm/nvm.sh
+        echo 'Killing processes...'
+        pkill -f blitz; pkill -f nest; pkill -f node
+        sleep 2
+        echo 'Git pull code...'
+        cd /home/ubuntu/dreamingsheep
+        git checkout master
+        git pull
+        echo 'Building dreamingsheep...'
+        nvm use 18
+        npm install -g yarn
+        yarn install
+        rm -rf .next
+        yarn build
+        cp public/assets/title-dreamingsheep.png public/assets/sheep-dreamingsheep.png .next/static/media/
+        echo 'Starting dreamingsheep...'
+        nohup bash -c 'cd ~/dreamingsheep && source ~/.nvm/nvm.sh && nvm use 18 && yarn start' > ~/dreamingsheep/nohup.out 2>&1 &
+        disown -a
+        echo 'Deploy complete!'
+      EOF
+  when: manual
+  only:
+    - tags

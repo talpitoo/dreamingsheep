@@ -1,0 +1,32 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:13.4 # use the specific version, e.g., 13.4
+    ports:
+      - "5432:5432"
+    container_name: docker-postgres-dreamingsheep # custom container name
+    environment: # environment variables
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres} # set via .env.local; defaults to 'postgres' for local dev
+      POSTGRES_USER: postgres # default user, you can adjust as needed
+      POSTGRES_DB: dreamingsheep # create the database on initialization
+    volumes:
+      - pgdata-dreamingsheep:/var/lib/postgresql/data/ # this volume persists the database data
+    restart: unless-stopped # ensure the service always restarts on failure or container stop
+
+  blitzjs-app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    network_mode: host
+    container_name: docker-dreamingsheep # custom container name
+    env_file:
+      - ./.env.local
+    depends_on:
+      - postgres
+    restart: always # ensure the service always restarts on failure or container stop
+
+# using an external volume makes it easier to create backups of your database data by simply creating snapshots of the volume. It also simplifies data migration if you ever need to move your database to a different host or container.
+# Check out https://docs.docker.com/desktop/backup-and-restore/ for creating backup into .zip files + backing up volumes https://docs.docker.com/storage/volumes/#back-up-restore-or-migrate-data-volumes
+volumes:
+  pgdata-dreamingsheep: # define a named volume with a specific name for PostgreSQL data
+    name: volume-postgres-dreamingsheep # custom name for the volume

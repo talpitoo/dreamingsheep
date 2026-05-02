@@ -1,0 +1,418 @@
+@font-face {
+  font-family: "lucidicon";
+  src: url("/fonts/lucidicon.ttf?4vhl77") format("truetype"),
+    url("/fonts/lucidicon.woff?4vhl77") format("woff"),
+    url("/fonts/lucidicon.svg?4vhl77#lucidicon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="lucidicon-"],
+[class*=" lucidicon-"],
+.glyphicon {
+  font-family: "lucidicon" !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  font-size: 16px;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: middle;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.lucidicon-abstract:before {
+  content: "\e900";
+}
+.lucidicon-account:before {
+  content: "\e901";
+}
+.lucidicon-ai:before {
+  content: "\e902";
+}
+.lucidicon-alarm:before {
+  content: "\e903";
+}
+.lucidicon-alien:before {
+  content: "\e904";
+}
+.lucidicon-alzheimer:before {
+  content: "\e905";
+}
+.lucidicon-arrow-down:before {
+  content: "\e906";
+}
+.lucidicon-arrow-left:before {
+  content: "\e907";
+}
+.lucidicon-arrow-right:before {
+  content: "\e908";
+}
+.lucidicon-arrow-up:before {
+  content: "\e909";
+}
+.lucidicon-astral:before {
+  content: "\e90a";
+}
+.lucidicon-batteryempty:before {
+  content: "\e90b";
+}
+.lucidicon-batteryfull:before {
+  content: "\e90c";
+}
+.lucidicon-batteryhalf:before {
+  content: "\e90d";
+}
+.lucidicon-brain:before {
+  content: "\e90e";
+}
+.lucidicon-burqa:before {
+  content: "\e90f";
+}
+.lucidicon-c-3po:before {
+  content: "\e910";
+}
+.lucidicon-cannabis:before {
+  content: "\e911";
+}
+.lucidicon-care:before {
+  content: "\e912";
+}
+.lucidicon-centaur:before {
+  content: "\e913";
+}
+.lucidicon-chip:before {
+  content: "\e914";
+}
+.lucidicon-city:before {
+  content: "\e915";
+}
+.lucidicon-coffee:before {
+  content: "\e916";
+}
+.lucidicon-constellation:before {
+  content: "\e917";
+}
+.lucidicon-couple:before {
+  content: "\e918";
+}
+.lucidicon-crystals:before {
+  content: "\e919";
+}
+.lucidicon-curve:before {
+  content: "\e91a";
+}
+.lucidicon-detective-agent:before {
+  content: "\e91b";
+}
+.lucidicon-device:before {
+  content: "\e91c";
+}
+.lucidicon-dinosaur:before {
+  content: "\e91d";
+}
+.lucidicon-dolphin:before {
+  content: "\e91e";
+}
+.lucidicon-dracula:before {
+  content: "\e91f";
+}
+.lucidicon-dragon:before {
+  content: "\e920";
+}
+.lucidicon-eagle:before {
+  content: "\e921";
+}
+.lucidicon-enterprise:before {
+  content: "\e922";
+}
+.lucidicon-eye:before {
+  content: "\e923";
+}
+.lucidicon-eye-of-horus:before {
+  content: "\e924";
+}
+.lucidicon-eyes:before {
+  content: "\e925";
+}
+.lucidicon-face:before {
+  content: "\e926";
+}
+.lucidicon-fairy:before {
+  content: "\e927";
+}
+.lucidicon-falling:before {
+  content: "\e928";
+}
+.lucidicon-family:before {
+  content: "\e929";
+}
+.lucidicon-fight:before {
+  content: "\e92a";
+}
+.lucidicon-fire:before {
+  content: "\e92b";
+}
+.lucidicon-friends:before {
+  content: "\e92c";
+}
+.lucidicon-genie:before {
+  content: "\e92d";
+}
+.lucidicon-geometry:before {
+  content: "\e92e";
+}
+.lucidicon-girl-open-eyes:before {
+  content: "\e92f";
+}
+.lucidicon-grave:before {
+  content: "\e930";
+}
+.lucidicon-grim-reaper:before {
+  content: "\e931";
+}
+.lucidicon-heart:before {
+  content: "\e932";
+}
+.lucidicon-heart-full:before {
+  content: "\e933";
+}
+.lucidicon-home:before {
+  content: "\e934";
+}
+.lucidicon-hotel:before {
+  content: "\e935";
+}
+.lucidicon-info:before {
+  content: "\e936";
+}
+.lucidicon-jaguar:before {
+  content: "\e937";
+}
+.lucidicon-jesus:before {
+  content: "\e938";
+}
+.lucidicon-joker:before {
+  content: "\e939";
+}
+.lucidicon-kiss:before {
+  content: "\e93a";
+}
+.lucidicon-leaf:before {
+  content: "\e93b";
+}
+.lucidicon-lesbian:before {
+  content: "\e93c";
+}
+.lucidicon-link:before {
+  content: "\e93d";
+}
+.lucidicon-lotus-flower:before {
+  content: "\e93e";
+}
+.lucidicon-magic-lamp:before {
+  content: "\e93f";
+}
+.lucidicon-mandelbrot:before {
+  content: "\e940";
+}
+.lucidicon-mask:before {
+  content: "\e941";
+}
+.lucidicon-meditation:before {
+  content: "\e942";
+}
+.lucidicon-mermaid:before {
+  content: "\e943";
+}
+.lucidicon-mushroom:before {
+  content: "\e944";
+}
+.lucidicon-mushroom-small:before {
+  content: "\e945";
+}
+.lucidicon-music:before {
+  content: "\e946";
+}
+.lucidicon-off:before {
+  content: "\e947";
+}
+.lucidicon-om:before {
+  content: "\e948";
+}
+.lucidicon-optical-illusion:before {
+  content: "\e949";
+}
+.lucidicon-ouroboros:before {
+  content: "\e94a";
+}
+.lucidicon-pencil:before {
+  content: "\e94b";
+}
+.lucidicon-penrose:before {
+  content: "\e94c";
+}
+.lucidicon-pet:before {
+  content: "\e94d";
+}
+.lucidicon-plus:before {
+  content: "\e94e";
+}
+.lucidicon-poker:before {
+  content: "\e94f";
+}
+.lucidicon-rain:before {
+  content: "\e950";
+}
+.lucidicon-rainbow:before {
+  content: "\e951";
+}
+.lucidicon-robocop:before {
+  content: "\e952";
+}
+.lucidicon-robot-ears:before {
+  content: "\e953";
+}
+.lucidicon-robot-head:before {
+  content: "\e954";
+}
+.lucidicon-scream:before {
+  content: "\e955";
+}
+.lucidicon-search:before {
+  content: "\e956";
+}
+.lucidicon-settings:before {
+  content: "\e957";
+}
+.lucidicon-sex:before {
+  content: "\e958";
+}
+.lucidicon-shine:before {
+  content: "\e959";
+}
+.lucidicon-shine-2:before {
+  content: "\e95a";
+}
+.lucidicon-significant-other:before {
+  content: "\e95b";
+}
+.lucidicon-skull:before {
+  content: "\e95c";
+}
+.lucidicon-smiley-laugh:before {
+  content: "\e95d";
+}
+.lucidicon-smiley-neutral:before {
+  content: "\e95e";
+}
+.lucidicon-smiley-sad:before {
+  content: "\e95f";
+}
+.lucidicon-smiley-scarry:before {
+  content: "\e960";
+}
+.lucidicon-smiley-smiley:before {
+  content: "\e961";
+}
+.lucidicon-snow:before {
+  content: "\e962";
+}
+.lucidicon-spider:before {
+  content: "\e963";
+}
+.lucidicon-spiral:before {
+  content: "\e964";
+}
+.lucidicon-spiral-simmetrical:before {
+  content: "\e965";
+}
+.lucidicon-split-leaf-philodendron:before {
+  content: "\e966";
+}
+.lucidicon-sport:before {
+  content: "\e967";
+}
+.lucidicon-square-optical:before {
+  content: "\e968";
+}
+.lucidicon-star:before {
+  content: "\e969";
+}
+.lucidicon-star-full:before {
+  content: "\e96a";
+}
+.lucidicon-starry-night:before {
+  content: "\e96b";
+}
+.lucidicon-stopwatch:before {
+  content: "\e96c";
+}
+.lucidicon-sun:before {
+  content: "\e96d";
+}
+.lucidicon-sunset:before {
+  content: "\e96e";
+}
+.lucidicon-superhero:before {
+  content: "\e96f";
+}
+.lucidicon-tag:before {
+  content: "\e970";
+}
+.lucidicon-tags:before {
+  content: "\e971";
+}
+.lucidicon-tesseract:before {
+  content: "\e972";
+}
+.lucidicon-tetrahedron:before {
+  content: "\e973";
+}
+.lucidicon-think-bubble:before {
+  content: "\e974";
+}
+.lucidicon-top:before {
+  content: "\e975";
+}
+.lucidicon-trash:before {
+  content: "\e976";
+}
+.lucidicon-trees:before {
+  content: "\e977";
+}
+.lucidicon-t-rex:before {
+  content: "\e978";
+}
+.lucidicon-ufo:before {
+  content: "\e979";
+}
+.lucidicon-unicorn:before {
+  content: "\e97a";
+}
+.lucidicon-users:before {
+  content: "\e97b";
+}
+.lucidicon-vehicle:before {
+  content: "\e97c";
+}
+.lucidicon-water:before {
+  content: "\e97d";
+}
+.lucidicon-wind:before {
+  content: "\e97e";
+}
+.lucidicon-work:before {
+  content: "\e97f";
+}
+.lucidicon-wormhole:before {
+  content: "\e980";
+}
+.lucidicon-zombie:before {
+  content: "\e981";
+}
+.lucidicon-zzz:before {
+  content: "\e982";
+}

@@ -1,0 +1,65 @@
+name: Deploy to production
+
+# Mirrors the previous .gitlab-ci.yml deploy job: SSHes into the EC2 instance,
+# pulls latest code, builds, and restarts the BlitzJS app via nohup.
+
+on:
+  # Manual trigger from the Actions tab
+  workflow_dispatch:
+  # Auto-trigger on semver tag push (e.g. v3.1.2)
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" << 'EOF'
+            set -e
+            source ~/.nvm/nvm.sh
+
+            echo 'Killing processes...'
+            pkill -f blitz || true
+            pkill -f nest || true
+            pkill -f node || true
+            sleep 2
+
+            echo 'Git pull code...'
+            cd /home/ubuntu/dreamingsheep
+            git fetch --all --tags
+            git checkout main
+            git pull
+
+            echo 'Building dreamingsheep...'
+            nvm use 18
+            npm install -g yarn
+            yarn install
+            rm -rf .next
+            yarn build
+            cp public/assets/title-dreamingsheep.png public/assets/sheep-dreamingsheep.png .next/static/media/
+
+            echo 'Starting dreamingsheep...'
+            nohup bash -c 'cd ~/dreamingsheep && source ~/.nvm/nvm.sh && nvm use 18 && yarn start' > ~/dreamingsheep/nohup.out 2>&1 &
+            disown -a
+
+            echo 'Deploy complete!'
+          EOF

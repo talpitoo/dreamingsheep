@@ -1,0 +1,296 @@
+import { gSSP } from "src/blitz-server"
+import Link from "next/link"
+import Image from "next/image"
+import { InferGetServerSidePropsType } from "next"
+import { useRouter } from "next/router"
+import { BlitzPage, Routes } from "@blitzjs/next"
+import Layout from "src/core/layouts/Layout"
+import sheepDreamingsheep from "public/assets/sheep-dreamingsheep.png"
+import sheepDream from "public/assets/sheep-dream.png"
+import { Box, Container, Grid, Card, CardHeader, CardContent, Typography } from "@mui/material"
+import getDreams from "src/dreams/queries/getDreams"
+import moment from "moment"
+import { Dream, DreamType, Symbol } from "db"
+import db from "db"
+import SwiperScreenshots from "src/core/components/SwiperScreenshots"
+import AuthenticationContainer from "src/core/components/AuthenticationContainer"
+import SheepGridContainer from "src/core/components/SheepGridContainer"
+import { Fragment, Suspense } from "react"
+import LoadingSpiral from "src/core/components/LoadingSpiral"
+
+const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
+  lastMonthDreams,
+  unicornDreamsCount,
+}) => {
+  const router = useRouter()
+  const total = getDreamsCounts(lastMonthDreams)
+
+  function getDreamsCounts(dreams: (Dream & { symbols: Symbol[] })[]) {
+    let lucid = 0
+    const symbolsObj = {}
+    dreams.forEach((dream) => {
+      if (dream.type === DreamType.LUCID) {
+        lucid += 1
+      }
+      dream.symbols.forEach((symbol) => {
+        if (symbol.builtIn) {
+          if (symbolsObj[symbol.id]) {
+            symbolsObj[symbol.id].count += 1
+          } else {
+            symbolsObj[symbol.id] = {
+              id: symbol.id,
+              name: symbol.name,
+              count: 1,
+            }
+          }
+        }
+      })
+    })
+
+    const symbols = Object.keys(symbolsObj)
+      .map((key) => symbolsObj[key])
+      .sort((a, b) => b.count - a.count)
+
+    return { lucid, symbols }
+  }
+
+  return (
+    <Fragment>
+      <Container>
+        <Suspense
+          fallback={
+            <SheepGridContainer
+              imageComponent={
+                <Image
+                  src={sheepDreamingsheep}
+                  alt="dreamingsheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              }
+            />
+          }
+        >
+          <AuthenticationContainer
+            imageComponent={
+              <Image
+                src={sheepDreamingsheep}
+                alt="dreamingsheep"
+                width={384}
+                height={384}
+                className="w-full h-auto"
+              />
+            }
+          />
+        </Suspense>
+
+        <Grid container>
+          <Grid item md={2}></Grid>
+          <Grid item md={8}>
+            <Card className="bg-mui-secondary-light mt-20 mb-6">
+              <CardHeader
+                title="An online journal for your dreams and beyond¹"
+                sx={{ paddingBottom: "0" }}
+                component="h1"
+              />
+              <CardContent>
+                <Typography variant="body1">
+                  <em>Dreamingsheep</em> is an online journal for your dreams and beyond¹. For a
+                  short introduction please watch the explainer video² and click through the{" "}
+                  <Link href="#demo" scroll={false}>
+                    #demo
+                  </Link>{" "}
+                  below. To learn more, read the <em>Five Ws</em> on the{" "}
+                  <Link href={Routes.FaqPage()} passHref={true}>
+                    FAQ
+                  </Link>{" "}
+                  page and browse the{" "}
+                  <Link href={Routes.BlogPage()} passHref={true}>
+                    Blog
+                  </Link>
+                  .
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <Grid container>
+          <Grid item md={12} sx={{ width: "100%", mb: 3 }}>
+            <Box className="ratio ratio-16x9">
+              <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube-nocookie.com/embed/0HE04S0hykE?si=tSgG3rIuNmFGnsW0&amp;controls=0"
+                title="YouTube video player: Faye Wong - Dreams - The Cranberries Cover"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              ></iframe>
+            </Box>
+            {/* NOTE: old/removed A/B video https://www.youtube-nocookie.com/embed/UwJvuo37dMw */}
+            {/* NOTE full embed snippet https://gitlab.com/talpitoo/dreamingsheep/-/issues/116 */}
+          </Grid>
+        </Grid>
+
+        <Grid container>
+          <Grid item md={1}></Grid>
+          <Grid item md={10}>
+            <Card className="bg-mui-secondary-light">
+              <CardContent>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {lastMonthDreams.length < 1 && (
+                    <>
+                      No dreams last month{" "}
+                      <span className="lucidicon lucidicon-smiley-neutral"></span>
+                    </>
+                  )}
+                  {lastMonthDreams.length > 0 && (
+                    <>
+                      Last month we&apos;ve collected <strong>{lastMonthDreams.length}</strong>{" "}
+                      dreams, from which <strong>{total.lucid}</strong> were lucid. The top 3 themes
+                      were{" "}
+                      <strong>
+                        {total.symbols[0]?.name !== undefined && total.symbols[0]?.name !== ""
+                          ? total.symbols[0]?.name
+                          : "n/a"}
+                        ,{" "}
+                        {total.symbols[1]?.name !== undefined && total.symbols[1]?.name !== ""
+                          ? total.symbols[1]?.name
+                          : "n/a"}
+                      </strong>{" "}
+                      and{" "}
+                      <strong>
+                        {total.symbols[2]?.name !== undefined && total.symbols[2]?.name !== ""
+                          ? total.symbols[2]?.name
+                          : "n/a"}
+                      </strong>
+                      . Unicorns <span className="lucidicon lucidicon-unicorn"></span> were
+                      encountered <strong>{unicornDreamsCount}</strong>{" "}
+                      {unicornDreamsCount === 1 ? "time" : "times"} so far.
+                    </>
+                  )}
+                </Typography>
+                {/* <Box sx={{ textAlign: "center", mb: 2 }}>
+                <Image src={globalSymbolsExample} alt="chart" width="192" height="174" />
+              </Box> */}
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  Join us as we watch Replicants³ jump over the fence (and transform into Humans).
+                  Let&apos;s dream a better⁴ world together!
+                  {/* <span className="lucidicon lucidicon-shine-2"></span> */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2, textAlign: "center" }}>
+                  <em>
+                    You may say that I&apos;m a dreamer
+                    <br />
+                    but I&apos;m not the only one
+                    <br />
+                    I hope someday you&apos;ll join us
+                    <br />
+                    and the world will be as one.⁵
+                  </em>
+                </Typography>
+                <Box sx={{ textAlign: "center", mb: { xs: -5, lg: -10 } }}>
+                  <Image
+                    src={sheepDream}
+                    alt="dream sheep"
+                    width={368}
+                    height={368}
+                    className="w-full h-auto max-w-[368px]"
+                  />
+                </Box>
+
+                <SwiperScreenshots />
+
+                <hr />
+                <Typography variant="body1">
+                  <small>1 - Jupiter and beyond the infinite (2001: A Space Odyssey)</small>
+                  <br />
+                  <small>2 - obviously, the explainer video is in the works</small>
+                  <br />
+                  <small>3 - Blade Runner</small>
+                  <br />
+                  <small>4 - different version of this already perfect</small>
+                  <br />
+                  <small>5 - Imagine - John Lennon</small>
+                  <br />
+                  <small>
+                    6 - forget about the latest iPhones or Pixels, Nexus 5/10 rulez (note for geeks)
+                  </small>
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+    </Fragment>
+  )
+}
+
+Home.suppressFirstRenderFlicker = true // TODO/FIXME @pastcontributor i might have prematurely removed this, we should experiment with the perceived loading speed and keep or refactor it later.
+Home.redirectAuthenticatedTo = () => Routes.DreamsPage()
+Home.getLayout = (page) => (
+  <Layout childrenContainerClassName="py-6">
+    {/* title="dreamingsheep" */}
+    {page}
+  </Layout>
+)
+
+export const getServerSideProps = gSSP(async ({ req, res, ctx }) => {
+  const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+  // TODO/NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110, debug further
+  // const lastMonthDreams = await getDreams(
+  //   {
+  //     orderBy: { dreamAt: "asc" },
+  //     where: {
+  //       dreamAt: {
+  //         gte: currentMoment.clone().subtract(31, "days").toISOString(),
+  //         lte: currentMoment.clone().add(1, "days").toISOString(),
+  //       },
+  //     },
+  //   },
+  //   ctx
+  // )
+
+  const lastMonthDreams = await db.dream.findMany({
+    orderBy: { dreamAt: "asc" },
+    where: {
+      dreamAt: {
+        gte: currentMoment.clone().subtract(31, "days").toISOString(),
+        lte: currentMoment.clone().add(1, "days").toISOString(),
+      },
+    },
+    include: {
+      symbols: true,
+    },
+  })
+
+  // const unicornDreams = await getDreams(
+  //   {
+  //     orderBy: { dreamAt: "asc" },
+  //     where: {
+  //       symbols: { some: { code: "unicorn" } },
+  //     },
+  //   },
+  //   ctx
+  // )
+
+  const unicornDreams = await db.dream.count({
+    where: {
+      symbols: { some: { code: "unicorn" } },
+    },
+  })
+
+  return {
+    props: {
+      // lastMonthDreams: lastMonthDreams.dreams,
+      // unicornDreamsCount: unicornDreams.count,
+      lastMonthDreams: lastMonthDreams,
+      unicornDreamsCount: unicornDreams,
+    },
+  }
+})
+
+export default Home

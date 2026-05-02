@@ -1,0 +1,282 @@
+@tailwind base; /* Preflight will be injected here */
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+  }
+
+  blockquote,
+  dl,
+  dd,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr,
+  figure,
+  p,
+  pre {
+    margin: 0;
+  }
+}
+
+@layer components {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    scroll-behavior: smooth;
+    background-color: #0097a7 !important; /* cyan[500] = #00bcd4 */
+    background-position: top left;
+    background-image: url("/assets/background-canvas-mobile-progressive-double-height.jpg"),
+      url("/assets/background-canvas-mobile-blur-double-height.jpg");
+    /* NOTE: old: background-size: 100% 200vh; new: to avoid mobile keyboard resize */
+    background-size: 600px 1920px;
+  }
+
+  @screen sm {
+    body {
+      background-image: url("/assets/background-canvas-progressive.jpg"),
+        url("/assets/background-canvas-blur.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+  }
+
+  a {
+    @apply text-mui-primary;
+    @apply no-underline !important;
+    @apply hover:underline !important;
+    /* TODO @talpitoo find a better way for global text links */
+  }
+
+  .ratio {
+    position: relative;
+    width: 100%;
+  }
+
+  .ratio::before {
+    display: block;
+    padding-top: var(--bs-aspect-ratio);
+    content: "";
+  }
+
+  .ratio-16x9 {
+    --bs-aspect-ratio: 56.25%;
+  }
+
+  .ratio > iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .hero {
+    @apply w-full text-[#333];
+  }
+
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+
+  .loading-spiral {
+    animation: rotation 1s infinite linear;
+    margin: 1rem auto;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .loading-spiral .lucidicon-spiral {
+    font-size: 2.75rem;
+  }
+
+  .heading {
+    font-size: 36px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    display: inline-block;
+    line-height: 1;
+    padding: 0.2em 1.5em 0.2em 0.5em;
+    background-image: linear-gradient(
+      115deg,
+      hsla(0, 0%, 100%, 0.75) calc(100% - 1em),
+      transparent calc(100% - 1em)
+    );
+    margin-bottom: 40px;
+  }
+
+  .footer-stripe {
+    box-decoration-break: clone;
+    padding: 0.75rem 1.5em 0.75rem 0.75rem;
+    background-image: linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.75) calc(100% - 1em),
+      transparent calc(100% - 1em)
+    );
+    line-height: 2.6rem;
+    justify-self: end;
+    width: 100%;
+    display: inline;
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    @apply m-0 w-full pt-20;
+    font-size: 48px;
+  }
+
+  .title,
+  .description {
+    @apply text-center;
+  }
+
+  .account-dropdown {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    max-width: 10rem;
+    margin-right: -0.5rem;
+    white-space: nowrap;
+  }
+}
+
+/* TODO @talpitoo This should be theme overrides and not done through pure css. Docs: https://mui.com/customization/theming/ */
+.MuiToggleButtonGroup-root {
+  border-left: 1px solid #e0e0e0;
+  padding-top: 1px;
+  overflow: hidden;
+}
+
+.MuiToggleButtonGroup-grouped {
+  margin-top: -1px !important;
+  min-width: 86px;
+  min-height: 76px;
+  border-color: #e0e0e0 !important;
+  text-transform: lowercase !important;
+  font-size: 14px !important;
+  line-height: 2 !important;
+}
+
+.MuiToggleButtonGroup-grouped:first-child {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  margin-left: -1px;
+}
+
+.MuiToggleButtonGroup-grouped:last-child {
+  border-top-right-radius: 0;
+}
+
+.MuiModal-root .temporary-img-fix {
+  width: 100%;
+  height: auto;
+  max-width: 300px;
+}
+
+.chart-card .MuiContainer-maxWidthLg {
+  min-height: 200px;
+}
+
+.text-outline label {
+  display: block !important;
+  background-color: white;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.text-outline label.Mui-focused {
+  border-top: 1px solid #00bcd4;
+}
+
+.text-outline label.MuiFormLabel-filled {
+  border-top: 1px solid rgba(0, 0, 0, 0.23);
+}
+
+.image-upload-label {
+  position: absolute;
+  display: inline-block;
+  background-color: white;
+  padding: 1px 5px;
+  margin-top: -19px !important;
+}
+
+.image-upload-fullwidth > div {
+  position: static !important;
+}
+
+.image-upload-fullwidth img {
+  position: static !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.MuiPickerStaticWrapper-content {
+  border-radius: 4px;
+}
+
+header .MuiOutlinedInput-notchedOutline {
+  top: 0;
+}
+
+/*
+  NOTE: not required anymore, as we are using the default recaptcha badge
+
+  #recaptcha-wrapper .grecaptcha-badge {
+  width: 100% !important;
+  box-shadow: none !important;
+  margin-top: 1rem;
+}
+
+#recaptcha-wrapper .grecaptcha-badge iframe {
+  width: 100% !important;
+  height: 76px !important;
+} */
+
+@layer utilities {
+  .transition-margin {
+    transition-property: margin;
+  }
+
+  .line-clamp {
+    @apply overflow-hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+  }
+
+  .pre-wrap {
+    white-space: pre-wrap;
+  }
+
+  .min-h-screen-minus-header {
+    min-height: calc(100vh - 80px);
+  }
+}

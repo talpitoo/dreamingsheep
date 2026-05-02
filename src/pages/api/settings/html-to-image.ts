@@ -1,0 +1,39 @@
+import { api } from "src/blitz-server"
+import puppeteer from "puppeteer"
+// https://github.com/puppeteer/puppeteer/blob/v14.1.0/docs/api.md#pagepdfoptions
+
+async function htmlToImage(html = "", css = "") {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  })
+  const page = await browser.newPage()
+
+  await page.setContent(html, {
+    waitUntil: ["load", "networkidle0"],
+  })
+
+  const pdfBuffer = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: {
+      top: 40,
+      bottom: 40,
+      left: 40,
+      right: 40,
+    },
+  })
+
+  await page.close()
+  await browser.close()
+
+  return pdfBuffer
+}
+
+export default api(async (req, res, ctx) => {
+  if (ctx.session.userId) {
+    const { html, css } = JSON.parse(req.body)
+    const pdf = await htmlToImage(html, css)
+    res.send(pdf)
+  }
+})

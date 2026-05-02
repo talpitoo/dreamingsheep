@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: "lucidicon";
+  src: url("/fonts/lucidicon.ttf?4vhl77") format("truetype"),
+    url("/fonts/lucidicon.woff?4vhl77") format("woff"),
+    url("/fonts/lucidicon.svg?4vhl77#lucidicon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="lucidicon-"],
+[class*=" lucidicon-"],
+.glyphicon {
+  font-family: "lucidicon" !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  font-size: 16px;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.lucidicon-unicorn::before {
+  content: "\e97a";
+}
+
+.lucidicon-meditation::before {
+  content: "\e942";
+}
+
+.lucidicon-mushroom::before {
+  content: "\e944";
+}
+
+.lucidicon-eye::before {
+  content: "\e923";
+}
+
+.lucidicon-superhero::before {
+  content: "\e96f";
+}
+
+.lucidicon-zzz::before {
+  content: "\e982";
+}
+
+body {
+  background-color: #0097a7 !important; /* cyan[500] = #00bcd4 */
+  background-position: top left;
+  background-image: url("/assets/background-canvas-progressive.jpg"),
+    url("/assets/background-canvas-blur.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.MuiButton-containedPrimary {
+  --tw-bg-opacity: 1;
+  background-color: rgb(232 65 34);
+  background-image: url(/_next/static/media/button.17b4aa09050e6f41336f346c56bf4d54.jpg);
+  background-repeat: no-repeat;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: rgb(232 65 34);
+}
+
+.ratio {
+  text-align: center;
+  padding-top: 2rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+}
+
+#no-script-content {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  border-radius: 4px;
+  background-color: rgb(255, 244, 229);
+  display: flex;
+  padding: 1rem;
+  color: rgb(102, 60, 0);
+  margin: 2rem;
+}
+
+.bg-mui-secondary-light {
+  margin-bottom: 1rem;
+}
+
+.rounded-top .MuiOutlinedInput-root {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.rounded-bottom {
+  margin-top: -1px !important;
+}
+
+.rounded-bottom .MuiOutlinedInput-root {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.pt-4 {
+  padding-top: 1rem !important;
+}
+
+.pt-5 {
+  padding-top: 1.25rem !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.footer-stripe {
+  box-decoration-break: clone;
+  padding: 0.75rem 1.5em 0.75rem 0.75rem;
+  background-image: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.75) calc(100% - 1em),
+    transparent calc(100% - 1em)
+  );
+  line-height: 2.6rem;
+  justify-self: end;
+  width: 100%;
+  display: inline;
+  margin-bottom: 1rem;
+}

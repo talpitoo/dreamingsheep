@@ -1,0 +1,237 @@
+import Image from "next/image"
+import { useRouter } from "next/router"
+import { usePaginatedQuery, useQuery } from "@blitzjs/rpc"
+import { BlitzPage, Routes } from "@blitzjs/next"
+import Layout from "src/core/layouts/Layout"
+import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import getDreams from "src/dreams/queries/getDreams"
+import React, { Fragment, Suspense, useMemo } from "react"
+import titleSearch from "public/assets/title-search.png"
+import sheepSearch from "public/assets/sheep-search.png"
+import { Container, Grid, Typography, Box } from "@mui/material"
+import { DreamTime, DreamType, RecallTime, Symbol } from "db"
+import { DreamList } from "src/dreams/components/DreamList"
+import { DreamSearchForm } from "src/dreams/components/DreamSearchForm"
+import getSymbols from "src/symbols/queries/getSymbols"
+import LoadingSpiral from "src/core/components/LoadingSpiral"
+import { ITEMS_PER_PAGE } from "src/core/constants/general"
+
+export const SearchList = () => {
+  const router = useRouter()
+  const page = Number(router.query.page) || 1
+  const [{ dreams, count }, { isLoading, refetch }] = usePaginatedQuery(getDreams, {
+    orderBy: { id: "desc" },
+    skip: ITEMS_PER_PAGE * (page - 1),
+    take: ITEMS_PER_PAGE,
+    where: {
+      AND: [
+        {
+          OR: [
+            {
+              title: {
+                contains: router.query.q ? decodeURI(router.query.q as string) : undefined,
+                mode: "insensitive",
+              },
+            },
+            {
+              description: {
+                contains: router.query.q ? decodeURI(router.query.q as string) : undefined,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+        ...(router.query.favorite
+          ? [
+              {
+                favorite: router.query.favorite === "TRUE" ? true : false,
+              },
+            ]
+          : []),
+        ...(router.query.time
+          ? [
+              {
+                time: {
+                  in: decodeURI(router.query.time as string).split(",") as DreamTime[],
+                },
+              },
+            ]
+          : []),
+        ...(router.query.mood
+          ? [
+              {
+                mood: {
+                  in: decodeURI(router.query.mood as string)
+                    .split(",")
+                    .map((val) => +val) as number[],
+                },
+              },
+            ]
+          : []),
+        ...(router.query.recall
+          ? [
+              {
+                recall: {
+                  in: decodeURI(router.query.recall as string).split(",") as RecallTime[],
+                },
+              },
+            ]
+          : []),
+        ...(router.query.type
+          ? [
+              {
+                type: {
+                  in: decodeURI(router.query.type as string).split(",") as DreamType[],
+                },
+              },
+            ]
+          : []),
+        ...(router.query.symbols
+          ? [
+              {
+                symbols: {
+                  some: {
+                    id: {
+                      in: decodeURI(router.query.symbols as string)
+                        .split(",")
+                        .map((val) => +val) as number[],
+                    },
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  })
+  function onPageChange(_, page: number) {
+    router.push({ query: { ...router.query, page: page } })
+  }
+  return (
+    <Fragment>
+      <Typography variant="h4" sx={{ color: "white" }} component="p">
+        {count} results
+      </Typography>
+      <DreamList
+        isLoading={isLoading}
+        dreams={dreams}
+        count={count}
+        page={page}
+        itemPerPage={ITEMS_PER_PAGE}
+        refetchList={refetch}
+        onPageChange={onPageChange}
+        noDreamMessage="No dreams matching your query."
+      />
+    </Fragment>
+  )
+}
+
+const SearchPage: BlitzPage = () => {
+  const router = useRouter()
+  const user = useCurrentUser()
+  const [{ symbols }, { isLoading }] = useQuery(getSymbols, {
+    where: {
+      id: {
+        in: router.query.symbols
+          ? (decodeURI(router.query.symbols as string)
+              .split(",")
+              .map((val) => +val) as number[])
+          : [],
+      },
+    },
+  })
+  const initialValues = useMemo(() => {
+    return {
+      c: router.query.c ? decodeURI(router.query.c as string) : "",
+      q: router.query.q ? decodeURI(router.query.q as string) : "",
+      favorite: router.query.favorite ? decodeURI(router.query.favorite as string) : "",
+      time: router.query.time
+        ? (decodeURI(router.query.time as string).split(",") as DreamTime[])
+        : [],
+      mood: router.query.mood
+        ? (decodeURI(router.query.mood as string)
+            .split(",")
+            .map((val) => +val) as number[])
+        : [],
+      recall: router.query.recall
+        ? (decodeURI(router.query.recall as string).split(",") as RecallTime[])
+        : [],
+      type: router.query.type
+        ? (decodeURI(router.query.type as string).split(",") as DreamType[])
+        : [],
+      symbols: symbols as Symbol[] | [],
+    }
+  }, [router.query, symbols])
+
+  function search(data) {
+    router.push(
+      Routes.SearchPage({
+        ...(data.q && { q: encodeURI(data.q as string) }),
+        ...(data.favorite && { favorite: encodeURI(data.favorite as string) }),
+        ...(data.time.length > 0 && { time: encodeURI(data.time.join(",") as string) }),
+        ...(data.mood.length > 0 && { mood: encodeURI(data.mood.join(",") as string) }),
+        ...(data.recall.length > 0 && { recall: encodeURI(data.recall.join(",") as string) }),
+        ...(data.type.length > 0 && { type: encodeURI(data.type.join(",") as string) }),
+        ...(data.symbols.length > 0 && {
+          symbols: encodeURI(data.symbols.map((val) => val.id).join(",") as string),
+        }),
+      })
+    )
+  }
+
+  return (
+    <Fragment>
+      <Container>
+        <Grid container>
+          <Grid item md={2} />
+          <Grid item xs={12} sm={6} md={4}>
+            <Box
+              sx={{
+                width: { xs: "50%", sm: "100%" },
+                ...(user && {
+                  margin: "auto",
+                }),
+                ...(!user && {
+                  margin: { xs: "0 auto -2rem", sm: "auto" },
+                }),
+              }}
+            >
+              <Image
+                src={sheepSearch}
+                alt="dreams sheep"
+                width={384}
+                height={384}
+                className="w-full h-auto"
+              />
+            </Box>
+          </Grid>
+        </Grid>
+        <Grid container>
+          <Grid item md={2} />
+          <Grid item md={8}>
+            <h1 className="heading">
+              <Image src={titleSearch} alt="Search" width="100" height="55" />
+              <span className="sr-only">Search</span>
+            </h1>
+
+            {!isLoading && (
+              <DreamSearchForm
+                initialValues={initialValues}
+                onSubmit={async (values) => search(values)}
+                resetOnInitialValuesChange
+              />
+            )}
+
+            <Suspense fallback={<LoadingSpiral />}>
+              <SearchList />
+            </Suspense>
+          </Grid>
+        </Grid>
+      </Container>
+    </Fragment>
+  )
+}
+SearchPage.authenticate = true
+SearchPage.getLayout = (page) => <Layout title="Search">{page}</Layout>
+
+export default SearchPage

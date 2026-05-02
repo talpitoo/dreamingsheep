@@ -1,0 +1,9 @@
+# TODO should be the same as `docker-compose.production.yml` with the addition of
+
+# TODO: Isolation for local testing: Having a local S3 mock service (s3-mock) allows you to isolate the testing without interacting with a real AWS S3 service. This is particularly useful for local development and testing scenarios.
+# s3-mock:
+#   image: atlassianlabs/localstack # the atlassianlabs/localstack Docker image is designed to provide a local, mock AWS environment with default configurations.
+#   environment:
+#     SERVICES: s3
+#   ports:
+#     - "4572:4572"

@@ -1,0 +1,74 @@
+🐏 dreamingsheep Source Available License
+Version 1.0, 2026
+
+Copyright (c) 2023-2026 Tóth Tamás (@talpitoo). All rights reserved.
+
+================================================================================
+PERMISSIONS
+================================================================================
+
+You are permitted to:
+
+  ✓ View, study, and learn from this source code
+  ✓ Run your own local development instance for contribution purposes
+  ✓ Submit bug reports, feature requests, and pull requests
+  ✓ Fork this repository solely to contribute improvements back via pull request
+
+================================================================================
+RESTRICTIONS
+================================================================================
+
+You are NOT permitted to:
+
+  ✗ Deploy a public or private instance of this application
+    (only https://dreamingsheep.net is authorized)
+  ✗ Use this code for commercial purposes
+  ✗ Create derivative works or competing services
+  ✗ Redistribute modified or unmodified copies
+  ✗ Use the "dreamingsheep" name, branding, sheep mascot, or logos
+    without prior written permission
+  ✗ Remove or alter copyright notices
+
+================================================================================
+CONTRIBUTIONS
+================================================================================
+
+By submitting a pull request, you agree that:
+
+  1. Your contribution is your original work (or you have the rights to submit it)
+  2. You grant the copyright holder a perpetual, worldwide, irrevocable,
+     royalty-free license to use, modify, and incorporate your contribution
+  3. Your contribution will be licensed under these same terms
+  4. The maintainer may accept, reject, or modify contributions at their
+     sole discretion
+
+================================================================================
+OFFICIAL INSTANCE
+================================================================================
+
+The only authorized public instance of Dreamingsheep is:
+  https://dreamingsheep.net
+
+Any other public deployment is a violation of this license.
+
+================================================================================
+DISCLAIMER
+================================================================================
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+================================================================================
+CONTACT
+================================================================================
+
+For permissions beyond this license: meh@dreamingsheep.net
+Project repository: https://github.com/talpitoo/dreamingsheep
+
+================================================================================
+
+🐏 Long time, no sleep?™
