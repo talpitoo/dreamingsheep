@@ -161,7 +161,9 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
 
 ArticlePageDreamingsheepIsNowOpenSource.authenticate = false
 ArticlePageDreamingsheepIsNowOpenSource.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout ogCoverImage={blogMatrixSheep.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+    {page}
+  </Layout>
 )
 
 export default ArticlePageDreamingsheepIsNowOpenSource

@@ -115,7 +115,9 @@ const ArticlePageTheBrainstorming: BlitzPage = () => {
 
 ArticlePageTheBrainstorming.authenticate = false
 ArticlePageTheBrainstorming.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout ogCoverImage={blogBrainstorming.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+    {page}
+  </Layout>
 )
 
 export default ArticlePageTheBrainstorming

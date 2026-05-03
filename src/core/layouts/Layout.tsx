@@ -14,13 +14,20 @@ import faviconApple from "public/assets/apple-icon.png"
 type LayoutProps = {
   title?: string
   ogCoverImage?: string
+  ogCoverImageSecondary?: string
   children: ReactNode
   childrenContainerClassName?: string
 }
 
 // const domain = 'https://dreamingsheep.net/' // TODO incorporate domain
 
-const Layout = ({ title, ogCoverImage, children, childrenContainerClassName }: LayoutProps) => {
+const Layout = ({
+  title,
+  ogCoverImage,
+  ogCoverImageSecondary,
+  children,
+  childrenContainerClassName,
+}: LayoutProps) => {
   // const ogImage = ogCoverImage ? `${domain}${ogCoverImage}` : `${domain}${ogCoverImageDefault.src}` // TODO incorporate domain
   const ogImage = ogCoverImage ? ogCoverImage : ogCoverImageDefault.src
 
@@ -47,6 +54,12 @@ const Layout = ({ title, ogCoverImage, children, childrenContainerClassName }: L
         <meta property="twitter:image" content={ogImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        {ogCoverImageSecondary && (
+          <>
+            <meta property="og:image" content={ogCoverImageSecondary} />
+            <meta property="twitter:image" content={ogCoverImageSecondary} />
+          </>
+        )}
         <noscript>
           {/* eslint-disable-next-line @next/next/no-css-tags */}
           <link rel="stylesheet" href="/styles/noscript.css" />

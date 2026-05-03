@@ -112,7 +112,9 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
 
 ArticlePageAGlitchInTheDreamJournalMatrix.authenticate = false
 ArticlePageAGlitchInTheDreamJournalMatrix.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout ogCoverImage={blogMaintenance.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+    {page}
+  </Layout>
 )
 
 export default ArticlePageAGlitchInTheDreamJournalMatrix

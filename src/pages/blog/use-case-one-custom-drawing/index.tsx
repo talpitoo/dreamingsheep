@@ -116,7 +116,12 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
 
 ArticlePageUseCaseOneCustomDrawing.authenticate = false
 ArticlePageUseCaseOneCustomDrawing.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout
+    ogCoverImage={blogUseCaseOneCustomDrawing.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
+    {page}
+  </Layout>
 )
 
 export default ArticlePageUseCaseOneCustomDrawing

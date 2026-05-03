@@ -117,7 +117,12 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
 
 ArticlePageUseCaseTwoAddToHomeScreen.authenticate = false
 ArticlePageUseCaseTwoAddToHomeScreen.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout
+    ogCoverImage={blogUseCaseTwoAddToHomeScreen.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
+    {page}
+  </Layout>
 )
 
 export default ArticlePageUseCaseTwoAddToHomeScreen

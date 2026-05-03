@@ -130,7 +130,9 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
 
 ArticlePagePrivacyPolicyAndTermsOfServiceUpdate.authenticate = false
 ArticlePagePrivacyPolicyAndTermsOfServiceUpdate.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout ogCoverImage={sheepPrivacy.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+    {page}
+  </Layout>
 )
 
 export default ArticlePagePrivacyPolicyAndTermsOfServiceUpdate

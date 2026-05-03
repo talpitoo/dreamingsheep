@@ -136,7 +136,9 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
 
 ArticlePageSupportUsOnPatreon.authenticate = false
 ArticlePageSupportUsOnPatreon.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout ogCoverImage={blogPatreon.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+    {page}
+  </Layout>
 )
 
 export default ArticlePageSupportUsOnPatreon
