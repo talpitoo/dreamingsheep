@@ -14,6 +14,7 @@ import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import moment from "moment"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
 import { AdvancedStats } from "src/stats/components/AdvancedStats"
+import { SleepChart } from "src/stats/components/SleepChart"
 import { setChartsData } from "src/stats/helpers/chartsData"
 import {
   Range,
@@ -176,6 +177,15 @@ export const Stats = () => {
         <Grid container>
           <Grid item md={2} />
           <Grid item xs={12} md={8}>
+            {/* 7th stat: full-width sleep pattern, only when bedtime/wake-up tracking is on;
+                range-driven but independent of the advanced filters, hence above them */}
+            {user?.trackSleepingTime && (
+              <Box sx={{ mb: 3 }}>
+                <Suspense fallback={<LoadingSpiral />}>
+                  <SleepChart range={range} />
+                </Suspense>
+              </Box>
+            )}
             {/* opted in: everything centers around the filtered advanced chart + its facets */}
             {user?.advancedCharting ? (
               <Suspense fallback={<LoadingSpiral />}>

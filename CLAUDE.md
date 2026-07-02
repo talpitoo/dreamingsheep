@@ -3,7 +3,6 @@
 Context file for AI agents (Claude Code & friends). Granular docs live next to the
 code: [db/CLAUDE.md](db/CLAUDE.md) (schema, migrations, seeds, production DB runbook)
 and [src/CLAUDE.md](src/CLAUDE.md) (Blitz patterns, forms, charts, page conventions).
-Current in-flight work is planned in [PLAN-issues-6-7.md](PLAN-issues-6-7.md).
 
 ## What this is
 

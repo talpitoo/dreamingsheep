@@ -3,6 +3,7 @@ export type Range = "day" | "week" | "month" | "3months" | "6months" | "1year" |
 // sessionStorage keys: remembered per browser tab/session, clean slate on a fresh visit
 export const STATS_RANGE_STORAGE_KEY = "dreamingsheep.stats.range"
 export const ADVANCED_STATS_FILTERS_STORAGE_KEY = "dreamingsheep.stats.advancedFilters"
+export const SLEEP_CHART_STYLE_STORAGE_KEY = "dreamingsheep.stats.sleepChartStyle"
 
 // days to subtract from "today"; null = no lower bound (all time)
 export const RANGE_TO_DAYS: Record<Range, number | null> = {
