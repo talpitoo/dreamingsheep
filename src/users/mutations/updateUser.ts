@@ -8,13 +8,14 @@ export default resolver.pipe(
   resolver.zod(UpdateUser),
   resolver.authorize(),
   async ({ id, ...data }, ctx: Ctx) => {
-    const { email, username, trackSleepingTime } = data
+    const { email, username, trackSleepingTime, advancedCharting } = data
     const user = await db.user.update({
       where: { id },
       data: {
         email,
         username,
         trackSleepingTime,
+        advancedCharting,
         relatedSymbols: {
           set: data.relatedSymbols,
         },

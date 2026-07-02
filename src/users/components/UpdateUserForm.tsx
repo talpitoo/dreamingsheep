@@ -22,7 +22,7 @@ import DeletionConfirmationDialog from "src/core/components/DeletionConfirmation
 import { deleteFolder } from "src/core/components/FileUpload/hooks"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 
-type FormType = "user" | "change-password" | "symbols" | "bedtime"
+type FormType = "user" | "change-password" | "symbols" | "bedtime" | "advanced-charting"
 
 export interface UpdateUserFormProps<S extends z.ZodType<any, any>> extends Partial<FormProps<S>> {
   initialValues: UseFormProps<z.infer<S>>["defaultValues"]
@@ -354,7 +354,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             <FormControlLabel
               disabled={editForm !== "bedtime"}
               control={<CheckboxField name="trackSleepingTime" />}
-              label="Opt-in for bedtime/wake-up time for more detailed stats (future-feature)."
+              label="Opt-in for bedtime/wake-up time for a sleep chart on the Stats page (the future-feature has arrived)."
             />
           </CardContent>
           <CardActions sx={{ p: 2 }}>
@@ -387,6 +387,64 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               <IconButton
                 color="primary"
                 onClick={() => onClickEdit("bedtime", editForm)}
+                sx={{ ml: "auto" }}
+              >
+                <span className="lucidicon-pencil"></span>
+              </IconButton>
+            )}
+          </CardActions>
+        </Card>
+      </Form>
+
+      <Form<S>
+        id="advanced-charting"
+        {...props}
+        onSubmit={(values) => onSubmit(values, () => setEditForm(null))}
+        onAfterReset={() => setEditForm(null)}
+      >
+        <Card
+          className={`mb-3 transition-margin translate-x-0 translate-y-0 transform-gpu ${
+            editForm !== "advanced-charting" ? "bg-mui-secondary-light" : "-mx-4"
+          }`}
+        >
+          <CardHeader title="Advanced charting" sx={{ paddingBottom: "0" }} component="h2" />
+          <CardContent>
+            <FormControlLabel
+              disabled={editForm !== "advanced-charting"}
+              control={<CheckboxField name="advancedCharting" />}
+              label="Opt-in for advanced charting on the Stats page (interactive charts)."
+            />
+          </CardContent>
+          <CardActions sx={{ p: 2 }}>
+            {editForm === "advanced-charting" && (
+              <Fragment>
+                <Button
+                  type="reset"
+                  form="advanced-charting"
+                  sx={{ ml: "auto" }}
+                  disabled={isUpdateUserLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  form="advanced-charting"
+                  disabled={isUpdateUserLoading}
+                  className={`w-auto transition-all ease-in-out duration-300 ${
+                    isUpdateUserLoading ? "max-w-[113px]" : "max-w-[89px]"
+                  }`}
+                  endIcon={isUpdateUserLoading && <HourglassTopIcon className="opacity-50" />}
+                >
+                  Update
+                </Button>
+              </Fragment>
+            )}
+            {editForm !== "advanced-charting" && (
+              <IconButton
+                color="primary"
+                onClick={() => onClickEdit("advanced-charting", editForm)}
                 sx={{ ml: "auto" }}
               >
                 <span className="lucidicon-pencil"></span>

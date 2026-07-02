@@ -13,7 +13,12 @@ export default resolver.pipe(
     { where = {}, orderBy, skip, take, withUsageCount = false }: GetSymbolsInput,
     ctx: Ctx
   ) => {
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
+    // a user can only ever see predefined symbols and their own creations,
+    // and only their own dreams inside the usage include
+    const scopedWhere = {
+      // authorize() above guarantees a logged-in session
+      AND: [where, { OR: [{ builtIn: true }, { authorId: ctx.session.userId! }] }],
+    }
     const {
       items: symbols,
       hasMore,
@@ -22,15 +27,16 @@ export default resolver.pipe(
     } = await paginate({
       skip,
       take,
-      count: () => db.symbol.count({ where }),
+      count: () => db.symbol.count({ where: scopedWhere }),
       query: async (paginateArgs) => {
         const collection = await db.symbol.findMany({
           ...(paginateArgs?.skip ? { skip: paginateArgs.skip } : {}),
           ...(paginateArgs?.take ? { take: paginateArgs.take } : {}),
-          where,
+          where: scopedWhere,
           orderBy,
           include: {
             dreams: {
+              where: { userId: ctx.session.userId! },
               select: { description: true, id: true },
             },
             _count: { select: { dreams: true } },

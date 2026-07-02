@@ -8,9 +8,12 @@ const GetSymbol = z.object({
   id: z.number().optional().refine(Boolean, "Required"),
 })
 
-export default resolver.pipe(resolver.zod(GetSymbol), resolver.authorize(), async ({ id }) => {
-  // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
-  const symbol = await db.symbol.findFirst({ where: { id } })
+export default resolver.pipe(resolver.zod(GetSymbol), resolver.authorize(), async ({ id }, ctx) => {
+  // visible symbols: predefined ones and the user's own creations
+  const symbol = await db.symbol.findFirst({
+    // authorize() above guarantees a logged-in session
+    where: { id, OR: [{ builtIn: true }, { authorId: ctx.session.userId! }] },
+  })
 
   if (!symbol) throw new NotFoundError()
 

@@ -8,7 +8,20 @@ interface GetSymbolsInput
 export default resolver.pipe(
   resolver.authorize(),
   async ({ where = {}, orderBy, skip, take }: GetSymbolsInput, ctx: Ctx) => {
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
+    // regardless of the client-supplied where, never expose other users' symbols
+    const scopedWhere = {
+      AND: [
+        where,
+        {
+          OR: [
+            { builtIn: true },
+            // authorize() above guarantees a logged-in session
+            { relatedTo: { some: { id: ctx.session.userId! } } },
+            { authorId: ctx.session.userId! },
+          ],
+        },
+      ],
+    }
     const {
       items: symbols,
       hasMore,
@@ -17,12 +30,12 @@ export default resolver.pipe(
     } = await paginate({
       skip,
       take,
-      count: () => db.symbol.count({ where }),
+      count: () => db.symbol.count({ where: scopedWhere }),
       query: (paginateArgs) =>
         db.symbol.findMany({
           ...(paginateArgs?.skip ? { skip: paginateArgs.skip } : {}),
           ...(paginateArgs?.take ? { take: paginateArgs.take } : {}),
-          where,
+          where: scopedWhere,
           orderBy,
         }),
     })

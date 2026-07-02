@@ -6,9 +6,9 @@ interface GetUsersInput
   extends Pick<Prisma.UserFindManyArgs, "where" | "orderBy" | "skip" | "take"> {}
 
 export default resolver.pipe(
-  resolver.authorize(),
+  // listing users is an admin-only capability (rows include hashedPassword!)
+  resolver.authorize("ADMIN"),
   async ({ where, orderBy, skip, take }: GetUsersInput) => {
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
     const {
       items: users,
       hasMore,

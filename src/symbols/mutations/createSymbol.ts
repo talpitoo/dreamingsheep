@@ -12,6 +12,8 @@ export default resolver.pipe(
     const symbol = await db.symbol.create({
       data: {
         ...input,
+        // user-created symbols are NEVER built-in, whatever the client claims
+        builtIn: false,
         // set symbol code with userId
         code: kebabCase(input.name) + "-user-" + ctx.session.userId,
         author: {
