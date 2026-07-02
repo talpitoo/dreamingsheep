@@ -15,6 +15,10 @@ import { DreamSearchForm } from "src/dreams/components/DreamSearchForm"
 import getSymbols from "src/symbols/queries/getSymbols"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
+import {
+  buildDreamSearchWhere,
+  parseDreamSearchQuery,
+} from "src/dreams/utils/buildDreamSearchWhere"
 
 export const SearchList = () => {
   const router = useRouter()
@@ -23,86 +27,7 @@ export const SearchList = () => {
     orderBy: { id: "desc" },
     skip: ITEMS_PER_PAGE * (page - 1),
     take: ITEMS_PER_PAGE,
-    where: {
-      AND: [
-        {
-          OR: [
-            {
-              title: {
-                contains: router.query.q ? decodeURI(router.query.q as string) : undefined,
-                mode: "insensitive",
-              },
-            },
-            {
-              description: {
-                contains: router.query.q ? decodeURI(router.query.q as string) : undefined,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
-        ...(router.query.favorite
-          ? [
-              {
-                favorite: router.query.favorite === "TRUE" ? true : false,
-              },
-            ]
-          : []),
-        ...(router.query.time
-          ? [
-              {
-                time: {
-                  in: decodeURI(router.query.time as string).split(",") as DreamTime[],
-                },
-              },
-            ]
-          : []),
-        ...(router.query.mood
-          ? [
-              {
-                mood: {
-                  in: decodeURI(router.query.mood as string)
-                    .split(",")
-                    .map((val) => +val) as number[],
-                },
-              },
-            ]
-          : []),
-        ...(router.query.recall
-          ? [
-              {
-                recall: {
-                  in: decodeURI(router.query.recall as string).split(",") as RecallTime[],
-                },
-              },
-            ]
-          : []),
-        ...(router.query.type
-          ? [
-              {
-                type: {
-                  in: decodeURI(router.query.type as string).split(",") as DreamType[],
-                },
-              },
-            ]
-          : []),
-        ...(router.query.symbols
-          ? [
-              {
-                symbols: {
-                  some: {
-                    id: {
-                      in: decodeURI(router.query.symbols as string)
-                        .split(",")
-                        .map((val) => +val) as number[],
-                    },
-                  },
-                },
-              },
-            ]
-          : []),
-      ],
-    },
+    where: buildDreamSearchWhere(parseDreamSearchQuery(router.query)),
   })
   function onPageChange(_, page: number) {
     router.push({ query: { ...router.query, page: page } })

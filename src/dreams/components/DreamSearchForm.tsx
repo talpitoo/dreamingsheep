@@ -20,7 +20,7 @@ interface SearchKeywordFieldProps extends PropsWithoutRef<Omit<InputBaseProps, "
   /** Field name. */
   name: string
 }
-const SearchKeywordField = forwardRef<InputBaseProps, SearchKeywordFieldProps>(
+export const SearchKeywordField = forwardRef<InputBaseProps, SearchKeywordFieldProps>(
   ({ name, ...props }, ref) => {
     const {
       control,

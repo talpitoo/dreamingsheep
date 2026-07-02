@@ -16,4 +16,5 @@ export const UpdateUser = z.object({
   username: z.string().refine(Boolean, "Required"),
   relatedSymbols: z.array(Symbol).optional(),
   trackSleepingTime: z.boolean().default(false),
+  advancedCharting: z.boolean().default(false),
 })

@@ -22,6 +22,7 @@ model User {
   verified          Boolean  @default(false)
   role              Role     @default(USER)
   trackSleepingTime Boolean  @default(false)
+  advancedCharting  Boolean  @default(false)
 
   tokens   Token[]
   sessions Session[]

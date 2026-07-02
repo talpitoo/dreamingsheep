@@ -14,11 +14,11 @@ import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import moment from "moment"
 import { Dream, DreamTime, DreamType, RecallTime, Symbol } from "db"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
+import { AdvancedStats } from "src/stats/components/AdvancedStats"
+import { Range, RANGE_TO_DAYS, RANGE_BUTTONS } from "src/stats/helpers/range"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 // import { useTheme } from "@mui/material/styles"
 // NOTE: not used but keeping it here for syntax reference: import useMediaQuery from "@mui/material/useMediaQuery"
-
-type Range = "day" | "week" | "month" | "all"
 
 export function setChartsData(range: Range, dreams: (Dream & { symbols: Symbol[] })[]) {
   const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
@@ -32,8 +32,7 @@ export function setChartsData(range: Range, dreams: (Dream & { symbols: Symbol[]
   // calculate the number of days between the earliest date and the current date
   const daysDifference = currentMoment.diff(earliestDate, "days") + 1
 
-  const subtractDays =
-    range === "day" ? 0 : range === "week" ? 6 : range === "month" ? 31 : daysDifference
+  const subtractDays = RANGE_TO_DAYS[range] ?? daysDifference
   const dreamCount = {}
   if (subtractDays !== null) {
     const startMoment = currentMoment.clone().subtract(subtractDays, "days")
@@ -157,19 +156,14 @@ export const Stats = () => {
   const user = useCurrentUser()
   // const theme = useTheme()
   // const breakpointSm = useMediaQuery(theme.breakpoints.down("sm"))
-  const [range, setRange] = useState<Range>("week")
+  const [range, setRange] = useState<Range>("3months")
   const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
   const [{ dreams }, { isLoading }] = useQuery(getDreams, {
     orderBy: { dreamAt: "asc" },
     where: {
       ...(range !== "all" && {
         dreamAt: {
-          gte:
-            range === "day"
-              ? currentMoment.toISOString()
-              : range === "week"
-              ? currentMoment.clone().subtract(6, "days").toISOString()
-              : currentMoment.clone().subtract(31, "days").toISOString(),
+          gte: currentMoment.clone().subtract(RANGE_TO_DAYS[range]!, "days").toISOString(),
           lte: currentMoment.clone().add(1, "days").toISOString(),
         },
       }),
@@ -227,44 +221,29 @@ export const Stats = () => {
                   // NOTE: using sx={...} instead of orientation={breakpointSm ? "vertical" : "horizontal"}
                   color="primary"
                   exclusive
+                  sx={{ flexWrap: "wrap" }}
                   onChange={(_, value) => {
                     if (value !== null) {
                       setRange(value)
                     }
                   }}
                 >
-                  <ToggleButton
-                    value="day"
-                    sx={{
-                      minWidth: { xs: "70px !important", sm: "86px" },
-                    }}
-                  >
-                    day
-                  </ToggleButton>
-                  <ToggleButton
-                    value="week"
-                    sx={{
-                      minWidth: { xs: "70px !important", sm: "86px" },
-                    }}
-                  >
-                    week
-                  </ToggleButton>
-                  <ToggleButton
-                    value="month"
-                    sx={{
-                      minWidth: { xs: "70px !important", sm: "86px" },
-                    }}
-                  >
-                    month
-                  </ToggleButton>
-                  <ToggleButton
-                    value="all"
-                    sx={{
-                      minWidth: { xs: "70px !important", sm: "86px" },
-                    }}
-                  >
-                    all
-                  </ToggleButton>
+                  {RANGE_BUTTONS.map(({ value, label, shortLabel }) => (
+                    <ToggleButton
+                      key={value}
+                      value={value}
+                      sx={{
+                        minWidth: { xs: "48px !important", sm: "86px" },
+                      }}
+                    >
+                      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                        {label}
+                      </Box>
+                      <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
+                        {shortLabel}
+                      </Box>
+                    </ToggleButton>
+                  ))}
                 </ToggleButtonGroup>
               </Card>
             </Box>
@@ -298,6 +277,14 @@ export const Stats = () => {
                 <Grid item xs={12} sm={5}>
                   <StatGoogleChart data={chartsData.recall} type="recall" />
                 </Grid>
+
+                {user?.advancedCharting && (
+                  <Grid item xs={12}>
+                    <Suspense fallback={<LoadingSpiral />}>
+                      <AdvancedStats range={range} />
+                    </Suspense>
+                  </Grid>
+                )}
               </Grid>
             </Grid>
           </Grid>
