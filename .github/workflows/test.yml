@@ -1,0 +1,41 @@
+name: Tests
+
+# Lint, type-check and unit tests on every PR and push to main.
+# Unit tests cover pure helpers and zod schemas only — no database needed.
+# The puppeteer E2E suite (`yarn test:e2e`) is local-only for now: it requires
+# a running dev server and a seeded Postgres (see test/e2e/helpers.ts).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Lint, types & unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Type check
+        run: yarn type:check
+
+      - name: Unit tests
+        run: yarn test

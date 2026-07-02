@@ -81,6 +81,21 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   negative offsets from midnight (`sleepChartData.ts`); days missing either
   value render as gaps. Data via `getSleepingTimes` (plural query).
 
+## Testing
+
+- **Unit** (`npm test`, Vitest, config `vitest.config.mts`): colocated
+  `*.test.ts` next to the code; pure helpers + zod schemas only. The vitest
+  config aliases `db` → `@prisma/client` so importing enums never instantiates
+  the Prisma client — don't import `db`'s default export in unit-tested code
+  paths. Time-sensitive helpers are tested with `vi.setSystemTime`.
+- **E2E** (`npm run test:e2e`, Vitest + puppeteer, config
+  `vitest.config.e2e.mts`): `test/e2e/*.e2e.test.ts` drive the real app;
+  shared plumbing in `test/e2e/helpers.ts` (login, deletion dialogs, settings
+  checkbox cards, pagination). Requires a running dev server + seeded DB;
+  flows restore toggled settings and delete what they create. User-created
+  symbols land on the LAST pagination page — use `gotoLastPaginationPage`.
+- CI runs lint + type-check + unit only (`.github/workflows/test.yml`).
+
 ## Gotchas
 
 - `useCurrentUser` reads `getCurrentUser`, which `select`s an explicit field

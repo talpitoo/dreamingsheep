@@ -44,20 +44,30 @@ export function buildDreamSearchWhere(values: DreamSearchValues): Prisma.DreamWh
   }
 }
 
+// decodeURI throws URIError on malformed sequences (e.g. a hand-typed "?q=100%"),
+// which used to crash the whole search page — fall back to the raw value instead
+export function safeDecodeURI(value: string): string {
+  try {
+    return decodeURI(value)
+  } catch (error) {
+    return value
+  }
+}
+
 export function parseDreamSearchQuery(query: ParsedUrlQuery): DreamSearchValues {
   return {
-    q: query.q ? decodeURI(query.q as string) : undefined,
-    favorite: query.favorite ? decodeURI(query.favorite as string) : undefined,
-    time: query.time ? (decodeURI(query.time as string).split(",") as DreamTime[]) : [],
+    q: query.q ? safeDecodeURI(query.q as string) : undefined,
+    favorite: query.favorite ? safeDecodeURI(query.favorite as string) : undefined,
+    time: query.time ? (safeDecodeURI(query.time as string).split(",") as DreamTime[]) : [],
     mood: query.mood
-      ? (decodeURI(query.mood as string)
+      ? (safeDecodeURI(query.mood as string)
           .split(",")
           .map((val) => +val) as number[])
       : [],
-    recall: query.recall ? (decodeURI(query.recall as string).split(",") as RecallTime[]) : [],
-    type: query.type ? (decodeURI(query.type as string).split(",") as DreamType[]) : [],
+    recall: query.recall ? (safeDecodeURI(query.recall as string).split(",") as RecallTime[]) : [],
+    type: query.type ? (safeDecodeURI(query.type as string).split(",") as DreamType[]) : [],
     symbolIds: query.symbols
-      ? (decodeURI(query.symbols as string)
+      ? (safeDecodeURI(query.symbols as string)
           .split(",")
           .map((val) => +val) as number[])
       : [],

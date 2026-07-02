@@ -22,6 +22,22 @@ Run your app in the development mode.
 
 14. `blitz dev`
 15. Open [localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 🧪 Testing
+
+- `npm test` — unit tests (Vitest): pure helpers (search where-builder, chart/sleep
+  aggregations) and zod validation schemas. Fast, no database or server needed.
+- `npm run test:watch` — the same in watch mode.
+- `npm run test:e2e` — end-to-end tests (Vitest + puppeteer) driving the real app in
+  headless Chromium: login, dream/symbol CRUD, search, settings toggles and their
+  effect on the Stats page, public pages. Requires a **running dev server**
+  (`npm run dev`, or set `E2E_BASE_URL`) and a **seeded local DB** (`blitz db seed`
+  — the flows log in as the demo user and clean up after themselves).
+- CI (`.github/workflows/test.yml`) runs lint, type-check and unit tests on every
+  PR; the E2E suite is local-only for now.
+- Philosophy (see issue #2): test the things that actually break — edge cases over
+  coverage percentages.
+
 16. If you want to test emails 1) sign up with a real email (you should receive a welcome email with a confirmation code), then sign out and initiate the forgot password flow (you should receive a forgot password email with a token).
 17. For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md). For the project roadmap, see [ROADMAP.md](ROADMAP.md).
 

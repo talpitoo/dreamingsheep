@@ -18,6 +18,7 @@ import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import {
   buildDreamSearchWhere,
   parseDreamSearchQuery,
+  safeDecodeURI,
 } from "src/dreams/utils/buildDreamSearchWhere"
 
 export const SearchList = () => {
@@ -57,33 +58,20 @@ const SearchPage: BlitzPage = () => {
   const [{ symbols }, { isLoading }] = useQuery(getSymbols, {
     where: {
       id: {
-        in: router.query.symbols
-          ? (decodeURI(router.query.symbols as string)
-              .split(",")
-              .map((val) => +val) as number[])
-          : [],
+        in: parseDreamSearchQuery(router.query).symbolIds,
       },
     },
   })
   const initialValues = useMemo(() => {
+    const values = parseDreamSearchQuery(router.query)
     return {
-      c: router.query.c ? decodeURI(router.query.c as string) : "",
-      q: router.query.q ? decodeURI(router.query.q as string) : "",
-      favorite: router.query.favorite ? decodeURI(router.query.favorite as string) : "",
-      time: router.query.time
-        ? (decodeURI(router.query.time as string).split(",") as DreamTime[])
-        : [],
-      mood: router.query.mood
-        ? (decodeURI(router.query.mood as string)
-            .split(",")
-            .map((val) => +val) as number[])
-        : [],
-      recall: router.query.recall
-        ? (decodeURI(router.query.recall as string).split(",") as RecallTime[])
-        : [],
-      type: router.query.type
-        ? (decodeURI(router.query.type as string).split(",") as DreamType[])
-        : [],
+      c: router.query.c ? safeDecodeURI(router.query.c as string) : "",
+      q: values.q ?? "",
+      favorite: values.favorite ?? "",
+      time: values.time as DreamTime[],
+      mood: values.mood as number[],
+      recall: values.recall as RecallTime[],
+      type: values.type as DreamType[],
       symbols: symbols as Symbol[] | [],
     }
   }, [router.query, symbols])
