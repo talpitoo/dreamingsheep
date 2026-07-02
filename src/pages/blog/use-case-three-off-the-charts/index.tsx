@@ -78,11 +78,10 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   There is a new <strong>Advanced charting</strong> switch waiting for you in{" "}
-                  <Link href={Routes.SettingsPage()}>Settings</Link>. Flip it, wander over to{" "}
-                  <Link href={Routes.StatsPage()}>Stats</Link>, and your dream garden turns into a
-                  criss-cross laboratory: type a keyword, toggle a mood, handpick a symbol — and
-                  every chart on the page redraws around your question, while you watch. No save
-                  button, no waiting, no <em>&quot;are you sure?&quot;</em>.
+                  <Link href={Routes.SettingsPage()}>&#47;settings</Link>. Flip it, wander over to{" "}
+                  <Link href={Routes.StatsPage()}>&#47;stats</Link>, and your dream garden turns
+                  into a criss-cross laboratory: type a keyword, toggle a mood, handpick a symbol —
+                  and every chart on the page redraws around your question, while you watch.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   What kind of questions, you ask? The kind only you can ask about your own dreams:
@@ -93,11 +92,12 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                       Pick the <span className="lucidicon-unicorn"></span> unicorn symbol and see
                       whether unicorns prefer to visit at night or sneak into your afternoon
                       daydreams — and whether they arrive in crisp high definition or pleasantly
-                      blurry².
+                      blurry.
                     </li>
                     <li>
-                      Toggle the grumpy smileys and find out which symbols keep bad company — the
-                      usual suspects lurking in your low-mood dreams might surprise you.
+                      Toggle the <span className="lucidicon-smiley-scarry"></span> grumpy smileys
+                      and find out which symbols keep bad company — the usual suspects lurking in
+                      your low-mood dreams might surprise you.
                     </li>
                     <li>
                       Select the <span className="lucidicon-eye"></span> lucid type and check the
@@ -110,10 +110,10 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   Speaking of sleep: remember the <em>&quot;(future-feature)&quot;</em> note next to
                   the bedtime/wake-up opt-in on the Settings page? The future has officially
                   arrived. Track your bedtime and wake-up time on the{" "}
-                  <Link href={Routes.DreamsPage()}>Dreams</Link> page and Stats greets you with a
-                  full-width sleep chart — bedtime at the bottom, wake-up at the top, your night
+                  <Link href={Routes.DreamsPage()}>&#47;dreams</Link> page and Stats greets you with
+                  a full-width sleep chart — bedtime at the bottom, wake-up at the top, your night
                   colored in between. Nights you don&apos;t track simply stay blank; the sheep
-                  doesn&apos;t judge³.
+                  doesn&apos;t judge².
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   And in case you are wondering: no, we still won&apos;t tell you what any of it{" "}
@@ -133,11 +133,9 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                 <Typography variant="body1">
                   <small>1 - no alarm clocks were harmed in the making of these charts</small>
                   <br />
-                  <small>2 - blurry is fine; even the best of us wake up at 240p sometimes</small>
-                  <br />
                   <small>
-                    3 - night-shift workers and vampires are fully supported — for you, the midnight
-                    line is merely a suggestion
+                    2 - night-shift workers and <span className="lucidicon-dracula"></span> vampires
+                    are fully supported — for you, the midnight line is merely a suggestion
                   </small>
                 </Typography>
               </CardContent>
