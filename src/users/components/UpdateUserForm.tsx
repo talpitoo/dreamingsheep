@@ -354,7 +354,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             <FormControlLabel
               disabled={editForm !== "bedtime"}
               control={<CheckboxField name="trackSleepingTime" />}
-              label="Opt-in for bedtime/wake-up time for more detailed stats (future-feature)."
+              label="Opt-in for bedtime/wake-up time for a sleep chart on the Stats page (the future-feature has arrived)."
             />
           </CardContent>
           <CardActions sx={{ p: 2 }}>
