@@ -1,12 +1,19 @@
 import { resolver } from "@blitzjs/rpc"
+import { NotFoundError } from "blitz"
 import db from "db"
 import { UpdateDream } from "src/dreams/validations"
 
 export default resolver.pipe(
   resolver.zod(UpdateDream),
   resolver.authorize(),
-  async ({ id, ...data }) => {
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
+  async ({ id, ...data }, ctx) => {
+    // scoped to the logged-in user — a foreign id must behave like a missing one
+    const existing = await db.dream.findFirst({
+      where: { id, userId: ctx.session.userId! },
+      select: { id: true },
+    })
+    if (!existing) throw new NotFoundError()
+
     const dream = await db.dream.update({
       where: { id },
       data: {

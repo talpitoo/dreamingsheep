@@ -8,9 +8,8 @@ import Layout from "src/core/layouts/Layout"
 import sheepDreamingsheep from "public/assets/sheep-dreamingsheep.png"
 import sheepDream from "public/assets/sheep-dream.png"
 import { Box, Container, Grid, Card, CardHeader, CardContent, Typography } from "@mui/material"
-import getDreams from "src/dreams/queries/getDreams"
 import moment from "moment"
-import { Dream, DreamType, Symbol } from "db"
+import { DreamType } from "db"
 import db from "db"
 import SwiperScreenshots from "src/core/components/SwiperScreenshots"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
@@ -19,40 +18,12 @@ import { Fragment, Suspense } from "react"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 
 const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
-  lastMonthDreams,
+  lastMonthDreamsCount,
+  lastMonthLucidCount,
+  topSymbols,
   unicornDreamsCount,
 }) => {
   const router = useRouter()
-  const total = getDreamsCounts(lastMonthDreams)
-
-  function getDreamsCounts(dreams: (Dream & { symbols: Symbol[] })[]) {
-    let lucid = 0
-    const symbolsObj = {}
-    dreams.forEach((dream) => {
-      if (dream.type === DreamType.LUCID) {
-        lucid += 1
-      }
-      dream.symbols.forEach((symbol) => {
-        if (symbol.builtIn) {
-          if (symbolsObj[symbol.id]) {
-            symbolsObj[symbol.id].count += 1
-          } else {
-            symbolsObj[symbol.id] = {
-              id: symbol.id,
-              name: symbol.name,
-              count: 1,
-            }
-          }
-        }
-      })
-    })
-
-    const symbols = Object.keys(symbolsObj)
-      .map((key) => symbolsObj[key])
-      .sort((a, b) => b.count - a.count)
-
-    return { lucid, symbols }
-  }
 
   return (
     <Fragment>
@@ -141,30 +112,30 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
             <Card className="bg-mui-secondary-light">
               <CardContent>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  {lastMonthDreams.length < 1 && (
+                  {lastMonthDreamsCount < 1 && (
                     <>
                       No dreams last month{" "}
                       <span className="lucidicon lucidicon-smiley-neutral"></span>
                     </>
                   )}
-                  {lastMonthDreams.length > 0 && (
+                  {lastMonthDreamsCount > 0 && (
                     <>
-                      Last month we&apos;ve collected <strong>{lastMonthDreams.length}</strong>{" "}
-                      dreams, from which <strong>{total.lucid}</strong> were lucid. The top 3 themes
-                      were{" "}
+                      Last month we&apos;ve collected <strong>{lastMonthDreamsCount}</strong>{" "}
+                      dreams, from which <strong>{lastMonthLucidCount}</strong> were lucid. The top
+                      3 themes were{" "}
                       <strong>
-                        {total.symbols[0]?.name !== undefined && total.symbols[0]?.name !== ""
-                          ? total.symbols[0]?.name
+                        {topSymbols[0]?.name !== undefined && topSymbols[0]?.name !== ""
+                          ? topSymbols[0]?.name
                           : "n/a"}
                         ,{" "}
-                        {total.symbols[1]?.name !== undefined && total.symbols[1]?.name !== ""
-                          ? total.symbols[1]?.name
+                        {topSymbols[1]?.name !== undefined && topSymbols[1]?.name !== ""
+                          ? topSymbols[1]?.name
                           : "n/a"}
                       </strong>{" "}
                       and{" "}
                       <strong>
-                        {total.symbols[2]?.name !== undefined && total.symbols[2]?.name !== ""
-                          ? total.symbols[2]?.name
+                        {topSymbols[2]?.name !== undefined && topSymbols[2]?.name !== ""
+                          ? topSymbols[2]?.name
                           : "n/a"}
                       </strong>
                       . Unicorns <span className="lucidicon lucidicon-unicorn"></span> were
@@ -240,55 +211,40 @@ Home.getLayout = (page) => (
 
 export const getServerSideProps = gSSP(async ({ req, res, ctx }) => {
   const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-  // TODO/NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110, debug further
-  // const lastMonthDreams = await getDreams(
-  //   {
-  //     orderBy: { dreamAt: "asc" },
-  //     where: {
-  //       dreamAt: {
-  //         gte: currentMoment.clone().subtract(31, "days").toISOString(),
-  //         lte: currentMoment.clone().add(1, "days").toISOString(),
-  //       },
-  //     },
-  //   },
-  //   ctx
-  // )
+  const lastMonth = {
+    gte: currentMoment.clone().subtract(31, "days").toDate(),
+    lte: currentMoment.clone().add(1, "days").toDate(),
+  }
 
-  const lastMonthDreams = await db.dream.findMany({
-    orderBy: { dreamAt: "asc" },
-    where: {
-      dreamAt: {
-        gte: currentMoment.clone().subtract(31, "days").toISOString(),
-        lte: currentMoment.clone().add(1, "days").toISOString(),
-      },
-    },
-    include: {
-      symbols: true,
-    },
-  })
+  // NOTE: aggregate counts ONLY — no dream rows may ever reach this public page
+  // (they would be serialized into the HTML; see issue #11 and the FAQ promise)
+  const [lastMonthDreamsCount, lastMonthLucidCount, unicornDreamsCount] = await Promise.all([
+    db.dream.count({ where: { dreamAt: lastMonth } }),
+    db.dream.count({ where: { dreamAt: lastMonth, type: DreamType.LUCID } }),
+    db.dream.count({ where: { symbols: { some: { code: "unicorn" } } } }),
+  ])
 
-  // const unicornDreams = await getDreams(
-  //   {
-  //     orderBy: { dreamAt: "asc" },
-  //     where: {
-  //       symbols: { some: { code: "unicorn" } },
-  //     },
-  //   },
-  //   ctx
-  // )
-
-  const unicornDreams = await db.dream.count({
-    where: {
-      symbols: { some: { code: "unicorn" } },
-    },
-  })
+  // top 3 most-used predefined/built-in symbols, counted in Postgres —
+  // user-created symbols are explicitly excluded (see the FAQ)
+  const topSymbols = await db.$queryRaw<{ id: number; name: string; count: number }[]>`
+    SELECT s."id", s."name", COUNT(*)::int AS "count"
+    FROM "_DreamToSymbol" ds
+    JOIN "Dream" d ON d."id" = ds."A"
+    JOIN "Symbol" s ON s."id" = ds."B"
+    WHERE s."builtIn" = true
+      AND d."dreamAt" >= ${lastMonth.gte}
+      AND d."dreamAt" <= ${lastMonth.lte}
+    GROUP BY s."id", s."name"
+    ORDER BY "count" DESC, s."id" ASC
+    LIMIT 3
+  `
 
   return {
     props: {
-      // lastMonthDreams: lastMonthDreams.dreams,
-      // unicornDreamsCount: unicornDreams.count,
-      lastMonthDreams: lastMonthDreams,
-      unicornDreamsCount: unicornDreams,
+      lastMonthDreamsCount,
+      lastMonthLucidCount,
+      topSymbols,
+      unicornDreamsCount,
     },
   }
 })

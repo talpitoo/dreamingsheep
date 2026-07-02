@@ -8,9 +8,21 @@ BlitzJS `2.0.0-beta.31` on Next 13 **pages router**. Domain-driven layout:
 
 - Queries/mutations are plain files auto-exposed as RPC:
   `resolver.pipe(resolver.zod(Schema), resolver.authorize(), async (input, ctx) => …)`.
-- **Every dream/symbol query is scoped to the logged-in user** — e.g.
-  `src/dreams/queries/getDreams.ts` injects `where["userId"] = ctx.session.userId`.
-  Never expose cross-user data (hard product rule: dreams are private).
+  **Every file in a `queries/`/`mutations/` folder is a public HTTP endpoint** —
+  even a bare exported function; it must carry `resolver.authorize()` and do its
+  own scoping, because client-supplied `where`/`id` inputs are attacker-controlled.
+- **Every dream/symbol/sleepingTime query AND mutation is scoped to the
+  logged-in user** — e.g. `getDreams` injects `where["userId"]`, `deleteDream`
+  deletes `{ id, userId }`, `updateDream` checks ownership first. Symbols
+  visibility rule: `builtIn: true` (shared, toggled per-user via `relatedTo`)
+  OR `authorId = userId` (private creations); user symbols can never become
+  built-in (`createSymbol`/`updateSymbol` force `builtIn: false`), and built-ins
+  can never be edited/deleted via RPC. `getUsers` is ADMIN-only.
+- The **only** legitimate cross-user aggregation is the public homepage's stats,
+  computed server-side in `src/pages/index.tsx` `getServerSideProps` (counts +
+  a raw SQL top-3 of built-in symbols) — **never pass dream rows as page props**;
+  they end up serialized in the public HTML (see issue #11). The
+  `test/e2e/isolation.e2e.test.ts` suite guards these rules with two users.
 - Client side: `useQuery` / `usePaginatedQuery` / `useMutation` from `@blitzjs/rpc`.
 - `getDreams` accepts a Prisma-shaped `{ where, orderBy, skip, take }` built on
   the **client** (see search page) — reuse it before writing a new endpoint.

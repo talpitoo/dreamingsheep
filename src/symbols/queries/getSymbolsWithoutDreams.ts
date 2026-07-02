@@ -1,21 +1,30 @@
-import db from "db"
+import { resolver } from "@blitzjs/rpc"
+import db, { Prisma } from "db"
 
-export default async function getSymbolsWithoutDreams({ where, orderBy }) {
-  return await db.symbol.findMany({
-    where: where,
-    orderBy: orderBy,
-    select: {
-      id: true,
-      createdAt: true,
-      updatedAt: true,
-      code: true,
-      name: true,
-      description: true,
-      picture: true,
-      icon: true,
-      builtIn: true,
-      authorId: true,
-      // Exclude the 'dreams' relationship here
-    },
-  })
-}
+interface GetSymbolsWithoutDreamsInput
+  extends Pick<Prisma.SymbolFindManyArgs, "where" | "orderBy"> {}
+
+// used by the predefined-symbols picker on Settings — built-in symbols only,
+// regardless of the client-supplied where (files in queries/ are public RPC endpoints!)
+export default resolver.pipe(
+  resolver.authorize(),
+  async ({ where = {}, orderBy }: GetSymbolsWithoutDreamsInput) => {
+    return await db.symbol.findMany({
+      where: { AND: [where, { builtIn: true }] },
+      orderBy: orderBy,
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        code: true,
+        name: true,
+        description: true,
+        picture: true,
+        icon: true,
+        builtIn: true,
+        authorId: true,
+        // Exclude the 'dreams' relationship here
+      },
+    })
+  }
+)

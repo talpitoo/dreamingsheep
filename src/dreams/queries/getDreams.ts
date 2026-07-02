@@ -6,11 +6,11 @@ interface GetDreamsInput
   extends Pick<Prisma.DreamFindManyArgs, "where" | "include" | "orderBy" | "skip" | "take"> {}
 
 export default resolver.pipe(
+  resolver.authorize(),
   async ({ where = {}, include = {}, orderBy, skip, take }: GetDreamsInput, ctx: Ctx) => {
-    if (ctx.session.$isAuthorized()) {
-      where["userId"] = ctx.session.userId
-    }
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
+    // ALWAYS scoped to the logged-in user — dreams are private, no exceptions
+    // (the public homepage aggregates its stats server-side in gSSP instead)
+    where["userId"] = ctx.session.userId
     const {
       items: dreams,
       hasMore,

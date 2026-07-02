@@ -8,10 +8,10 @@ const GetDream = z.object({
   id: z.number().optional().refine(Boolean, "Required"),
 })
 
-export default resolver.pipe(resolver.zod(GetDream), resolver.authorize(), async ({ id }) => {
-  // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
+export default resolver.pipe(resolver.zod(GetDream), resolver.authorize(), async ({ id }, ctx) => {
+  // scoped to the logged-in user — a foreign id must behave like a missing one
   const dream = await db.dream.findFirst({
-    where: { id },
+    where: { id, userId: ctx.session.userId! },
     include: { symbols: { select: { name: true, code: true, id: true, builtIn: true } } },
   })
 
