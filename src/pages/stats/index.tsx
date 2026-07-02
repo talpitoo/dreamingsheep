@@ -12,151 +12,23 @@ import sheepStats from "public/assets/sheep-stats.png"
 import getDreams from "src/dreams/queries/getDreams"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import moment from "moment"
-import { Dream, DreamTime, DreamType, RecallTime, Symbol } from "db"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
 import { AdvancedStats } from "src/stats/components/AdvancedStats"
-import { Range, RANGE_TO_DAYS, RANGE_BUTTONS } from "src/stats/helpers/range"
+import { setChartsData } from "src/stats/helpers/chartsData"
+import {
+  Range,
+  RANGE_TO_DAYS,
+  RANGE_BUTTONS,
+  STATS_RANGE_STORAGE_KEY,
+} from "src/stats/helpers/range"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 // import { useTheme } from "@mui/material/styles"
 // NOTE: not used but keeping it here for syntax reference: import useMediaQuery from "@mui/material/useMediaQuery"
 
-export function setChartsData(range: Range, dreams: (Dream & { symbols: Symbol[] })[]) {
-  const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+// NOTE: kept for backwards compatibility, the implementation moved to src/stats/helpers/chartsData
+export { setChartsData } from "src/stats/helpers/chartsData"
 
-  // find the earliest dream date
-  const earliestDate = dreams.reduce((earliest, dream) => {
-    const dreamDate = moment(dream.dreamAt)
-    return dreamDate.isBefore(earliest) ? dreamDate : earliest
-  }, moment())
-
-  // calculate the number of days between the earliest date and the current date
-  const daysDifference = currentMoment.diff(earliestDate, "days") + 1
-
-  const subtractDays = RANGE_TO_DAYS[range] ?? daysDifference
-  const dreamCount = {}
-  if (subtractDays !== null) {
-    const startMoment = currentMoment.clone().subtract(subtractDays, "days")
-    while (startMoment <= currentMoment) {
-      dreamCount[startMoment.format("YYYY-MM-DD")] = 0
-      startMoment.add(1, "days")
-    }
-  }
-  const timeChartBarColors = {
-    NIGHT: "#581845",
-    MORNING: "#ff5733",
-    AFTERNOON: "#c70039",
-    EVENING: "#900c3f",
-  }
-  const dailyMood = {}
-  const timeCount = Object.values(DreamTime).reduce((arr, key) => ({ ...arr, [key]: 0 }), {})
-  const typeCount = Object.values(DreamType).reduce((arr, key) => ({ ...arr, [key]: 0 }), {})
-  const dailyRecall = {}
-  // mapping for RecallTime enum
-  const recallMapping = {
-    BLURRY: -1,
-    N_A: 0,
-    CLEAR: 1,
-  }
-  const symbolCount = {}
-
-  dreams.forEach((dream) => {
-    const dreamKey = moment(dream.dreamAt).format("YYYY-MM-DD")
-    if (dreamCount[dreamKey]) {
-      dreamCount[dreamKey] += 1
-    } else {
-      dreamCount[dreamKey] = 1
-    }
-    if (dailyMood[dreamKey]) {
-      // update total mood and dream count for the day
-      dailyMood[dreamKey].totalMood += dream.mood
-      dailyMood[dreamKey].dreamCount += 1
-    } else {
-      // initialize total mood and dream count for the day
-      dailyMood[dreamKey] = {
-        totalMood: dream.mood,
-        dreamCount: 1,
-      }
-    }
-    timeCount[dream.time] += 1
-    typeCount[dream.type] += 1
-    if (dailyRecall[dreamKey]) {
-      // update total recall and dream count for the day
-      dailyRecall[dreamKey].totalRecall += recallMapping[dream.recall]
-      dailyRecall[dreamKey].dreamCount += 1
-    } else {
-      // initialize total recall and dream count for the day
-      dailyRecall[dreamKey] = {
-        totalRecall: recallMapping[dream.recall],
-        dreamCount: 1,
-      }
-    }
-
-    dream.symbols.forEach((symbol) => {
-      if (symbolCount[symbol.id]) {
-        symbolCount[symbol.id].count += 1
-      } else {
-        symbolCount[symbol.id] = {
-          symbol: symbol.name,
-          count: 1,
-        }
-      }
-    })
-  })
-
-  // calculate the average mood and recall for each day
-  const averageMood = Object.keys(dailyMood).map((key) => {
-    const average = dailyMood[key].totalMood / dailyMood[key].dreamCount // Calculate the average mood
-    return [moment(key).format("LL"), average]
-  })
-
-  const averageRecall = Object.keys(dailyRecall).map((key) => {
-    const average = dailyRecall[key].totalRecall / dailyRecall[key].dreamCount // Calculate the average recall
-    return [moment(key).format("LL"), average]
-  })
-
-  // fill in missing days with the middle value (3)
-  if (subtractDays !== null) {
-    const startMoment = currentMoment.clone().subtract(subtractDays, "days")
-    while (startMoment <= currentMoment) {
-      const key = startMoment.format("YYYY-MM-DD")
-      if (!dailyMood[key]) {
-        averageMood.push([moment(key).format("LL"), 3]) // Add the middle value for missing days
-      }
-      if (!dailyRecall[key]) {
-        averageRecall.push([moment(key).format("LL"), 0]) // Add the default recall value for missing days
-      }
-
-      startMoment.add(1, "days")
-    }
-  }
-
-  // sort the array by date
-  averageMood.sort((a, b) => moment(a[0]).valueOf() - moment(b[0]).valueOf())
-  averageRecall.sort((a, b) => moment(a[0]).valueOf() - moment(b[0]).valueOf())
-
-  return {
-    dream: [
-      ["date", "count"],
-      ...Object.keys(dreamCount).map((key) => [moment(key).format("LL"), dreamCount[key]]),
-    ],
-    mood: [["date", "mood"], ...averageMood],
-    time: [
-      ["time", "count", { role: "style" }],
-      ...Object.keys(timeCount).map((key) => [key, timeCount[key], timeChartBarColors[key]]),
-    ],
-    type: [["type", "count"], ...Object.keys(typeCount).map((key) => [key, typeCount[key]])],
-    recall: [["date", "recall"], ...averageRecall],
-    symbol: [...Object.keys(symbolCount).map((key) => symbolCount[key])],
-  }
-}
-
-export const Stats = () => {
-  const router = useRouter()
-  const session = useSession()
-  const user = useCurrentUser()
-  // const theme = useTheme()
-  // const breakpointSm = useMediaQuery(theme.breakpoints.down("sm"))
-  const [range, setRange] = useState<Range>("3months")
+const StaticStatsCharts = ({ range }: { range: Range }) => {
   const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
   const [{ dreams }, { isLoading }] = useQuery(getDreams, {
     orderBy: { dreamAt: "asc" },
@@ -173,6 +45,57 @@ export const Stats = () => {
     return setChartsData(range, dreams)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dreams])
+
+  if (isLoading) {
+    return <LoadingSpiral />
+  }
+
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12} sm={7}>
+        <StatGoogleChart data={chartsData.dream} type="dream" />
+      </Grid>
+      <Grid item xs={12} sm={5}>
+        <StatGoogleChart data={chartsData.mood} type="mood" />
+      </Grid>
+
+      <Grid item xs={12} sm={5}>
+        <StatGoogleChart data={chartsData.time} type="time" />
+      </Grid>
+      <Grid item xs={12} sm={7}>
+        <StatGoogleChart data={chartsData.type} type="type" />
+      </Grid>
+
+      <Grid item xs={12} sm={7} className="chart-card">
+        <StatSymbolChart data={chartsData.symbol} />
+      </Grid>
+      <Grid item xs={12} sm={5}>
+        <StatGoogleChart data={chartsData.recall} type="recall" />
+      </Grid>
+    </Grid>
+  )
+}
+
+export const Stats = () => {
+  const router = useRouter()
+  const session = useSession()
+  const user = useCurrentUser()
+  // const theme = useTheme()
+  // const breakpointSm = useMediaQuery(theme.breakpoints.down("sm"))
+  const [range, setRange] = useState<Range>("3months")
+
+  // restore the last selected range within this browser session
+  useEffect(() => {
+    const saved = window.sessionStorage.getItem(STATS_RANGE_STORAGE_KEY)
+    if (saved && saved in RANGE_TO_DAYS) {
+      setRange(saved as Range)
+    }
+  }, [])
+
+  function changeRange(value: Range) {
+    setRange(value)
+    window.sessionStorage.setItem(STATS_RANGE_STORAGE_KEY, value)
+  }
 
   useEffect(() => {
     if (!session.userId) router.push(Routes.Home())
@@ -224,7 +147,7 @@ export const Stats = () => {
                   sx={{ flexWrap: "wrap" }}
                   onChange={(_, value) => {
                     if (value !== null) {
-                      setRange(value)
+                      changeRange(value)
                     }
                   }}
                 >
@@ -250,45 +173,21 @@ export const Stats = () => {
           </Grid>
         </Grid>
 
-        {isLoading && <LoadingSpiral />}
-
-        {!isLoading && (
-          <Grid container>
-            <Grid item md={2} />
-            <Grid item xs={12} md={8}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={7}>
-                  <StatGoogleChart data={chartsData.dream} type="dream" />
-                </Grid>
-                <Grid item xs={12} sm={5}>
-                  <StatGoogleChart data={chartsData.mood} type="mood" />
-                </Grid>
-
-                <Grid item xs={12} sm={5}>
-                  <StatGoogleChart data={chartsData.time} type="time" />
-                </Grid>
-                <Grid item xs={12} sm={7}>
-                  <StatGoogleChart data={chartsData.type} type="type" />
-                </Grid>
-
-                <Grid item xs={12} sm={7} className="chart-card">
-                  <StatSymbolChart data={chartsData.symbol} />
-                </Grid>
-                <Grid item xs={12} sm={5}>
-                  <StatGoogleChart data={chartsData.recall} type="recall" />
-                </Grid>
-
-                {user?.advancedCharting && (
-                  <Grid item xs={12}>
-                    <Suspense fallback={<LoadingSpiral />}>
-                      <AdvancedStats range={range} />
-                    </Suspense>
-                  </Grid>
-                )}
-              </Grid>
-            </Grid>
+        <Grid container>
+          <Grid item md={2} />
+          <Grid item xs={12} md={8}>
+            {/* opted in: everything centers around the filtered advanced chart + its facets */}
+            {user?.advancedCharting ? (
+              <Suspense fallback={<LoadingSpiral />}>
+                <AdvancedStats range={range} />
+              </Suspense>
+            ) : (
+              <Suspense fallback={<LoadingSpiral />}>
+                <StaticStatsCharts range={range} />
+              </Suspense>
+            )}
           </Grid>
-        )}
+        </Grid>
       </Container>
     </Fragment>
   )

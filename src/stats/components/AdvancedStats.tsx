@@ -1,10 +1,10 @@
 import { Routes } from "@blitzjs/next"
 import { useQuery } from "@blitzjs/rpc"
-import { Box, Button, Paper } from "@mui/material"
+import { Box, Button, Grid, Paper } from "@mui/material"
 import { Dream, DreamTime, DreamType, RecallTime, Symbol } from "db"
 import Link from "next/link"
 import moment from "moment"
-import React, { Fragment, Suspense, useMemo, useState } from "react"
+import React, { Fragment, Suspense, useEffect, useMemo, useState } from "react"
 import { useDebounce } from "usehooks-ts"
 import Form from "src/core/components/Form"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
@@ -20,7 +20,15 @@ import {
   TIME_ICONS,
   TYPE_ICONS,
 } from "src/core/helpers/icons"
-import { Range, RANGE_TO_BUCKET, RANGE_TO_DAYS } from "src/stats/helpers/range"
+import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
+import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
+import { setChartsData } from "src/stats/helpers/chartsData"
+import {
+  ADVANCED_STATS_FILTERS_STORAGE_KEY,
+  Range,
+  RANGE_TO_BUCKET,
+  RANGE_TO_DAYS,
+} from "src/stats/helpers/range"
 import { AdvancedStatChart } from "./AdvancedStatChart"
 
 interface AdvancedStatsFormValues {
@@ -78,7 +86,7 @@ export function setAdvancedChartData(range: Range, dreams: (Dream & { symbols: S
   return [["date", "dreams"], ...Object.values(counts).map(({ label, count }) => [label, count])]
 }
 
-const AdvancedStatsQueryAndChart = ({
+const AdvancedStatsQueryAndCharts = ({
   range,
   values,
 }: {
@@ -125,9 +133,38 @@ const AdvancedStatsQueryAndChart = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range, dreams])
 
+  // facet breakdowns of the filtered subset: "for these dreams, how do the
+  // other dimensions distribute?" (e.g. symbol 'dao' -> mostly night? mostly lucid?)
+  const facetsData = useMemo(() => {
+    return setChartsData(range, dreams)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range, dreams])
+
   return (
     <Fragment>
-      <AdvancedStatChart data={chartData} count={count} />
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <AdvancedStatChart data={chartData} count={count} />
+        </Grid>
+
+        <Grid item xs={12} sm={5}>
+          <StatGoogleChart data={facetsData.time} type="time" />
+        </Grid>
+        <Grid item xs={12} sm={7}>
+          <StatGoogleChart data={facetsData.type} type="type" />
+        </Grid>
+
+        <Grid item xs={12} sm={7} className="chart-card">
+          <StatSymbolChart data={facetsData.symbol} />
+        </Grid>
+        <Grid item xs={12} sm={5}>
+          <StatGoogleChart data={facetsData.recall} type="recall" />
+        </Grid>
+
+        <Grid item xs={12} sm={7}>
+          <StatGoogleChart data={facetsData.mood} type="mood" />
+        </Grid>
+      </Grid>
       <Box sx={{ mt: 2, textAlign: "right" }}>
         <Link
           href={Routes.SearchPage({
@@ -150,32 +187,56 @@ const AdvancedStatsQueryAndChart = ({
   )
 }
 
+function normalizeValues(values: Partial<AdvancedStatsFormValues>): AdvancedStatsFormValues {
+  return {
+    q: values.q ?? "",
+    favorite: values.favorite ?? "",
+    time: values.time ?? [],
+    mood: values.mood ?? [],
+    recall: values.recall ?? [],
+    type: values.type ?? [],
+    symbols: (values.symbols ?? []).filter(Boolean),
+  }
+}
+
 export interface AdvancedStatsProps {
   range: Range
 }
 
 export const AdvancedStats = ({ range }: AdvancedStatsProps) => {
+  // null until the sessionStorage restore ran, so the form mounts with the saved filters
+  const [initialValues, setInitialValues] = useState<AdvancedStatsFormValues | null>(null)
   const [formValues, setFormValues] = useState<AdvancedStatsFormValues>(INITIAL_VALUES)
   // one debounce for the whole form: keystrokes settle, toggles feel instant
   const debouncedValues = useDebounce(formValues, 400)
 
+  useEffect(() => {
+    let saved: Partial<AdvancedStatsFormValues> | null = null
+    try {
+      saved = JSON.parse(
+        window.sessionStorage.getItem(ADVANCED_STATS_FILTERS_STORAGE_KEY) ?? "null"
+      )
+    } catch (error) {
+      saved = null
+    }
+    const values = normalizeValues(saved ?? {})
+    setInitialValues(values)
+    setFormValues(values)
+  }, [])
+
+  function onValuesChange(values: Partial<AdvancedStatsFormValues>) {
+    const normalized = normalizeValues(values)
+    setFormValues(normalized)
+    window.sessionStorage.setItem(ADVANCED_STATS_FILTERS_STORAGE_KEY, JSON.stringify(normalized))
+  }
+
+  if (!initialValues) {
+    return <LoadingSpiral />
+  }
+
   return (
     <Fragment>
-      <Form
-        id="advanced-stats"
-        initialValues={INITIAL_VALUES}
-        onValuesChange={(values) =>
-          setFormValues({
-            q: values.q ?? "",
-            favorite: values.favorite ?? "",
-            time: values.time ?? [],
-            mood: values.mood ?? [],
-            recall: values.recall ?? [],
-            type: values.type ?? [],
-            symbols: (values.symbols ?? []).filter(Boolean),
-          })
-        }
-      >
+      <Form id="advanced-stats" initialValues={initialValues} onValuesChange={onValuesChange}>
         <Paper sx={{ mb: 2, p: 2 }}>
           <SearchKeywordField
             sx={{
@@ -232,7 +293,7 @@ export const AdvancedStats = ({ range }: AdvancedStatsProps) => {
       </Form>
 
       <Suspense fallback={<LoadingSpiral />}>
-        <AdvancedStatsQueryAndChart range={range} values={debouncedValues} />
+        <AdvancedStatsQueryAndCharts range={range} values={debouncedValues} />
       </Suspense>
     </Fragment>
   )

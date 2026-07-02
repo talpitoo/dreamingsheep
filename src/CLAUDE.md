@@ -54,15 +54,25 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
 ## Stats & charts (src/stats/, src/pages/stats/)
 
 - Data: one `getDreams` fetch (server-filtered by `dreamAt` range), then
-  **client-side aggregation** in `setChartsData()` (moment-based daily buckets,
+  **client-side aggregation** in `setChartsData()`
+  (`src/stats/helpers/chartsData.ts`; moment-based daily buckets,
   zero/middle-filling for gaps). No server-side groupBy for time series.
 - `StatGoogleChart` (react-google-charts): chart type + options keyed by
   `type: "dream" | "mood" | "time" | "type" | "recall"`; `isPdf` variant renders
   bare (used by the PDF export in `src/settings/components/ExportDreams` /
   puppeteer). Remounts on window resize via a `key` hack.
 - `StatSymbolChart`: d3 bubble-pack of symbol usage.
-- The range ToggleButtonGroup on the stats page drives the query window; issues
-  #6/#7 extend this — see [../PLAN-issues-6-7.md](../PLAN-issues-6-7.md).
+- The range ToggleButtonGroup (7 values, default `3months`, defined in
+  `src/stats/helpers/range.ts`) drives the query window and is remembered in
+  `sessionStorage` — built for issues #6/#7, see
+  [../PLAN-issues-6-7.md](../PLAN-issues-6-7.md).
+- **Advanced charting** (opt-in via `User.advancedCharting` on Settings): the
+  Stats page _replaces_ the static grid with `AdvancedStats` — an always-expanded
+  search form (live, debounced, no submit) + hero timeline
+  (`AdvancedStatChart`, buckets from `RANGE_TO_BUCKET`) + facet mini-charts of
+  the _filtered_ subset (reusing `StatGoogleChart`/`StatSymbolChart` +
+  `setChartsData`). Filter values persist in `sessionStorage`; "View as list"
+  deep-links to Search via the shared URL param format.
 
 ## Gotchas
 
