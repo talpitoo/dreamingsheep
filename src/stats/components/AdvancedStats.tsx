@@ -1,10 +1,10 @@
 import { Routes } from "@blitzjs/next"
 import { useQuery } from "@blitzjs/rpc"
-import { Box, Button, Grid, Paper } from "@mui/material"
+import { Box, Button, Collapse, Grid, Paper } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import Link from "next/link"
 import moment from "moment"
-import React, { Fragment, Suspense, useEffect, useMemo, useState } from "react"
+import React, { Fragment, ReactNode, Suspense, useEffect, useMemo, useState } from "react"
 import { useDebounce } from "usehooks-ts"
 import Form from "src/core/components/Form"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
@@ -22,7 +22,11 @@ import {
 } from "src/core/helpers/icons"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
-import { setAdvancedChartData } from "src/stats/helpers/advancedChartData"
+import {
+  setCalendarData,
+  setTimeAreaData,
+  setTypeMoodComboData,
+} from "src/stats/helpers/advancedChartData"
 import { setChartsData } from "src/stats/helpers/chartsData"
 import { ADVANCED_STATS_FILTERS_STORAGE_KEY, Range, RANGE_TO_DAYS } from "src/stats/helpers/range"
 import { AdvancedStatChart } from "./AdvancedStatChart"
@@ -89,8 +93,13 @@ const AdvancedStatsQueryAndCharts = ({
     { keepPreviousData: true }
   )
 
-  const chartData = useMemo(() => {
-    return setAdvancedChartData(range, dreams)
+  // three combined hero views of the filtered subset — trial run, cull the keepers later
+  const heroData = useMemo(() => {
+    return {
+      typeMood: setTypeMoodComboData(range, dreams),
+      timeArea: setTimeAreaData(range, dreams),
+      calendar: setCalendarData(dreams),
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range, dreams])
 
@@ -104,8 +113,20 @@ const AdvancedStatsQueryAndCharts = ({
   return (
     <Fragment>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <AdvancedStatChart data={chartData} count={count} />
+        <AdvancedStatChart
+          typeMoodData={heroData.typeMood}
+          timeAreaData={heroData.timeArea}
+          calendarData={heroData.calendar}
+          count={count}
+        />
+
+        {/* facet layout mirrors the static stats grid — the plain dream-count chart is back
+            as one of them, the hero above shows the combined view */}
+        <Grid item xs={12} sm={7}>
+          <StatGoogleChart data={facetsData.dream} type="dream" />
+        </Grid>
+        <Grid item xs={12} sm={5}>
+          <StatGoogleChart data={facetsData.mood} type="mood" />
         </Grid>
 
         <Grid item xs={12} sm={5}>
@@ -120,10 +141,6 @@ const AdvancedStatsQueryAndCharts = ({
         </Grid>
         <Grid item xs={12} sm={5}>
           <StatGoogleChart data={facetsData.recall} type="recall" />
-        </Grid>
-
-        <Grid item xs={12} sm={7}>
-          <StatGoogleChart data={facetsData.mood} type="mood" />
         </Grid>
       </Grid>
       <Box sx={{ mt: 2, textAlign: "right" }}>
@@ -162,9 +179,13 @@ function normalizeValues(values: Partial<AdvancedStatsFormValues>): AdvancedStat
 
 export interface AdvancedStatsProps {
   range: Range
+  /** the filter panel toggles from the Stats page header row (search-page pattern) */
+  filtersOpen?: boolean
+  /** rendered between the filter panel and the charts (e.g. the sleep chart) */
+  children?: ReactNode
 }
 
-export const AdvancedStats = ({ range }: AdvancedStatsProps) => {
+export const AdvancedStats = ({ range, filtersOpen = true, children }: AdvancedStatsProps) => {
   // null until the sessionStorage restore ran, so the form mounts with the saved filters
   const [initialValues, setInitialValues] = useState<AdvancedStatsFormValues | null>(null)
   const [formValues, setFormValues] = useState<AdvancedStatsFormValues>(INITIAL_VALUES)
@@ -198,60 +219,66 @@ export const AdvancedStats = ({ range }: AdvancedStatsProps) => {
   return (
     <Fragment>
       <Form id="advanced-stats" initialValues={initialValues} onValuesChange={onValuesChange}>
-        <Paper sx={{ mb: 2, p: 2 }}>
-          <SearchKeywordField
-            sx={{
-              mb: 4,
-              px: 1,
-              width: "100%",
-              border: 1,
-              borderColor: "grey.400",
-              borderRadius: 1,
-            }}
-            name="q"
-            placeholder="Search..."
-          />
-          <ToggleButtonField
-            label="favorite"
-            name="favorite"
-            exclusive={true}
-            buttons={FAVORITE_ICONS}
-            className="mb-4 flex-wrap"
-          />
-          <ToggleButtonField
-            label="time"
-            name="time"
-            exclusive={false}
-            buttons={TIME_ICONS}
-            className="mb-4 flex-wrap"
-          />
-          <ToggleButtonField
-            label="mood"
-            name="mood"
-            exclusive={false}
-            buttons={MOOD_ICONS}
-            className="mb-4 flex-wrap"
-          />
-          <ToggleButtonField
-            label="recall"
-            exclusive={false}
-            name="recall"
-            buttons={RECALL_ICONS}
-            className="mb-4 flex-wrap"
-          />
-          <ToggleButtonField
-            label="type"
-            name="type"
-            exclusive={false}
-            buttons={TYPE_ICONS}
-            className="mb-4 flex-wrap"
-          />
+        {/* Collapse (not conditional render) keeps the form mounted, so the active
+            filter values survive toggling the panel */}
+        <Collapse in={filtersOpen} id="advanced-stats-panel">
+          <Paper sx={{ mb: 2, p: 2 }}>
+            <SearchKeywordField
+              sx={{
+                mb: 4,
+                px: 1,
+                width: "100%",
+                border: 1,
+                borderColor: "grey.400",
+                borderRadius: 1,
+              }}
+              name="q"
+              placeholder="Search..."
+            />
+            <ToggleButtonField
+              label="favorite"
+              name="favorite"
+              exclusive={true}
+              buttons={FAVORITE_ICONS}
+              className="mb-4 flex-wrap"
+            />
+            <ToggleButtonField
+              label="time"
+              name="time"
+              exclusive={false}
+              buttons={TIME_ICONS}
+              className="mb-4 flex-wrap"
+            />
+            <ToggleButtonField
+              label="mood"
+              name="mood"
+              exclusive={false}
+              buttons={MOOD_ICONS}
+              className="mb-4 flex-wrap"
+            />
+            <ToggleButtonField
+              label="recall"
+              exclusive={false}
+              name="recall"
+              buttons={RECALL_ICONS}
+              className="mb-4 flex-wrap"
+            />
+            <ToggleButtonField
+              label="type"
+              name="type"
+              exclusive={false}
+              buttons={TYPE_ICONS}
+              className="mb-4 flex-wrap"
+            />
 
-          <Suspense fallback={<LoadingSpiral />}>
-            <SymbolsAutocomplete />
-          </Suspense>
-        </Paper>
+            <Suspense fallback={<LoadingSpiral />}>
+              <SymbolsAutocomplete />
+            </Suspense>
+          </Paper>
+        </Collapse>
       </Form>
+
+      {children}
 
       <Suspense fallback={<LoadingSpiral />}>
         <AdvancedStatsQueryAndCharts range={range} values={debouncedValues} />

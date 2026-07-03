@@ -24,6 +24,9 @@ function options(style: SleepChartStyle, ticks: { v: number; f: string }[]): Rec
       gridlineColor: "#eee",
       ticks,
     },
+    // edge-to-edge: just enough room on the left for the clock ticks; hAxis labels
+    // are hidden, so the bottom can be tight too
+    chartArea: { left: 44, right: 8, top: 8, bottom: 8 },
   }
   if (style === "bars") {
     return {
@@ -123,7 +126,7 @@ export const SleepChart = ({ range }: SleepChartProps) => {
             data={data}
             options={options(style, ticks)}
             width="100%"
-            height="300px"
+            height="200px"
           />
         ) : (
           <Typography variant="body2" className="opacity-60">
