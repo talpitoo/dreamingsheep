@@ -37,7 +37,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
   const [updateUserMutation, { isLoading: isUpdateUserLoading }] = useMutation(updateUser)
   const [changePasswordMutation, { isLoading: isChangePasswordLoading }] =
     useMutation(changePassword)
-  const [deleteUserMutation, { isLoading: isDeleteLoading }] = useMutation(deleteUser)
+  const [deleteUserMutation] = useMutation(deleteUser)
   const [deleteDialogVisibility, setDeleteDialogVisibility] = useState(false)
   const [editForm, setEditForm] = useState<FormType | null>(null)
 
@@ -468,7 +468,6 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
         to sign up again if you decide to do so. Are you sure?"
         onCancel={() => setDeleteDialogVisibility(false)}
         onDelete={onDelete}
-        isDeleteLoading={isDeleteLoading}
         deleteButton="Yes, Delete Account"
       />
     </Fragment>

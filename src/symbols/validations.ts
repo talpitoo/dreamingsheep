@@ -13,6 +13,14 @@ export const DeleteSymbol = z.object({
   id: z.number(),
 })
 
+export const GetSymbolsWithUsage = z.object({
+  skip: z.number().int().nonnegative().optional().default(0),
+  take: z.number().int().positive().max(100).optional().default(100),
+  // deep links from a dream only carry the symbol id — when set, the query also
+  // returns that symbol's 1-based position so the client can jump to its page
+  positionOfId: z.number().int().optional(),
+})
+
 export const UpdateSymbol = z.object({
   id: z.number(),
   name: z.string().refine(Boolean, "Required"),

@@ -25,6 +25,10 @@ export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
         {/* <meta name="theme-color" content={Theme.palette.primary.main} /> */}
         <meta name="theme-color" content="#0097a7" />
         <link rel="shortcut icon" href="/favicon.ico" />
+        {/* web app manifest — proper "Add to home screen" icons (192/512 + maskable);
+            iOS keeps using the apple-touch-icon linked in Layout.tsx (+ /apple-touch-icon.png
+            at the root as the auto-probed fallback for pages without <Head>, e.g. maintenance) */}
+        <link rel="manifest" href="/manifest.json" />
         <meta name="emotion-insertion-point" content="" />
         {emotionStyleTags}
       </Head>

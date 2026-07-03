@@ -26,7 +26,7 @@ export const SymbolsAutocomplete = () => {
     getAutocompleteSymbols,
     {
       orderBy: { name: "asc" },
-      // TODO/NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
+      // NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
       // where: { OR: [{ relatedToId: user?.id }, { authorId: user?.id }] },
       where: { OR: [{ relatedTo: { some: { id: user?.id } } }, { authorId: user?.id }] },
       take: 200,

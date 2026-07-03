@@ -60,7 +60,7 @@ export const SymbolsRadioList = (props: SymbolsRadioListProps) => {
   }, [])
 
   useEffect(() => {
-    // TODO/NOTE: this is ChatGPT's solution for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
+    // NOTE: this is ChatGPT's solution for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
     if (symbolsRef.current) {
       const syms = symbols.filter((sym) =>
         symbolsRef.current?.some((symRef) => sym.id === symRef.id)

@@ -14,7 +14,7 @@ import {
   Toolbar,
 } from "@mui/material"
 import logout from "src/auth/mutations/logout"
-import React, { Fragment, useState } from "react"
+import React, { Fragment, useEffect, useState } from "react"
 import logo from "public/assets/logo-dreamingsheep-white.png"
 import title from "public/assets/title-dreamingsheep.png"
 import { Routes } from ".blitz"
@@ -52,6 +52,25 @@ export function Header() {
 
   const collapseMobileMenu = () => {
     setExpanded(false)
+  }
+
+  // auto-collapse the mobile menu on EVERY navigation (logo, account menu, back/forward, ...),
+  // not only on the nav buttons with an explicit onClick
+  useEffect(() => {
+    router.events.on("routeChangeStart", collapseMobileMenu)
+    return () => {
+      router.events.off("routeChangeStart", collapseMobileMenu)
+    }
+  }, [router.events])
+
+  async function handleLogout() {
+    await logoutMutation()
+    if (isAuthenticatedPage(router.pathname)) {
+      // full page load instead of a client-side push: the dead session would make the still-mounted
+      // authenticated page throw AuthenticationError (issue #10), and a reload also flushes
+      // dream data from the in-memory query cache
+      window.location.assign(Routes.Home().pathname)
+    }
   }
 
   const isAuthenticatedPage = (currentRoutePathname: string) => {
@@ -347,12 +366,7 @@ export function Header() {
                   }),
                 }}
                 color="inherit"
-                onClick={async () => {
-                  logoutMutation()
-                  if (isAuthenticatedPage(router.pathname)) {
-                    router.push(Routes.Home())
-                  }
-                }}
+                onClick={handleLogout}
               >
                 <Logout />
                 <Box sx={{ ml: ".5rem" }}>Sign out</Box>
@@ -400,11 +414,8 @@ export function Header() {
                 </MenuItem>
                 <MenuItem
                   onClick={async () => {
-                    logoutMutation()
                     handleClose()
-                    if (isAuthenticatedPage(router.pathname)) {
-                      router.push(Routes.Home())
-                    }
+                    await handleLogout()
                   }}
                 >
                   <Logout />

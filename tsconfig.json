@@ -5,8 +5,15 @@
     "baseUrl": "./",
     "allowJs": true,
     "skipLibCheck": true,
+    // full "strict" is deferred until after the App Router migration (issue #3 / #4):
+    // missing are noImplicitAny (~58 errors) and strictFunctionTypes (3 errors)
     "strict": false,
     "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "useUnknownInCatchVariables": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
