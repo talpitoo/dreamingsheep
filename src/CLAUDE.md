@@ -78,15 +78,17 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   `src/stats/helpers/range.ts`) drives the query window and is remembered in
   `sessionStorage` — built for issues #6/#7.
 - **Advanced charting** (opt-in via `User.advancedCharting` on Settings): the
-  Stats page _replaces_ the static grid with `AdvancedStats` — an always-expanded
-  search form (live, debounced, no submit) + hero timeline
-  (`AdvancedStatChart`, buckets from `RANGE_TO_BUCKET`) + facet mini-charts of
-  the _filtered_ subset (reusing `StatGoogleChart`/`StatSymbolChart` +
+  Stats page _replaces_ the static grid with `AdvancedStats` — a search-page-style
+  filter panel (live, debounced, no submit) toggled by the "Advanced" button next
+  to the range buttons (MUI `Collapse` keeps the form mounted, so active filter
+  values survive collapsing; panel state persists in `sessionStorage`), a
+  "N matching dreams" caption, and the same six facet charts as the static grid,
+  fed by the _filtered_ subset (reusing `StatGoogleChart`/`StatSymbolChart` +
   `setChartsData`). Filter values persist in `sessionStorage`; "View as list"
   deep-links to Search via the shared URL param format.
 - **Sleep chart** (`SleepChart`, shown only when `User.trackSleepingTime` is on):
-  full-width top row in _both_ static and advanced views; range-driven but
-  independent of the dream filters. Two styles behind a "smooth" checkbox
+  full-width row in _both_ static and advanced views (below the filter panel in
+  the advanced one); range-driven but independent of the dream filters. Two styles behind a "smooth" checkbox
   (persisted in `sessionStorage`): floating bars (CandlestickChart trick:
   low=open=bedtime, close=high=wake-up) or a mid-sleep line with interval-area
   band. Clock y-axis via `{v, f}` ticks; evening bedtimes are plotted as

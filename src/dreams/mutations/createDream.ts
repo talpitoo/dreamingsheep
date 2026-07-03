@@ -8,7 +8,6 @@ export default resolver.pipe(
   resolver.authorize(),
   async (input, ctx: Ctx) => {
     const { symbols, ...data } = input
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
     const dream = await db.dream.create({
       data: {
         ...data,

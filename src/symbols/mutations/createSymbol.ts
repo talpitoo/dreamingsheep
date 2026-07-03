@@ -8,7 +8,6 @@ export default resolver.pipe(
   resolver.zod(CreateSymbol),
   resolver.authorize(),
   async (input, ctx: Ctx) => {
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
     const symbol = await db.symbol.create({
       data: {
         ...input,

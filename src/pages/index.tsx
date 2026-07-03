@@ -200,8 +200,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
   )
 }
 
-Home.suppressFirstRenderFlicker = true // TODO/FIXME @pastcontributor i might have prematurely removed this, we should experiment with the perceived loading speed and keep or refactor it later.
-Home.redirectAuthenticatedTo = () => Routes.DreamsPage()
+Home.suppressFirstRenderFlicker = true // TODO (future-feature): experiment with the perceived loading speed and keep or refactor it later.
 Home.getLayout = (page) => (
   <Layout childrenContainerClassName="py-6">
     {/* title="dreamingsheep" */}
@@ -210,6 +209,15 @@ Home.getLayout = (page) => (
 )
 
 export const getServerSideProps = gSSP(async ({ req, res, ctx }) => {
+  // logged-in users go straight to their journal. Server-side replacement for
+  // `Home.redirectAuthenticatedTo`, which threw a client-side RedirectError on every
+  // login/logo-click and raced the LoginForm's own router.push (console errors, issue #10)
+  if (ctx.session.userId) {
+    return {
+      redirect: { destination: Routes.DreamsPage().pathname, permanent: false },
+    }
+  }
+
   const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
   const lastMonth = {
     gte: currentMoment.clone().subtract(31, "days").toDate(),

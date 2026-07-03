@@ -131,18 +131,24 @@ function RootErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 
   if (error instanceof AuthorizationError) {
     return (
-      <CustomErrorContainer>
-        <ErrorComponent
-          statusCode={error.statusCode}
-          title="Sorry, you are not authorized to access this"
-        />
-      </CustomErrorContainer>
+      <Layout>
+        <CustomErrorContainer>
+          <ErrorComponent
+            statusCode={error.statusCode}
+            title="Sorry, you are not authorized to access this"
+          />
+        </CustomErrorContainer>
+      </Layout>
     )
   }
 
+  // wrapped in Layout so error states (offline, unexpected failures, ...) keep the
+  // header/footer instead of rendering a bare page
   return (
-    <CustomErrorContainer>
-      <ErrorComponent statusCode={error.statusCode || 400} title={error.message || error.name} />
-    </CustomErrorContainer>
+    <Layout>
+      <CustomErrorContainer>
+        <ErrorComponent statusCode={error.statusCode || 400} title={error.message || error.name} />
+      </CustomErrorContainer>
+    </Layout>
   )
 }

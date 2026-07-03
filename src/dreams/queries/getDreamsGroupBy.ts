@@ -9,7 +9,6 @@ export default resolver.pipe(
   async ({ by = [], where = {} }: GetDreamsInput, ctx: Ctx) => {
     where["userId"] = ctx.session.userId
 
-    // TODO @pastcontributor double-check: in multi-tenant app, you must add validation to ensure correct tenant
     const dreams = await db.dream.groupBy({
       by,
       _count: {

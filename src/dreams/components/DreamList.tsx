@@ -91,7 +91,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
   const [formValues, setFormValues] = useState<any>(dream)
   const [isEdit, setEdit] = useState(false)
   const [updateDreamMutation, { isLoading: isUpdateDreamLoading }] = useMutation(updateDream)
-  const [deleteDreamMutation, { isLoading: isDeleteDreamLoading }] = useMutation(deleteDream)
+  const [deleteDreamMutation] = useMutation(deleteDream)
   const [deleteDialogVisibility, setDeleteDialogVisibility] = useState(false)
 
   function changeEdit(e: boolean) {
@@ -268,7 +268,6 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
           onAfterUpdate()
           setDeleteDialogVisibility(false)
         }}
-        isDeleteLoading={isDeleteDreamLoading}
       />
     </Fragment>
   )

@@ -19,7 +19,7 @@ type LayoutProps = {
   childrenContainerClassName?: string
 }
 
-// const domain = 'https://dreamingsheep.net/' // TODO incorporate domain
+// const domain = 'https://dreamingsheep.net/' // TODO (future-feature): incorporate domain
 
 const Layout = ({
   title,
@@ -28,7 +28,7 @@ const Layout = ({
   children,
   childrenContainerClassName,
 }: LayoutProps) => {
-  // const ogImage = ogCoverImage ? `${domain}${ogCoverImage}` : `${domain}${ogCoverImageDefault.src}` // TODO incorporate domain
+  // const ogImage = ogCoverImage ? `${domain}${ogCoverImage}` : `${domain}${ogCoverImageDefault.src}` // TODO (future-feature): incorporate domain
   const ogImage = ogCoverImage ? ogCoverImage : ogCoverImageDefault.src
 
   return (

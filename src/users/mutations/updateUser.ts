@@ -7,10 +7,11 @@ import { Role } from "types"
 export default resolver.pipe(
   resolver.zod(UpdateUser),
   resolver.authorize(),
-  async ({ id, ...data }, ctx: Ctx) => {
+  async ({ id: _clientSuppliedId, ...data }, ctx: Ctx) => {
     const { email, username, trackSleepingTime, advancedCharting } = data
+    // the client-supplied id is deliberately ignored — users may only ever update THEMSELVES
     const user = await db.user.update({
-      where: { id },
+      where: { id: ctx.session.userId! },
       data: {
         email,
         username,

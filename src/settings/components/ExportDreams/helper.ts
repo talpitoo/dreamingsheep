@@ -1,7 +1,7 @@
 import { CSSProperties } from "react"
 // NOTE these base64 images are used in the PDF generation
 
-// TODO @talpitoo covert the following images to base64 instead of inlining, e.g. https://stackoverflow.com/questions/66751136/puppeteer-does-not-load-images-stored-locally-when-generate-pdf
+// TODO (future-feature): convert the following images to base64 instead of inlining, e.g. https://stackoverflow.com/questions/66751136/puppeteer-does-not-load-images-stored-locally-when-generate-pdf
 // and read them from a json file:
 // const titleDreamsBase64 = title-dreams.png
 // const titleSymbolsBase64 = title-symbols.png

@@ -19,8 +19,8 @@ export const Settings = () => {
     getUser,
     { id: session.userId! },
     {
-      // TODO/NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
-      // TODO: curious why was this introduced? This ensures the query never refreshes and overwrites the form data while the user is editing.
+      // NOTE: `staleTime: Infinity` was a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110 —
+      // it ensured the query never refreshes and overwrites the form data while the user is editing
       // staleTime: Infinity,
       enabled: !!session.userId,
     }
@@ -65,7 +65,8 @@ export const Settings = () => {
               <Image src={titleSettings} alt="Settings" width="130" height="55" />
               <span className="sr-only">Settings</span>
             </h1>
-            {/* TODO/NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110, TODO debug further */}
+            {/* NOTE: reload instead of refetch is a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110.
+                TODO (future-feature): debug further and restore the refetch variant */}
             {/* <UpdateUserForm initialValues={{ ...user }} onSuccess={refetch} /> */}
             <UpdateUserForm initialValues={{ ...user }} onSuccess={router.reload} />
           </Grid>
