@@ -54,23 +54,26 @@ export const ExportDreams = () => {
     const element = document.getElementById("pdf")
     if (element) {
       const csrf = getAntiCSRFToken()
-      await fetch("/api/settings/html-to-image", {
+      const res = await fetch("/api/settings/html-to-image", {
         method: "POST",
         headers: {
           "anti-csrf": csrf,
         },
         body: JSON.stringify({ html: element.innerHTML }),
       })
-        .then((res) => {
-          return res.arrayBuffer()
-        })
-        .then((data) => {
-          const blob = new Blob([data], { type: "application/pdf" })
-          const link = document.createElement("a")
-          link.href = window.URL.createObjectURL(blob)
-          link.download = "dreamjournal.pdf"
-          link.click()
-        })
+      if (!res.ok) {
+        // e.g. a 413 when the journal outgrows the API body limit — don't save the
+        // error message as a broken "PDF"
+        console.error("PDF generation failed:", res.status, await res.text())
+        window.alert("Sorry, the PDF could not be generated. Please try again.")
+        return
+      }
+      const data = await res.arrayBuffer()
+      const blob = new Blob([data], { type: "application/pdf" })
+      const link = document.createElement("a")
+      link.href = window.URL.createObjectURL(blob)
+      link.download = "dreamjournal.pdf"
+      link.click()
     }
   }
 
