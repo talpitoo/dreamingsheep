@@ -35,7 +35,7 @@ export const SearchList = () => {
   }
   return (
     <Fragment>
-      <Typography variant="h4" sx={{ color: "white" }} component="p">
+      <Typography variant="h4" sx={{ color: "white", mb: 1 }} component="p">
         {count} results
       </Typography>
       <DreamList

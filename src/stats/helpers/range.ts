@@ -26,14 +26,3 @@ export const RANGE_BUTTONS: { value: Range; label: string; shortLabel: string }[
   { value: "1year", label: "1 year", shortLabel: "1y" },
   { value: "all", label: "all", shortLabel: "all" },
 ]
-
-// time bucket for the advanced chart, derived from the selected range
-export const RANGE_TO_BUCKET: Record<Range, "day" | "week" | "month"> = {
-  day: "day",
-  week: "day",
-  month: "day",
-  "3months": "week",
-  "6months": "week",
-  "1year": "month",
-  all: "month",
-}

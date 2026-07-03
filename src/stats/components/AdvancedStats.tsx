@@ -1,6 +1,6 @@
 import { Routes } from "@blitzjs/next"
 import { useQuery } from "@blitzjs/rpc"
-import { Box, Button, Collapse, Grid, Paper } from "@mui/material"
+import { Box, Button, Collapse, Grid, Paper, Typography } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import Link from "next/link"
 import moment from "moment"
@@ -22,14 +22,8 @@ import {
 } from "src/core/helpers/icons"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
-import {
-  setCalendarData,
-  setTimeAreaData,
-  setTypeMoodComboData,
-} from "src/stats/helpers/advancedChartData"
 import { setChartsData } from "src/stats/helpers/chartsData"
 import { ADVANCED_STATS_FILTERS_STORAGE_KEY, Range, RANGE_TO_DAYS } from "src/stats/helpers/range"
-import { AdvancedStatChart } from "./AdvancedStatChart"
 
 interface AdvancedStatsFormValues {
   q: string
@@ -93,16 +87,6 @@ const AdvancedStatsQueryAndCharts = ({
     { keepPreviousData: true }
   )
 
-  // three combined hero views of the filtered subset — trial run, cull the keepers later
-  const heroData = useMemo(() => {
-    return {
-      typeMood: setTypeMoodComboData(range, dreams),
-      timeArea: setTimeAreaData(range, dreams),
-      calendar: setCalendarData(dreams),
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range, dreams])
-
   // facet breakdowns of the filtered subset: "for these dreams, how do the
   // other dimensions distribute?" (e.g. symbol 'dao' -> mostly night? mostly lucid?)
   const facetsData = useMemo(() => {
@@ -112,16 +96,13 @@ const AdvancedStatsQueryAndCharts = ({
 
   return (
     <Fragment>
+      {/* the only feedback that the filters are narrowing things down while the panel is
+          collapsed; same style as the search page's result count */}
+      <Typography variant="h4" sx={{ color: "white", mb: 1 }} component="p">
+        {count} matching dream{count === 1 ? "" : "s"}
+      </Typography>
       <Grid container spacing={3}>
-        <AdvancedStatChart
-          typeMoodData={heroData.typeMood}
-          timeAreaData={heroData.timeArea}
-          calendarData={heroData.calendar}
-          count={count}
-        />
-
-        {/* facet layout mirrors the static stats grid — the plain dream-count chart is back
-            as one of them, the hero above shows the combined view */}
+        {/* facet layout mirrors the static stats grid */}
         <Grid item xs={12} sm={7}>
           <StatGoogleChart data={facetsData.dream} type="dream" />
         </Grid>
