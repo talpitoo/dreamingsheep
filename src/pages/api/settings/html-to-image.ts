@@ -2,6 +2,17 @@ import { api } from "src/blitz-server"
 import puppeteer from "puppeteer"
 // https://github.com/puppeteer/puppeteer/blob/v14.1.0/docs/api.md#pagepdfoptions
 
+export const config = {
+  api: {
+    // the serialized #pdf markup (all dreams + inlined base64 images) easily exceeds
+    // Next's default 1mb body limit — which used to truncate downloads to a 23-byte
+    // "Body exceeded 1mb limit" response saved as the PDF
+    bodyParser: {
+      sizeLimit: "10mb",
+    },
+  },
+}
+
 async function htmlToImage(html = "", css = "") {
   const browser = await puppeteer.launch({
     headless: true,
@@ -31,9 +42,11 @@ async function htmlToImage(html = "", css = "") {
 }
 
 export default api(async (req, res, ctx) => {
-  if (ctx.session.userId) {
-    const { html, css } = JSON.parse(req.body)
-    const pdf = await htmlToImage(html, css)
-    res.send(pdf)
+  if (!ctx.session.userId) {
+    res.status(401).end()
+    return
   }
+  const { html, css } = JSON.parse(req.body)
+  const pdf = await htmlToImage(html, css)
+  res.send(pdf)
 })
