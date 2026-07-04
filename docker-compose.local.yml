@@ -1,9 +1,45 @@
-# TODO should be the same as `docker-compose.production.yml` with the addition of
+# Local development add-ons — currently the S3 mock for symbol image uploads
+# (issue #13; MinIO instead of LocalStack, whose free Docker images were
+# discontinued in March 2026).
+#
+# Standalone (app runs on the host via `npm run dev`, services in Docker):
+#   docker compose -f docker-compose.local.yml up -d
+#   docker compose -f docker-compose.production.yml up -d postgres   # optional: DB in Docker too
+#
+# Or as an overlay on the full stack (app + postgres + s3 mock, everything in Docker):
+#   docker compose -f docker-compose.production.yml -f docker-compose.local.yml up -d
+#
+# The app talks to the mock only when S3_ENDPOINT is set — see the
+# "Local S3 mock" block in .env.example. Production is unaffected.
+services:
+  s3-mock:
+    image: minio/minio
+    container_name: docker-s3-dreamingsheep
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: test # = AWS_ACCESS_KEY_ID in .env.local
+      MINIO_ROOT_PASSWORD: test1234 # = AWS_SECRET_ACCESS_KEY in .env.local
+    ports:
+      - "9000:9000" # S3 API → S3_ENDPOINT=http://localhost:9000
+      - "9001:9001" # web console → http://localhost:9001 (login: test / test1234)
+    volumes:
+      - s3-mock-dreamingsheep:/data # uploaded files survive restarts
+    restart: unless-stopped
 
-# TODO: Isolation for local testing: Having a local S3 mock service (s3-mock) allows you to isolate the testing without interacting with a real AWS S3 service. This is particularly useful for local development and testing scenarios.
-# s3-mock:
-#   image: atlassianlabs/localstack # the atlassianlabs/localstack Docker image is designed to provide a local, mock AWS environment with default configurations.
-#   environment:
-#     SERVICES: s3
-#   ports:
-#     - "4572:4572"
+  # one-shot init: creates the bucket and allows anonymous downloads
+  # (the browser loads symbol images straight from NEXT_PUBLIC_S3_BUCKET URLs)
+  s3-mock-init:
+    image: minio/mc
+    depends_on:
+      - s3-mock
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://s3-mock:9000 test test1234; do sleep 1; done;
+      mc mb --ignore-existing local/dreamingsheep-local;
+      mc anonymous set download local/dreamingsheep-local;
+      echo 's3-mock ready: s3://dreamingsheep-local';
+      "
+
+volumes:
+  s3-mock-dreamingsheep:
+    name: volume-s3-dreamingsheep
