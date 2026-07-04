@@ -1,7 +1,7 @@
 export { FORM_ERROR } from "src/core/components/Form"
 import { z } from "zod"
 import { Form, FormProps } from "src/core/components/Form"
-import { Button, ButtonGroup, InputBase, Paper, Box, InputBaseProps } from "@mui/material"
+import { Button, ButtonGroup, Collapse, InputBase, Paper, Box, InputBaseProps } from "@mui/material"
 import { forwardRef, Fragment, PropsWithoutRef, Suspense, useEffect, useState } from "react"
 import { KeyboardArrowDown, Search, Settings } from "@mui/icons-material"
 import ToggleButtonField from "src/core/components/ToggleButtonField"
@@ -74,7 +74,7 @@ export function DreamSearchForm<S extends z.ZodType<any, any>>({
           <ButtonGroup size="large">
             <Button variant="outlined" endIcon={<KeyboardArrowDown />} onClick={toggle}>
               <Settings sx={{ display: { xs: "inline", sm: "none" } }} />{" "}
-              <Box sx={{ display: { xs: "none", sm: "inline" } }}>Advanced</Box>
+              <Box sx={{ display: { xs: "none", sm: "inline" } }}>Filters</Box>
             </Button>
             <Button variant="contained" type="submit" form="search-dream">
               <Search />
@@ -82,7 +82,9 @@ export function DreamSearchForm<S extends z.ZodType<any, any>>({
           </ButtonGroup>
         </Paper>
 
-        {isExpanded(openState) && (
+        {/* Collapse (same animation as the stats page's advanced panel) keeps the fields
+            mounted, so toggling never loses in-progress filter values */}
+        <Collapse in={isExpanded(openState)}>
           <Paper sx={{ mb: 2, p: 2 }}>
             <ToggleButtonField
               label="favorite"
@@ -124,7 +126,7 @@ export function DreamSearchForm<S extends z.ZodType<any, any>>({
               <SymbolsAutocomplete />
             </Suspense>
           </Paper>
-        )}
+        </Collapse>
       </Form>
     </Fragment>
   )

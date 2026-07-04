@@ -1,11 +1,15 @@
 import { useQuery } from "@blitzjs/rpc"
 import { Box, Card, CardContent, Checkbox, FormControlLabel, Typography } from "@mui/material"
-import moment from "moment"
 import React, { useEffect, useMemo, useState } from "react"
 import { Chart } from "react-google-charts"
 import { useWindowSize } from "usehooks-ts"
 import getSleepingTimes from "src/sleepingTimes/queries/getSleepingTimes"
-import { Range, RANGE_TO_DAYS, SLEEP_CHART_STYLE_STORAGE_KEY } from "src/stats/helpers/range"
+import {
+  CustomRange,
+  Range,
+  resolveRangeBounds,
+  SLEEP_CHART_STYLE_STORAGE_KEY,
+} from "src/stats/helpers/range"
 import { SleepChartStyle, setSleepChartData } from "src/stats/helpers/sleepChartData"
 
 // matches the NIGHT color of the time chart
@@ -54,11 +58,12 @@ function options(style: SleepChartStyle, ticks: { v: number; f: string }[]): Rec
 
 export interface SleepChartProps {
   range: Range
+  custom?: CustomRange | null
 }
 
 // full-width bedtime/wake-up chart: bottom edge = bedtime, top edge = wake-up
 // time, per day; days with incomplete tracking stay uncolored
-export const SleepChart = ({ range }: SleepChartProps) => {
+export const SleepChart = ({ range, custom }: SleepChartProps) => {
   const [style, setStyle] = useState<SleepChartStyle>("bars")
   const [key, setkey] = useState(0)
   const size = useWindowSize()
@@ -81,27 +86,22 @@ export const SleepChart = ({ range }: SleepChartProps) => {
     window.sessionStorage.setItem(SLEEP_CHART_STYLE_STORAGE_KEY, value)
   }
 
-  const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+  const bounds = resolveRangeBounds(range, custom)
   const [sleepingTimes] = useQuery(
     getSleepingTimes,
     {
       orderBy: { sleepingAt: "asc" },
       where: {
-        ...(range !== "all" && {
-          sleepingAt: {
-            gte: currentMoment.clone().subtract(RANGE_TO_DAYS[range]!, "days").toISOString(),
-            lte: currentMoment.clone().add(1, "days").toISOString(),
-          },
-        }),
+        ...(bounds && { sleepingAt: bounds }),
       },
     },
     { keepPreviousData: true }
   )
 
   const { data, ticks, hasData } = useMemo(() => {
-    return setSleepChartData(range, sleepingTimes, style)
+    return setSleepChartData(range, sleepingTimes, style, custom)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range, sleepingTimes, style])
+  }, [range, custom, sleepingTimes, style])
 
   return (
     <Card className="bg-white translate-x-0 translate-y-0 transform-gpu">

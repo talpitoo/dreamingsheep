@@ -1,6 +1,6 @@
 import moment from "moment"
 import { SleepingTime } from "db"
-import { Range, RANGE_TO_DAYS } from "src/stats/helpers/range"
+import { CustomRange, Range, resolveChartWindow } from "src/stats/helpers/range"
 
 export type SleepChartStyle = "bars" | "band"
 
@@ -29,14 +29,14 @@ export function formatClock(value: number) {
 export function setSleepChartData(
   range: Range,
   sleepingTimes: SleepingTime[],
-  style: SleepChartStyle
+  style: SleepChartStyle,
+  custom?: CustomRange | null
 ) {
-  const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
   const earliestDate = sleepingTimes.reduce((earliest, sleepingTime) => {
     const sleepingDate = moment(sleepingTime.sleepingAt)
     return sleepingDate.isBefore(earliest) ? sleepingDate : earliest
   }, moment())
-  const subtractDays = RANGE_TO_DAYS[range] ?? currentMoment.diff(earliestDate, "days") + 1
+  const { start: windowStart, end: windowEnd } = resolveChartWindow(range, custom, earliestDate)
 
   const byDay: Record<string, SleepingTime> = {}
   sleepingTimes.forEach((sleepingTime) => {
@@ -59,8 +59,8 @@ export function setSleepChartData(
   let minHours = 0
   let maxHours = 9
 
-  const cursor = currentMoment.clone().subtract(subtractDays, "days")
-  while (cursor <= currentMoment) {
+  const cursor = windowStart.clone()
+  while (cursor <= windowEnd) {
     const key = cursor.format("YYYY-MM-DD")
     const label = cursor.format("MMM D")
     const sleepingTime = byDay[key]

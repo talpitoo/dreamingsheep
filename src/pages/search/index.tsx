@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/router"
 import { usePaginatedQuery, useQuery } from "@blitzjs/rpc"
 import { BlitzPage, Routes } from "@blitzjs/next"
@@ -8,7 +9,7 @@ import getDreams from "src/dreams/queries/getDreams"
 import React, { Fragment, Suspense, useMemo } from "react"
 import titleSearch from "public/assets/title-search.png"
 import sheepSearch from "public/assets/sheep-search.png"
-import { Container, Grid, Typography, Box } from "@mui/material"
+import { Button, Container, Grid, Typography, Box } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import { DreamList } from "src/dreams/components/DreamList"
 import { DreamSearchForm } from "src/dreams/components/DreamSearchForm"
@@ -76,6 +77,14 @@ const SearchPage: BlitzPage = () => {
     }
   }, [router.query, symbols])
 
+  // the current search filters, in the shared URL param format, for the "View stats" deep link
+  const statsQuery = useMemo(() => {
+    const keys = ["q", "favorite", "time", "mood", "recall", "type", "symbols"]
+    return Object.fromEntries(
+      keys.filter((key) => router.query[key]).map((key) => [key, router.query[key] as string])
+    )
+  }, [router.query])
+
   function search(data) {
     router.push(
       Routes.SearchPage({
@@ -138,6 +147,16 @@ const SearchPage: BlitzPage = () => {
             <Suspense fallback={<LoadingSpiral />}>
               <SearchList />
             </Suspense>
+
+            {/* mirrors the stats page's "View as list": carries the current filters over.
+                the stats page defaults to the "all" range for these (search has no range) */}
+            {user?.advancedCharting && (
+              <Box sx={{ mt: 2, textAlign: "right" }}>
+                <Link href={Routes.StatsPage(statsQuery)} passHref={true}>
+                  <Button variant="contained">View stats</Button>
+                </Link>
+              </Box>
+            )}
           </Grid>
         </Grid>
       </Container>
