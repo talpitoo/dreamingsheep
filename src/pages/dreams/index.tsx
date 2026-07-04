@@ -19,13 +19,12 @@ import {
   CardActions,
   Container,
   Grid,
-  styled,
   TextField,
   Box,
 } from "@mui/material"
-import { PickersDay, PickersDayProps, StaticDatePicker } from "@mui/x-date-pickers"
+import { PickersDayProps, StaticDatePicker } from "@mui/x-date-pickers"
 import getDreamsByMonth from "src/dreams/queries/getDreamsByMonth"
-import { cyan } from "@mui/material/colors"
+import { renderDreamDay } from "src/dreams/components/DreamCalendarDay"
 import { DreamItemFooter, DreamList } from "src/dreams/components/DreamList"
 import { DreamForm, FORM_ERROR, FORM_RESET } from "src/dreams/components/DreamForm"
 import { SleepingTimeForm } from "src/sleepingTimes/components/SleepingTimeForm"
@@ -66,56 +65,8 @@ function getCurrentMonthRange(today: Date): [Date, Date] {
   ]
 }
 
-interface SelectedPickerDayProps extends PickersDayProps<DateTime> {
-  hasDreams?: boolean
-  numberOfDreams?: number
-  selected?: boolean
-  today?: boolean
-  debug?: string
-}
-
 // determine the user's timezone on the client-side
 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-const SelectedPickersDay = styled(PickersDay, {
-  shouldForwardProp: (prop) =>
-    prop !== "hasDreams" &&
-    prop !== "selected" &&
-    prop !== "today" &&
-    prop !== "numberOfDreams" &&
-    prop !== "debug",
-})<SelectedPickerDayProps>(({ theme, hasDreams, numberOfDreams, selected, today, debug }) => ({
-  ...(hasDreams && {
-    backgroundColor: theme.palette.secondary.main,
-    color: theme.palette.common.black,
-    transform: "translate3d(0,0,0)",
-    "&:hover, &:focus": {
-      backgroundColor: theme.palette.secondary.dark,
-    },
-    "&:after": {
-      // NOTE: debug the number of dreams // NOTE: possible UTC/local timezone conflict, double-check
-      fontWeight: "bold",
-      opacity: 0.25,
-      content: debug === "true" ? `':${numberOfDreams}'` : "''",
-    },
-  }),
-  ...(today && {
-    backgroundColor: cyan[500],
-    color: theme.palette.common.white,
-    transform: "translate3d(0,0,0)",
-    "&:hover, &:focus": {
-      backgroundColor: cyan[700],
-    },
-  }),
-  ...(selected && {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.common.white,
-    transform: "translate3d(0,0,0)",
-    "&:hover, &:focus": {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  }),
-})) as React.ComponentType<SelectedPickerDayProps>
 
 export const DreamsCalendar = () => {
   const router = useRouter()
@@ -138,23 +89,7 @@ export const DreamsCalendar = () => {
     day: DateTime,
     selectedDates: Array<DateTime | null>,
     pickersDayProps: PickersDayProps<DateTime>
-  ) => {
-    const isoDate = day.toISODate() // NOTE: possible UTC/local timezone conflict, double-check
-    const numberOfDreams = dreamsByMonth[isoDate] ? dreamsByMonth[isoDate].count : 0
-    const hasDreams = !!dreamsByMonth[isoDate] // boolean
-    const currentDate =
-      day.hasSame(DateTime.local(), "day") &&
-      day.hasSame(DateTime.local(), "month") &&
-      day.hasSame(DateTime.local(), "year")
-    const selected =
-      day.hasSame(DateTime.fromJSDate(today), "day") &&
-      day.hasSame(DateTime.fromJSDate(today), "month") &&
-      day.hasSame(DateTime.fromJSDate(today), "year")
-
-    const props = { today: currentDate, selected, hasDreams, numberOfDreams, debug: debugParam }
-
-    return <SelectedPickersDay {...pickersDayProps} {...props} />
-  }
+  ) => renderDreamDay(day, dreamsByMonth, DateTime.fromJSDate(today), pickersDayProps, debugParam)
 
   return (
     <StaticDatePicker<DateTime>

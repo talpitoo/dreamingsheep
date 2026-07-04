@@ -1,18 +1,21 @@
 import { Routes } from "@blitzjs/next"
 import { useQuery } from "@blitzjs/rpc"
-import { Box, Button, Collapse, Grid, Paper, Typography } from "@mui/material"
+import { Box, Button, Chip, Collapse, Grid, Paper, Typography } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import Link from "next/link"
+import { useRouter } from "next/router"
 import moment from "moment"
 import React, { Fragment, ReactNode, Suspense, useEffect, useMemo, useState } from "react"
 import { useDebounce } from "usehooks-ts"
 import Form from "src/core/components/Form"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import ToggleButtonField from "src/core/components/ToggleButtonField"
-import { SearchKeywordField } from "src/dreams/components/DreamSearchForm"
 import SymbolsAutocomplete from "src/dreams/components/SymbolsAutocomplete"
 import getDreams from "src/dreams/queries/getDreams"
-import { buildDreamSearchWhere } from "src/dreams/utils/buildDreamSearchWhere"
+import {
+  buildDreamSearchWhere,
+  parseDreamSearchQuery,
+} from "src/dreams/utils/buildDreamSearchWhere"
 import {
   FAVORITE_ICONS,
   MOOD_ICONS,
@@ -23,7 +26,13 @@ import {
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
 import { setChartsData } from "src/stats/helpers/chartsData"
-import { ADVANCED_STATS_FILTERS_STORAGE_KEY, Range, RANGE_TO_DAYS } from "src/stats/helpers/range"
+import {
+  ADVANCED_STATS_FILTERS_STORAGE_KEY,
+  CustomRange,
+  Range,
+  resolveRangeBounds,
+} from "src/stats/helpers/range"
+import getSymbols from "src/symbols/queries/getSymbols"
 
 interface AdvancedStatsFormValues {
   q: string
@@ -47,12 +56,19 @@ const INITIAL_VALUES: AdvancedStatsFormValues = {
 
 const AdvancedStatsQueryAndCharts = ({
   range,
+  custom,
   values,
+  keyword,
+  onClearKeyword,
 }: {
   range: Range
+  custom: CustomRange | null
   values: AdvancedStatsFormValues
+  /** the live (undebounced) keyword, only shown — filtering uses values.q */
+  keyword: string
+  onClearKeyword: () => void
 }) => {
-  const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+  const bounds = resolveRangeBounds(range, custom)
   const [{ dreams, count }] = useQuery(
     getDreams,
     {
@@ -68,19 +84,7 @@ const AdvancedStatsQueryAndCharts = ({
             type: values.type,
             symbolIds: (values.symbols ?? []).map((symbol) => symbol.id),
           }),
-          ...(range !== "all"
-            ? [
-                {
-                  dreamAt: {
-                    gte: currentMoment
-                      .clone()
-                      .subtract(RANGE_TO_DAYS[range]!, "days")
-                      .toISOString(),
-                    lte: currentMoment.clone().add(1, "days").toISOString(),
-                  },
-                },
-              ]
-            : []),
+          ...(bounds ? [{ dreamAt: bounds }] : []),
         ],
       },
     },
@@ -90,16 +94,34 @@ const AdvancedStatsQueryAndCharts = ({
   // facet breakdowns of the filtered subset: "for these dreams, how do the
   // other dimensions distribute?" (e.g. symbol 'dao' -> mostly night? mostly lucid?)
   const facetsData = useMemo(() => {
-    return setChartsData(range, dreams)
+    return setChartsData(range, dreams, custom)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range, dreams])
+  }, [range, custom, dreams])
 
   return (
     <Fragment>
       {/* the only feedback that the filters are narrowing things down while the panel is
-          collapsed; same style as the search page's result count */}
+          collapsed; same style as the search page's result count. The keyword chip is the
+          searched words carried over from the search page — deletable here, editable there */}
       <Typography variant="h4" sx={{ color: "white", mb: 1 }} component="p">
         {count} matching dream{count === 1 ? "" : "s"}
+        {keyword && (
+          <Chip
+            variant="outlined"
+            label={`"${keyword}"`}
+            onDelete={onClearKeyword}
+            sx={{
+              ml: 1.5,
+              verticalAlign: "middle",
+              color: "white",
+              borderColor: "white",
+              "& .MuiChip-deleteIcon": {
+                color: "rgba(255, 255, 255, 0.7)",
+                "&:hover": { color: "white" },
+              },
+            }}
+          />
+        )}
       </Typography>
       <Grid container spacing={3}>
         {/* facet layout mirrors the static stats grid */}
@@ -160,37 +182,89 @@ function normalizeValues(values: Partial<AdvancedStatsFormValues>): AdvancedStat
 
 export interface AdvancedStatsProps {
   range: Range
+  custom?: CustomRange | null
   /** the filter panel toggles from the Stats page header row (search-page pattern) */
   filtersOpen?: boolean
   /** rendered between the filter panel and the charts (e.g. the sleep chart) */
   children?: ReactNode
 }
 
-export const AdvancedStats = ({ range, filtersOpen = true, children }: AdvancedStatsProps) => {
-  // null until the sessionStorage restore ran, so the form mounts with the saved filters
+export const AdvancedStats = ({
+  range,
+  custom = null,
+  filtersOpen = true,
+  children,
+}: AdvancedStatsProps) => {
+  const router = useRouter()
+  // null until the sessionStorage/URL restore ran, so the form mounts with the saved filters
   const [initialValues, setInitialValues] = useState<AdvancedStatsFormValues | null>(null)
   const [formValues, setFormValues] = useState<AdvancedStatsFormValues>(INITIAL_VALUES)
+  // the keyword lives OUTSIDE the form: there's no search field on the stats page —
+  // it only arrives via the search page's "View stats" (or sessionStorage) and is
+  // cleared via the chip next to the count
+  const [keyword, setKeyword] = useState("")
+
+  // filters arriving from the search page in the shared URL param format
+  const incoming = useMemo(() => parseDreamSearchQuery(router.query), [router.query])
+  const [{ symbols: incomingSymbols }] = useQuery(getSymbols, {
+    where: { id: { in: incoming.symbolIds } },
+  })
+
+  const filterValues = useMemo(() => ({ ...formValues, q: keyword }), [formValues, keyword])
   // one debounce for the whole form: keystrokes settle, toggles feel instant
-  const debouncedValues = useDebounce(formValues, 400)
+  const debouncedValues = useDebounce(filterValues, 400)
 
   useEffect(() => {
-    let saved: Partial<AdvancedStatsFormValues> | null = null
-    try {
-      saved = JSON.parse(
-        window.sessionStorage.getItem(ADVANCED_STATS_FILTERS_STORAGE_KEY) ?? "null"
-      )
-    } catch (error) {
-      saved = null
+    if (!router.isReady || initialValues) return
+    const cameWithFilters = ["q", "favorite", "time", "mood", "recall", "type", "symbols"].some(
+      (key) => router.query[key]
+    )
+    let values: AdvancedStatsFormValues
+    if (cameWithFilters) {
+      values = normalizeValues({
+        q: incoming.q,
+        favorite: incoming.favorite,
+        time: incoming.time as DreamTime[],
+        mood: incoming.mood as number[],
+        recall: incoming.recall as RecallTime[],
+        type: incoming.type as DreamType[],
+        symbols: incomingSymbols as Symbol[],
+      })
+    } else {
+      let saved: Partial<AdvancedStatsFormValues> | null = null
+      try {
+        saved = JSON.parse(
+          window.sessionStorage.getItem(ADVANCED_STATS_FILTERS_STORAGE_KEY) ?? "null"
+        )
+      } catch (error) {
+        saved = null
+      }
+      values = normalizeValues(saved ?? {})
     }
-    const values = normalizeValues(saved ?? {})
     setInitialValues(values)
-    setFormValues(values)
-  }, [])
+    setFormValues({ ...values, q: "" })
+    setKeyword(values.q)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, initialValues, incomingSymbols])
+
+  // persist the combined filters (toggles + keyword) once the restore has run
+  useEffect(() => {
+    if (!initialValues) return
+    window.sessionStorage.setItem(ADVANCED_STATS_FILTERS_STORAGE_KEY, JSON.stringify(filterValues))
+  }, [filterValues, initialValues])
 
   function onValuesChange(values: Partial<AdvancedStatsFormValues>) {
-    const normalized = normalizeValues(values)
-    setFormValues(normalized)
-    window.sessionStorage.setItem(ADVANCED_STATS_FILTERS_STORAGE_KEY, JSON.stringify(normalized))
+    // the form has no keyword field — ignore any stale q from the form's defaultValues
+    setFormValues({ ...normalizeValues(values), q: "" })
+  }
+
+  function clearKeyword() {
+    setKeyword("")
+    // also strip q from the URL, so a refresh doesn't resurrect it
+    if (router.query.q) {
+      const { q: _q, ...rest } = router.query
+      router.replace({ query: rest }, undefined, { shallow: true })
+    }
   }
 
   if (!initialValues) {
@@ -204,18 +278,8 @@ export const AdvancedStats = ({ range, filtersOpen = true, children }: AdvancedS
             filter values survive toggling the panel */}
         <Collapse in={filtersOpen} id="advanced-stats-panel">
           <Paper sx={{ mb: 2, p: 2 }}>
-            <SearchKeywordField
-              sx={{
-                mb: 4,
-                px: 1,
-                width: "100%",
-                border: 1,
-                borderColor: "grey.400",
-                borderRadius: 1,
-              }}
-              name="q"
-              placeholder="Search..."
-            />
+            {/* NOTE: no keyword field on purpose — searching for words happens on the
+                Search page, which carries them over via its "View stats" button */}
             <ToggleButtonField
               label="favorite"
               name="favorite"
@@ -262,7 +326,13 @@ export const AdvancedStats = ({ range, filtersOpen = true, children }: AdvancedS
       {children}
 
       <Suspense fallback={<LoadingSpiral />}>
-        <AdvancedStatsQueryAndCharts range={range} values={debouncedValues} />
+        <AdvancedStatsQueryAndCharts
+          range={range}
+          custom={custom}
+          values={debouncedValues}
+          keyword={keyword}
+          onClearKeyword={clearKeyword}
+        />
       </Suspense>
     </Fragment>
   )

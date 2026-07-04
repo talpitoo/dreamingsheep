@@ -112,7 +112,7 @@ export const SymbolsAutocomplete = () => {
           renderInput={(params) => (
             <Fragment>
               <FormLabel>symbols (themes, characters, setting, etc.)</FormLabel>
-              <TextField {...params} placeholder="type to search..." />
+              <TextField {...params} placeholder="type to search symbols..." />
             </Fragment>
           )}
         />

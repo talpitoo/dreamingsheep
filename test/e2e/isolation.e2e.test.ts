@@ -71,9 +71,11 @@ describe("cross-user isolation (dreams + symbols)", () => {
   it("dalecooper's search autocomplete doesn't offer it either", async () => {
     await dalecooper.goto(`${BASE}/search`, { waitUntil: "networkidle2" })
     await sleep(2000)
-    await clickButtonWithText(dalecooper, "Advanced")
-    await dalecooper.waitForSelector('input[placeholder="type to search..."]', { timeout: 15_000 })
-    await dalecooper.type('input[placeholder="type to search..."]', symbolName)
+    await clickButtonWithText(dalecooper, "Filters")
+    await dalecooper.waitForSelector('input[placeholder="type to search symbols..."]', {
+      timeout: 15_000,
+    })
+    await dalecooper.type('input[placeholder="type to search symbols..."]', symbolName)
     await sleep(1500)
     const options = await dalecooper.evaluate(() =>
       [...document.querySelectorAll('li[role="option"]')].map((option) =>

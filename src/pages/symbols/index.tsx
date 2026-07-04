@@ -13,6 +13,7 @@ import { CreateSymbol } from "src/symbols/validations"
 import createSymbol from "src/symbols/mutations/createSymbol"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import { SymbolsList } from "src/symbols/components/SymbolsList"
+import { SymbolJumpAutocomplete } from "src/symbols/components/SymbolJumpAutocomplete"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 
 const SymbolsPage: BlitzPage = () => {
@@ -60,6 +61,8 @@ const SymbolsPage: BlitzPage = () => {
               : "All symbols"}
           </Typography> */}
           <Suspense fallback={<LoadingSpiral />}>
+            {/* quick jump — the list below is paginated, this finds a symbol directly */}
+            <SymbolJumpAutocomplete />
             <SymbolsList />
           </Suspense>
           <p className="mt-6 text-right">

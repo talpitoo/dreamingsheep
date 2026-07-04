@@ -74,9 +74,19 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   bare (used by the PDF export in `src/settings/components/ExportDreams` /
   puppeteer). Remounts on window resize via a `key` hack.
 - `StatSymbolChart`: d3 bubble-pack of symbol usage.
-- The range ToggleButtonGroup (7 values, default `3months`, defined in
-  `src/stats/helpers/range.ts`) drives the query window and is remembered in
-  `sessionStorage` — built for issues #6/#7.
+- The range ToggleButtonGroup (`day`/`week`/`month`/`custom`/`all`, default
+  `month`, defined in `src/stats/helpers/range.ts`) drives the query window and is
+  remembered in `sessionStorage` — built for issues #6/#7. `custom` is a from–to
+  window backed by two `DreamDatePicker`s (dream-highlighted, in a `Collapse`
+  under the toggle card). One source of truth for the window:
+  `resolveRangeBounds()` (query `{gte,lte}`, or null for `all`) and
+  `resolveChartWindow()` (inclusive day span for the chart zero-fill) — used by
+  the three query sites (`StaticStatsCharts`, `AdvancedStats`, `SleepChart`) and
+  the two chart helpers (`chartsData`, `sleepChartData`). Preset math is identical
+  to the old inline logic (guarded by `range.test.ts` + the helper tests).
+- `DreamDatePicker`/`DreamCalendarDay` (`src/dreams/components/`): the
+  dream-highlighted calendar day styling, shared by the dreams-page calendar and
+  the stats from–to pickers (dream days tinted, today cyan, selected primary).
 - **Advanced charting** (opt-in via `User.advancedCharting` on Settings): the
   Stats page _replaces_ the static grid with `AdvancedStats` — a search-page-style
   filter panel (live, debounced, no submit) toggled by the "Advanced" button next

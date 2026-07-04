@@ -40,10 +40,10 @@ describe("settings drive the stats page", () => {
     }
   }
 
-  it("shows all 7 range buttons", async () => {
+  it("shows all 5 range buttons (day/week/month/from–to/all)", async () => {
     originalAdvanced = await setCheckboxSetting(page, "advanced-charting")
     originalBedtime = await setCheckboxSetting(page, "bedtime")
-    expect((await statsState()).rangeButtons).toBe(7)
+    expect((await statsState()).rangeButtons).toBe(5)
   })
 
   it("advanced charting OFF -> static charts, no filter form", async () => {

@@ -1,26 +1,27 @@
 import moment from "moment"
 import { Dream, DreamTime, DreamType, Symbol } from "db"
-import { Range, RANGE_TO_DAYS } from "src/stats/helpers/range"
+import { CustomRange, Range, resolveChartWindow } from "src/stats/helpers/range"
 
 // Aggregates a dreams array into the data shapes the stat charts consume.
 // Used by the static Stats grid, the advanced (filtered) facet charts and the PDF export.
-export function setChartsData(range: Range, dreams: (Dream & { symbols: Symbol[] })[]) {
-  const currentMoment = moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-
-  // find the earliest dream date
+export function setChartsData(
+  range: Range,
+  dreams: (Dream & { symbols: Symbol[] })[],
+  custom?: CustomRange | null
+) {
+  // find the earliest dream date (used for the "all" range)
   const earliestDate = dreams.reduce((earliest, dream) => {
     const dreamDate = moment(dream.dreamAt)
     return dreamDate.isBefore(earliest) ? dreamDate : earliest
   }, moment())
 
-  // calculate the number of days between the earliest date and the current date
-  const daysDifference = currentMoment.diff(earliestDate, "days") + 1
+  // inclusive [start, end] day window to zero-fill (end = today for presets, or `to` for custom)
+  const { start: windowStart, end: windowEnd } = resolveChartWindow(range, custom, earliestDate)
 
-  const subtractDays = RANGE_TO_DAYS[range] ?? daysDifference
   const dreamCount = {}
-  if (subtractDays !== null) {
-    const startMoment = currentMoment.clone().subtract(subtractDays, "days")
-    while (startMoment <= currentMoment) {
+  {
+    const startMoment = windowStart.clone()
+    while (startMoment <= windowEnd) {
       dreamCount[startMoment.format("YYYY-MM-DD")] = 0
       startMoment.add(1, "days")
     }
@@ -99,9 +100,9 @@ export function setChartsData(range: Range, dreams: (Dream & { symbols: Symbol[]
   })
 
   // fill in missing days with the middle value (3)
-  if (subtractDays !== null) {
-    const startMoment = currentMoment.clone().subtract(subtractDays, "days")
-    while (startMoment <= currentMoment) {
+  {
+    const startMoment = windowStart.clone()
+    while (startMoment <= windowEnd) {
       const key = startMoment.format("YYYY-MM-DD")
       if (!dailyMood[key]) {
         averageMood.push([moment(key).format("LL"), 3]) // Add the middle value for missing days

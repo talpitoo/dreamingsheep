@@ -10,6 +10,18 @@ export interface StatSymbolChartProps {
   isPdf?: boolean
 }
 
+// grapheme-aware truncation: String.prototype.substring cuts emojis in half
+// (surrogate pairs / ZWJ sequences), which rendered as empty boxes in the bubbles
+function truncateLabel(label: string, maxLength: number): string {
+  const length = Math.max(1, Math.floor(maxLength))
+  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+    const graphemes = [...new Intl.Segmenter().segment(label)].map((segment) => segment.segment)
+    return graphemes.slice(0, length).join("")
+  }
+  // fallback: code points (still keeps surrogate pairs intact)
+  return [...label].slice(0, length).join("")
+}
+
 export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
   const chartRef = useRef<HTMLDivElement>(null)
 
@@ -51,9 +63,13 @@ export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
         .append("text")
         .attr("text-anchor", "middle")
         .attr("dy", ".3em")
-        .attr("font-family", "Arial")
+        // explicit emoji fallbacks — a bare "Arial" left emojis as empty boxes
+        .attr(
+          "font-family",
+          "Arial, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif"
+        )
         .attr("font-size", "11")
-        .text((d) => d.data.symbol.substring(0, d.r / 3))
+        .text((d) => truncateLabel(d.data.symbol, d.r / 3))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])

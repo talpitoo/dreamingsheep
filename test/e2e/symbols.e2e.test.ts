@@ -55,9 +55,11 @@ describe("symbols CRUD", () => {
   it("offers the new symbol in the dream form autocomplete (cross-page effect)", async () => {
     await page.goto(`${BASE}/search`, { waitUntil: "networkidle2" })
     await sleep(2000)
-    await clickButtonWithText(page, "Advanced")
-    await page.waitForSelector('input[placeholder="type to search..."]', { timeout: 15_000 })
-    await page.type('input[placeholder="type to search..."]', name)
+    await clickButtonWithText(page, "Filters")
+    await page.waitForSelector('input[placeholder="type to search symbols..."]', {
+      timeout: 15_000,
+    })
+    await page.type('input[placeholder="type to search symbols..."]', name)
     await sleep(1500)
     const options = await page.evaluate(() =>
       [...document.querySelectorAll('li[role="option"]')].map((option) =>

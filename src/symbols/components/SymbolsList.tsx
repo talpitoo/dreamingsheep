@@ -51,9 +51,15 @@ export const SymbolsList = () => {
 
   useEffect(() => {
     if (!router.query.page && !isLoading && symbolPosition) {
-      router.push({
-        query: { ...router.query, page: Math.ceil(symbolPosition / ITEMS_PER_PAGE) },
-      })
+      // scroll: false — the deep-linked SymbolCard smooth-scrolls itself into view;
+      // the default scroll-to-top would cancel it when the card is already rendered
+      router.push(
+        {
+          query: { ...router.query, page: Math.ceil(symbolPosition / ITEMS_PER_PAGE) },
+        },
+        undefined,
+        { scroll: false }
+      )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, symbolPosition, router])
