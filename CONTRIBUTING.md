@@ -41,6 +41,10 @@ test/e2e/          # Puppeteer end-to-end tests
 - `npm test` — unit tests (Vitest); fast, no DB needed
 - `npm run test:e2e` — puppeteer end-to-end tests; needs a running dev server
   and a seeded DB (details in [README.md](README.md))
+- **Symbol image uploads** don't need real AWS credentials: start the local S3
+  mock with `docker compose -f docker-compose.local.yml up -d` and set the
+  "Local S3 mock" block from [.env.example](.env.example) in your `.env.local`
+  (full walkthrough in [README.md](README.md#-local-dev-services-in-docker-s3-mock--postgresql))
 - CI runs lint, type-check and unit tests on every PR
 - Philosophy (see [#2](https://github.com/talpitoo/dreamingsheep/issues/2)):
   test what actually breaks — edge cases over coverage percentages

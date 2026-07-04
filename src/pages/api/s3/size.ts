@@ -7,6 +7,9 @@ const s3Client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
+  // local S3 mock for development (LocalStack, see issue #13): set e.g.
+  // S3_ENDPOINT=http://localhost:4566 — unset in production, where the real AWS endpoint is used
+  ...(process.env.S3_ENDPOINT && { endpoint: process.env.S3_ENDPOINT, forcePathStyle: true }),
 })
 
 export default api(async (req, res, ctx) => {
