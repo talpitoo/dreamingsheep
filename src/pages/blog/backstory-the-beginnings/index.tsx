@@ -8,17 +8,12 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import Link from "next/link"
 
 const ArticlePageBackstoryTheBeginnings: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Backstory - the beginnings | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -133,7 +128,13 @@ const ArticlePageBackstoryTheBeginnings: BlitzPage = () => {
 
 ArticlePageBackstoryTheBeginnings.authenticate = false
 ArticlePageBackstoryTheBeginnings.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout
+    title="Backstory - the beginnings"
+    description="How 20+ years of lucid dreams, notebooks and monsters-chasing-me nights turned into dreamingsheep — the backstory of an online dream journal."
+    ogCoverImage={ogCoverImageBlog.src}
+  >
+    {page}
+  </Layout>
 )
 
 export default ArticlePageBackstoryTheBeginnings

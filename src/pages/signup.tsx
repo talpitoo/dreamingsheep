@@ -47,6 +47,13 @@ const SignupPage: BlitzPage = () => {
 }
 
 SignupPage.redirectAuthenticatedTo = () => Routes.DreamsPage()
-SignupPage.getLayout = (page) => <Layout title="Sign up">{page}</Layout>
+SignupPage.getLayout = (page) => (
+  <Layout
+    title="Sign up"
+    description="Create a free dreamingsheep account and start journaling your dreams — only an email is needed, no strings (or subscriptions) attached."
+  >
+    {page}
+  </Layout>
+)
 
 export default SignupPage

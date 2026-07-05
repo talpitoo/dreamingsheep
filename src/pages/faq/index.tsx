@@ -210,7 +210,11 @@ const FaqPage: BlitzPage = () => {
 
 FaqPage.authenticate = false
 FaqPage.getLayout = (page) => (
-  <Layout title="FAQ" ogCoverImage={ogCoverImageFaq.src}>
+  <Layout
+    title="FAQ"
+    description="Frequently asked questions about dreamingsheep — privacy, dream statistics, symbols, lucid dreams, and why the dream journal is free (forever)."
+    ogCoverImage={ogCoverImageFaq.src}
+  >
     {page}
   </Layout>
 )

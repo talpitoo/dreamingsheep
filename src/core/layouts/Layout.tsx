@@ -14,6 +14,7 @@ import faviconApple from "public/assets/apple-icon.png"
 
 type LayoutProps = {
   title?: string
+  description?: string
   ogCoverImage?: string
   ogCoverImageSecondary?: string
   children: ReactNode
@@ -28,6 +29,7 @@ const absoluteUrl = (path: string) => (path.startsWith("http") ? path : `${DOMAI
 
 const Layout = ({
   title,
+  description,
   ogCoverImage,
   ogCoverImageSecondary,
   children,
@@ -36,6 +38,7 @@ const Layout = ({
   const router = useRouter()
   const ogImage = absoluteUrl(ogCoverImage ? ogCoverImage : ogCoverImageDefault.src)
   const pageTitle = title ? `${title} | dreamingsheep` : "dreamingsheep"
+  const pageDescription = description || DESCRIPTION
   // bare domain + query-less path: one canonical per page, no ?utm_/?page= duplicates,
   // and it reasserts the non-www preference on every page
   const canonicalUrl = `${DOMAIN}${(router.asPath ?? "/").split("?")[0]?.split("#")[0]}`
@@ -44,12 +47,12 @@ const Layout = ({
     <Fragment>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={DESCRIPTION} />
+        <meta name="description" content={pageDescription} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:site_name" content="dreamingsheep" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={canonicalUrl} />
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="icon" href="/favicon.ico" />

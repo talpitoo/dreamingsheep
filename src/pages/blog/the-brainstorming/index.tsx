@@ -1,4 +1,3 @@
-import Head from "next/head"
 import Image from "next/image"
 import { Fragment, Suspense } from "react"
 import Layout from "src/core/layouts/Layout"
@@ -14,10 +13,6 @@ import { BlitzPage } from "@blitzjs/next"
 const ArticlePageTheBrainstorming: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>The brainstorming | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -115,7 +110,12 @@ const ArticlePageTheBrainstorming: BlitzPage = () => {
 
 ArticlePageTheBrainstorming.authenticate = false
 ArticlePageTheBrainstorming.getLayout = (page) => (
-  <Layout ogCoverImage={blogBrainstorming.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="The brainstorming"
+    description="Designing the go-to dream journal for dreamers of all colors: generic enough for every use case, opinionated enough to stay simple and fun."
+    ogCoverImage={blogBrainstorming.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

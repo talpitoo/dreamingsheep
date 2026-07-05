@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import blogMatrixSheep from "public/assets/sheep-matrix.jpg"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>dreamingsheep is now open source | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -161,7 +156,12 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
 
 ArticlePageDreamingsheepIsNowOpenSource.authenticate = false
 ArticlePageDreamingsheepIsNowOpenSource.getLayout = (page) => (
-  <Layout ogCoverImage={blogMatrixSheep.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="dreamingsheep is now open source"
+    description="dreamingsheep took the red pill and went open source: read, study and contribute to the dream journal's code on GitHub."
+    ogCoverImage={blogMatrixSheep.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

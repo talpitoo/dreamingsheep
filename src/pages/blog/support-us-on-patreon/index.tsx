@@ -1,4 +1,3 @@
-import Head from "next/head"
 import Image from "next/image"
 import Link from "next/link"
 import { Fragment, Suspense } from "react"
@@ -15,10 +14,6 @@ import { BlitzPage } from "@blitzjs/next"
 const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Support us on Patreon | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -136,7 +131,12 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
 
 ArticlePageSupportUsOnPatreon.authenticate = false
 ArticlePageSupportUsOnPatreon.getLayout = (page) => (
-  <Layout ogCoverImage={blogPatreon.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="Support us on Patreon"
+    description="Why dreamingsheep is free forever — no subscriptions, no ads. If you'd like to keep the dream journal caffeinated, there's Patreon."
+    ogCoverImage={blogPatreon.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

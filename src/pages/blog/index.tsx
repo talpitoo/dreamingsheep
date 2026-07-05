@@ -125,7 +125,11 @@ const BlogPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
 
 BlogPage.authenticate = false
 BlogPage.getLayout = (page) => (
-  <Layout title="Blog" ogCoverImage={ogCoverImageBlog.src}>
+  <Layout
+    title="Blog"
+    description="Sheep-sized news from the dreamingsheep meadow: release notes, use cases, and the story of how an online dream journal came to be."
+    ogCoverImage={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )
