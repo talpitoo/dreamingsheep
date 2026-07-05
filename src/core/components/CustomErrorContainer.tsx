@@ -1,3 +1,4 @@
+import Head from "next/head"
 import Image from "next/image"
 import { ReactNode } from "react"
 import { Container, Grid, Box } from "@mui/material"
@@ -15,6 +16,11 @@ interface CustomErrorContainerProps {
 const CustomErrorContainer = ({ children }: CustomErrorContainerProps) => {
   return (
     <Container>
+      {/* error states must never be indexed — Google once indexed a transient
+          "499: Client Closed Request" render as the homepage snippet */}
+      <Head>
+        <meta name="robots" content="noindex" />
+      </Head>
       <Grid container>
         <Grid item md={2} />
         <Grid item xs={12} sm={6} md={4}>

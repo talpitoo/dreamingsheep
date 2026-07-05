@@ -90,6 +90,11 @@ function RootErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     return (
       <Layout>
         <Container>
+          {/* error/login fallback states must never be indexed (the other branches
+              get this via CustomErrorContainer) */}
+          <Head>
+            <meta name="robots" content="noindex" />
+          </Head>
           <Grid container sx={{ mb: 2 }}>
             <Grid container item sm={12} justifyContent="center">
               <Alert severity="warning">Your session expired. Please log in</Alert>
