@@ -178,7 +178,8 @@ ArticlePageLifePurposeMilestoneOne.getLayout = (page) => (
   <Layout
     title="Life purpose, milestone #1"
     description="After 20+ years of hard procrastination and casual work, dreamingsheep is finally online — the dream journal reaches milestone #1."
-    ogCoverImage={ogCoverImageBlog.src}
+    ogCoverImage="https://images.tothtamas.tt/weblog/iceland/toth-tamas-iceland-11.jpg"
+    ogCoverImageSecondary={ogCoverImageBlog.src}
   >
     {page}
   </Layout>

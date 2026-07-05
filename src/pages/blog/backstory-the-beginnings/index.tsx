@@ -131,7 +131,8 @@ ArticlePageBackstoryTheBeginnings.getLayout = (page) => (
   <Layout
     title="Backstory - the beginnings"
     description="How 20+ years of lucid dreams, notebooks and monsters-chasing-me nights turned into dreamingsheep — the backstory of an online dream journal."
-    ogCoverImage={ogCoverImageBlog.src}
+    ogCoverImage="https://images.pexels.com/photos/4506259/pexels-photo-4506259.jpeg?w=1472"
+    ogCoverImageSecondary={ogCoverImageBlog.src}
   >
     {page}
   </Layout>
