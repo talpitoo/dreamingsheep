@@ -1,5 +1,6 @@
 import { gSSP } from "src/blitz-server"
 import Link from "next/link"
+import Head from "next/head"
 import Image from "next/image"
 import { InferGetServerSidePropsType } from "next"
 import { useRouter } from "next/router"
@@ -17,6 +18,22 @@ import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { Fragment, Suspense } from "react"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 
+// structured data for search engines — kept to plain facts, no review/rating fluff
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "dreamingsheep",
+  url: "https://dreamingsheep.net/",
+  description: "dreamingsheep, an online journal for your dreams and beyond",
+  applicationCategory: "LifestyleApplication",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+}
+
 const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   lastMonthDreamsCount,
   lastMonthLucidCount,
@@ -27,6 +44,12 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 
   return (
     <Fragment>
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
+      </Head>
       <Container>
         <Suspense
           fallback={

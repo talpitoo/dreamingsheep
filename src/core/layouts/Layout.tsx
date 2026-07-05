@@ -1,4 +1,5 @@
 import Head from "next/head"
+import { useRouter } from "next/router"
 import Footer from "src/core/layouts/Footer"
 import Header from "src/core/layouts/Header"
 import React, { Fragment, ReactNode, Suspense } from "react"
@@ -19,7 +20,11 @@ type LayoutProps = {
   childrenContainerClassName?: string
 }
 
-// const domain = 'https://dreamingsheep.net/' // TODO (future-feature): incorporate domain
+const DOMAIN = "https://dreamingsheep.net"
+const DESCRIPTION = "dreamingsheep, an online journal for your dreams and beyond"
+
+// social scrapers (Facebook, LinkedIn, WhatsApp, ...) silently drop relative og:image URLs
+const absoluteUrl = (path: string) => (path.startsWith("http") ? path : `${DOMAIN}${path}`)
 
 const Layout = ({
   title,
@@ -28,17 +33,25 @@ const Layout = ({
   children,
   childrenContainerClassName,
 }: LayoutProps) => {
-  // const ogImage = ogCoverImage ? `${domain}${ogCoverImage}` : `${domain}${ogCoverImageDefault.src}` // TODO (future-feature): incorporate domain
-  const ogImage = ogCoverImage ? ogCoverImage : ogCoverImageDefault.src
+  const router = useRouter()
+  const ogImage = absoluteUrl(ogCoverImage ? ogCoverImage : ogCoverImageDefault.src)
+  const pageTitle = title ? `${title} | dreamingsheep` : "dreamingsheep"
+  // bare domain + query-less path: one canonical per page, no ?utm_/?page= duplicates,
+  // and it reasserts the non-www preference on every page
+  const canonicalUrl = `${DOMAIN}${(router.asPath ?? "/").split("?")[0]?.split("#")[0]}`
 
   return (
     <Fragment>
       <Head>
-        <title>{`${title ? title + " | dreamingsheep" : "dreamingsheep"}`}</title>
-        <meta
-          name="description"
-          content="dreamingsheep, an online journal for your dreams and beyond"
-        />
+        <title>{pageTitle}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:site_name" content="dreamingsheep" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" href={faviconApple.src} type="image/png" />
         {/* <link rel="icon" href={faviconSvg.src} type="image/svg+xml" />
@@ -56,8 +69,8 @@ const Layout = ({
         <meta property="og:image:height" content="630" />
         {ogCoverImageSecondary && (
           <>
-            <meta property="og:image" content={ogCoverImageSecondary} />
-            <meta property="twitter:image" content={ogCoverImageSecondary} />
+            <meta property="og:image" content={absoluteUrl(ogCoverImageSecondary)} />
+            <meta property="twitter:image" content={absoluteUrl(ogCoverImageSecondary)} />
           </>
         )}
         <noscript>
