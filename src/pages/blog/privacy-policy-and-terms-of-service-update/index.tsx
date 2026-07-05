@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import sheepPrivacy from "public/assets/sheep-privacy.png"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Privacy Policy and Terms of Service update | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -130,7 +125,12 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
 
 ArticlePagePrivacyPolicyAndTermsOfServiceUpdate.authenticate = false
 ArticlePagePrivacyPolicyAndTermsOfServiceUpdate.getLayout = (page) => (
-  <Layout ogCoverImage={sheepPrivacy.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="Privacy Policy and Terms of Service update"
+    description="We updated the Privacy Policy and added Terms of Service — nothing changed about what dreamingsheep collects, it's just properly documented."
+    ogCoverImage={sheepPrivacy.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

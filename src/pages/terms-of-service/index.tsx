@@ -247,6 +247,13 @@ const TermsOfServicePage: BlitzPage = () => {
 }
 
 TermsOfServicePage.authenticate = false
-TermsOfServicePage.getLayout = (page) => <Layout title="Terms of Service">{page}</Layout>
+TermsOfServicePage.getLayout = (page) => (
+  <Layout
+    title="Terms of Service"
+    description="The ground rules for using dreamingsheep, the online dream journal — in plain language, with the occasional footnote."
+  >
+    {page}
+  </Layout>
+)
 
 export default TermsOfServicePage

@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import blogUseCaseOneCustomDrawing from "public/assets/blog-the-floating-island-by-araiko-o.jpg"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Use case one: Custom drawing | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -117,6 +112,8 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
 ArticlePageUseCaseOneCustomDrawing.authenticate = false
 ArticlePageUseCaseOneCustomDrawing.getLayout = (page) => (
   <Layout
+    title="Use case one: Custom drawing"
+    description="Some dreams defy words. With custom symbols you can attach your own drawings or images to dream entries and capture their essence precisely."
     ogCoverImage={blogUseCaseOneCustomDrawing.src}
     ogCoverImageSecondary={ogCoverImageBlog.src}
   >

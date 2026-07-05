@@ -1,5 +1,4 @@
 import { Routes } from ".blitz"
-import Head from "next/head"
 import Image from "next/image"
 import Link from "next/link"
 import { Fragment, Suspense } from "react"
@@ -16,10 +15,6 @@ import { BlitzPage } from "@blitzjs/next"
 const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Life purpose, milestone #1 | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -180,7 +175,13 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
 
 ArticlePageLifePurposeMilestoneOne.authenticate = false
 ArticlePageLifePurposeMilestoneOne.getLayout = (page) => (
-  <Layout ogCoverImage={ogCoverImageBlog.src}>{page}</Layout>
+  <Layout
+    title="Life purpose, milestone #1"
+    description="After 20+ years of hard procrastination and casual work, dreamingsheep is finally online — the dream journal reaches milestone #1."
+    ogCoverImage={ogCoverImageBlog.src}
+  >
+    {page}
+  </Layout>
 )
 
 export default ArticlePageLifePurposeMilestoneOne

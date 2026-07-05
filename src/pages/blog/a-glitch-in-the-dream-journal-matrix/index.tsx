@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import blogMaintenance from "public/assets/blog-sheep-bliss-by-lucifer-enterprises.jpg"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>A glitch in the dream journal matrix | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -112,7 +107,12 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
 
 ArticlePageAGlitchInTheDreamJournalMatrix.authenticate = false
 ArticlePageAGlitchInTheDreamJournalMatrix.getLayout = (page) => (
-  <Layout ogCoverImage={blogMaintenance.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="A glitch in the dream journal matrix"
+    description="A database-level bug bumped dreamingsheep to v2.0.0 — what glitched in the dream journal matrix, and how your dreams slept through it."
+    ogCoverImage={blogMaintenance.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

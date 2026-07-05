@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import sheepStats from "public/assets/sheep-stats.png"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Use case three: Off the charts | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -149,7 +144,12 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
 
 ArticlePageUseCaseThreeOffTheCharts.authenticate = false
 ArticlePageUseCaseThreeOffTheCharts.getLayout = (page) => (
-  <Layout ogCoverImage={sheepStats.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="Use case three: Off the charts"
+    description="Interactive stats have arrived: flip one switch in Settings and your dream charts become a criss-cross laboratory of symbols and filters."
+    ogCoverImage={sheepStats.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

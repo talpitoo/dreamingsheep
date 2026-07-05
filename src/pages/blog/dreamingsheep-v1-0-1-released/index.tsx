@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import blogDna from "public/assets/blog-dna.gif"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>dreamingsheep v1.0.1 released | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -132,7 +127,12 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
 
 ArticlePageDreamingsheepV101Released.authenticate = false
 ArticlePageDreamingsheepV101Released.getLayout = (page) => (
-  <Layout ogCoverImage={blogDna.src} ogCoverImageSecondary={ogCoverImageBlog.src}>
+  <Layout
+    title="dreamingsheep v1.0.1 released"
+    description="dreamingsheep v1.0.1 is live: the dream journal's DNS — ahem, DNA — has officially come to life on the production server."
+    ogCoverImage={blogDna.src}
+    ogCoverImageSecondary={ogCoverImageBlog.src}
+  >
     {page}
   </Layout>
 )

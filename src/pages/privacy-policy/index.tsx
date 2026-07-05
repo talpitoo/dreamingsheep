@@ -341,7 +341,11 @@ const PrivacyPolicyPage: BlitzPage = () => {
 
 PrivacyPolicyPage.authenticate = false
 PrivacyPolicyPage.getLayout = (page) => (
-  <Layout title="Privacy policy" ogCoverImage={ogCoverImagePrivacyPolicy.src}>
+  <Layout
+    title="Privacy policy"
+    description="dreamingsheep collects only your email and your dream entries. Dreams stay private to you, and you can export or delete everything from Settings."
+    ogCoverImage={ogCoverImagePrivacyPolicy.src}
+  >
     {page}
   </Layout>
 )

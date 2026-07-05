@@ -8,7 +8,6 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { BlitzPage } from "@blitzjs/next"
-import Head from "next/head"
 import Image from "next/image"
 import blogUseCaseTwoAddToHomeScreen from "public/assets/blog-add-to-home-screen.jpg"
 import Link from "next/link"
@@ -16,10 +15,6 @@ import Link from "next/link"
 const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
   return (
     <Fragment>
-      <Head>
-        <title>Use case two: Add to home screen | dreamingsheep</title>
-      </Head>
-
       <Container>
         <Suspense
           fallback={
@@ -118,6 +113,8 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
 ArticlePageUseCaseTwoAddToHomeScreen.authenticate = false
 ArticlePageUseCaseTwoAddToHomeScreen.getLayout = (page) => (
   <Layout
+    title="Use case two: Add to home screen"
+    description="Add dreamingsheep to your home screen and use the dream journal like an app — minus the tracking that usually comes with the app ecosystem."
     ogCoverImage={blogUseCaseTwoAddToHomeScreen.src}
     ogCoverImageSecondary={ogCoverImageBlog.src}
   >
