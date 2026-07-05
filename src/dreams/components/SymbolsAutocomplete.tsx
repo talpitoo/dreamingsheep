@@ -18,7 +18,9 @@ function label(options: Symbol[]): PartialSymbol[] {
   }))
 }
 
-export const SymbolsAutocomplete = () => {
+// allowCreate: only the dream create/edit form may offer the `Add "…"` instant-symbol
+// option; the search/stats filter panels pick from existing symbols only
+export const SymbolsAutocomplete = ({ allowCreate = false }: { allowCreate?: boolean }) => {
   const user = useCurrentUser()
   const { setValues: setDialogValue, toggleDialog, state } = useInstantDreamDialog()
   const [, setCb] = state
@@ -46,7 +48,7 @@ export const SymbolsAutocomplete = () => {
           value={field.value}
           id="tags-filled"
           options={label(symbols)}
-          freeSolo
+          freeSolo={allowCreate}
           autoHighlight
           handleHomeEndKeys
           loading={isLoading}
@@ -102,7 +104,7 @@ export const SymbolsAutocomplete = () => {
             const filtered = filter(options, params)
 
             const isExisting = options.some((option) => params.inputValue === option.name)
-            if (params.inputValue !== "" && !isExisting) {
+            if (allowCreate && params.inputValue !== "" && !isExisting) {
               // @ts-expect-error type mismatch
               filtered.push({ inputValue: params.inputValue, name: `Add "${params.inputValue}"` })
             }

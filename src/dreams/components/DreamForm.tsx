@@ -88,7 +88,7 @@ export function DreamForm<S extends z.ZodType<any, any>>(props: FormProps<S>) {
             />
 
             <Suspense fallback={<LoadingSpiral />}>
-              <SymbolsAutocomplete />
+              <SymbolsAutocomplete allowCreate />
             </Suspense>
           </Fragment>
         )}

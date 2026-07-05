@@ -8,11 +8,13 @@ import {
   Box,
   Button,
   ClickAwayListener,
+  Collapse,
   InputAdornment,
   Menu,
   MenuItem,
   TextField,
   Toolbar,
+  useMediaQuery,
 } from "@mui/material"
 import logout from "src/auth/mutations/logout"
 import React, { Fragment, useEffect, useState } from "react"
@@ -31,6 +33,9 @@ export function Header() {
   const [query, setQuery] = useState(router.query.q ?? "")
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
+  // noSsr: the header only renders with a session (client-side), so resolve the
+  // breakpoint immediately instead of a false-then-true double render
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true })
 
   function handleMenu(event: React.MouseEvent<HTMLElement>) {
     setAnchorEl(event.currentTarget)
@@ -100,12 +105,10 @@ export function Header() {
               className="py-3 translate-x-0 translate-y-0 transform-gpu"
               sx={{
                 minHeight: { xs: "80px" },
-                ...(expanded && {
-                  flexDirection: { xs: "column", md: "row" },
-                }),
-                ...(!expanded && {
-                  flexDirection: "row",
-                }),
+                // below md the mobile menu is a full-width Collapse that wraps to its own
+                // line; md+ must stay nowrap like before, otherwise the nav wraps under
+                // the logo at borderline widths instead of squeezing onto one row
+                flexWrap: { xs: "wrap", md: "nowrap" },
               }}
             >
               <div className="absolute top-0 left-0">
@@ -124,12 +127,9 @@ export function Header() {
               <Box
                 className="flex-grow mr-8"
                 sx={{
-                  ...(expanded && {
-                    marginLeft: { xs: "0", md: `${SQUARE_LOGO_SIZE - 30}px` },
-                  }),
-                  ...(!expanded && {
-                    marginLeft: `${SQUARE_LOGO_SIZE - 30}px`,
-                  }),
+                  // on xs the box is empty (title hidden or absolutely positioned),
+                  // so the logo offset only matters from md up
+                  marginLeft: { xs: "0", md: `${SQUARE_LOGO_SIZE - 30}px` },
                 }}
               >
                 <Link href={Routes.Home()} passHref={true}>
@@ -176,256 +176,214 @@ export function Header() {
                 </Button>
               </Fragment>
 
-              <Box
-                sx={{
-                  ...(expanded && {
-                    marginTop: { xs: "8.5rem", md: "0" },
+              {/* Collapse (same animation as the search/stats filter panels) slides the
+                  mobile menu open/closed; on md+ it's permanently open, so the desktop
+                  nav renders exactly as before */}
+              <Collapse in={expanded || isDesktop} sx={{ width: { xs: "100%", md: "auto" } }}>
+                <Box
+                  sx={{
+                    // padding (not margin — margins don't count into Collapse's measured
+                    // height) clears the absolutely positioned title image on mobile
+                    paddingTop: { xs: "8.5rem", md: 0 },
                     display: { xs: "grid", md: "flex" },
                     flexDirection: { xs: "column", md: "row" },
                     alignItems: { xs: "start", md: "center" },
                     width: { xs: "100%", md: "auto" },
-                  }),
-                  ...(!expanded && {
-                    marginTop: "0",
-                    display: { xs: "none", md: "flex" },
-                    flexDirection: "row",
-                    alignItems: "center",
-                    width: "auto",
-                  }),
-                }}
-              >
-                <Link href={Routes.DreamsPage()} passHref={true}>
-                  <Button
-                    sx={{
-                      flexShrink: 0,
-                      ...(expanded && {
+                  }}
+                >
+                  <Link href={Routes.DreamsPage()} passHref={true}>
+                    <Button
+                      sx={{
+                        flexShrink: 0,
                         mr: { xs: 0, md: 2 },
-                      }),
-                      ...(!expanded && {
-                        mr: 2,
-                      }),
-                      "&:hover": { textDecoration: "none !important" },
-                      backgroundColor:
-                        Routes.DreamsPage().pathname === router.pathname
+                        "&:hover": { textDecoration: "none !important" },
+                        backgroundColor:
+                          Routes.DreamsPage().pathname === router.pathname
+                            ? "lightgray !important"
+                            : "transparent",
+                      }}
+                      color="inherit"
+                      onClick={collapseMobileMenu}
+                      className="w-full md:w-auto text-[#202020]"
+                    >
+                      Dreams
+                    </Button>
+                  </Link>
+                  <Link href={Routes.SymbolsPage()} passHref={true}>
+                    <Button
+                      sx={{
+                        flexShrink: 0,
+                        mr: { xs: 0, md: 2 },
+                        "&:hover": { textDecoration: "none !important" },
+                        backgroundColor:
+                          Routes.SymbolsPage().pathname === router.pathname
+                            ? "lightgray !important"
+                            : "transparent",
+                      }}
+                      color="inherit"
+                      onClick={collapseMobileMenu}
+                      className="w-full md:w-auto text-[#202020]"
+                    >
+                      Symbols
+                    </Button>
+                  </Link>
+                  <Link href={Routes.StatsPage()} passHref={true}>
+                    <Button
+                      sx={{
+                        flexShrink: 0,
+                        mr: { xs: 0, md: 2 },
+                        "&:hover": { textDecoration: "none !important" },
+                        backgroundColor:
+                          Routes.StatsPage().pathname === router.pathname
+                            ? "lightgray !important"
+                            : "transparent",
+                      }}
+                      color="inherit"
+                      onClick={collapseMobileMenu}
+                      className="w-full md:w-auto text-[#202020]"
+                    >
+                      Stats
+                    </Button>
+                  </Link>
+                  <Link href={Routes.FaqPage()} passHref={true}>
+                    <Button
+                      sx={{
+                        flexShrink: 0,
+                        mr: { xs: 0, md: 2 },
+                        "&:hover": { textDecoration: "none !important" },
+                        backgroundColor:
+                          Routes.FaqPage().pathname === router.pathname
+                            ? "lightgray !important"
+                            : "transparent",
+                      }}
+                      color="inherit"
+                      onClick={collapseMobileMenu}
+                      className="w-full md:w-auto text-[#202020]"
+                    >
+                      FAQ
+                    </Button>
+                  </Link>
+                  <Link href={Routes.BlogPage()} passHref={true}>
+                    <Button
+                      sx={{
+                        flexShrink: 0,
+                        mr: { xs: 0, md: 2 },
+                        "&:hover": { textDecoration: "none !important" },
+                        backgroundColor: router.pathname.startsWith(Routes.BlogPage().pathname)
                           ? "lightgray !important"
                           : "transparent",
-                    }}
-                    color="inherit"
-                    onClick={collapseMobileMenu}
-                    className="w-full md:w-auto text-[#202020]"
-                  >
-                    Dreams
-                  </Button>
-                </Link>
-                <Link href={Routes.SymbolsPage()} passHref={true}>
-                  <Button
+                      }}
+                      color="inherit"
+                      onClick={collapseMobileMenu}
+                      className="w-full md:w-auto text-[#202020]"
+                    >
+                      Blog
+                    </Button>
+                  </Link>
+                  <TextField
                     sx={{
-                      flexShrink: 0,
-                      ...(expanded && {
-                        mr: { xs: 0, md: 2 },
-                      }),
-                      ...(!expanded && {
-                        mr: 2,
-                      }),
-                      "&:hover": { textDecoration: "none !important" },
-                      backgroundColor:
-                        Routes.SymbolsPage().pathname === router.pathname
-                          ? "lightgray !important"
-                          : "transparent",
-                    }}
-                    color="inherit"
-                    onClick={collapseMobileMenu}
-                    className="w-full md:w-auto text-[#202020]"
-                  >
-                    Symbols
-                  </Button>
-                </Link>
-                <Link href={Routes.StatsPage()} passHref={true}>
-                  <Button
-                    sx={{
-                      flexShrink: 0,
-                      ...(expanded && {
-                        mr: { xs: 0, md: 2 },
-                      }),
-                      ...(!expanded && {
-                        mr: 2,
-                      }),
-                      "&:hover": { textDecoration: "none !important" },
-                      backgroundColor:
-                        Routes.StatsPage().pathname === router.pathname
-                          ? "lightgray !important"
-                          : "transparent",
-                    }}
-                    color="inherit"
-                    onClick={collapseMobileMenu}
-                    className="w-full md:w-auto text-[#202020]"
-                  >
-                    Stats
-                  </Button>
-                </Link>
-                <Link href={Routes.FaqPage()} passHref={true}>
-                  <Button
-                    sx={{
-                      flexShrink: 0,
-                      ...(expanded && {
-                        mr: { xs: 0, md: 2 },
-                      }),
-                      ...(!expanded && {
-                        mr: 2,
-                      }),
-                      "&:hover": { textDecoration: "none !important" },
-                      backgroundColor:
-                        Routes.FaqPage().pathname === router.pathname
-                          ? "lightgray !important"
-                          : "transparent",
-                    }}
-                    color="inherit"
-                    onClick={collapseMobileMenu}
-                    className="w-full md:w-auto text-[#202020]"
-                  >
-                    FAQ
-                  </Button>
-                </Link>
-                <Link href={Routes.BlogPage()} passHref={true}>
-                  <Button
-                    sx={{
-                      flexShrink: 0,
-                      ...(expanded && {
-                        mr: { xs: 0, md: 2 },
-                      }),
-                      ...(!expanded && {
-                        mr: 2,
-                      }),
-                      "&:hover": { textDecoration: "none !important" },
-                      backgroundColor: router.pathname.startsWith(Routes.BlogPage().pathname)
-                        ? "lightgray !important"
-                        : "transparent",
-                    }}
-                    color="inherit"
-                    onClick={collapseMobileMenu}
-                    className="w-full md:w-auto text-[#202020]"
-                  >
-                    Blog
-                  </Button>
-                </Link>
-                <TextField
-                  sx={{
-                    ...(expanded && {
                       mr: { xs: 0, md: 2 },
                       mb: { xs: 2, md: 0 },
                       order: { xs: -1, md: "unset" },
-                    }),
-                    ...(!expanded && {
-                      mr: 2,
-                      mb: 0,
-                    }),
-                  }}
-                  className="translate-x-0 translate-y-0 transform-gpu"
-                  // InputLabelProps={{ shrink: true, disableAnimation: true }}
-                  // variant="outlined"
-                  placeholder="Search..."
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && onSearchSubmit()}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Search />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <Link href={Routes.SettingsPage()} passHref={true} className="hover:!no-underline">
+                    }}
+                    className="translate-x-0 translate-y-0 transform-gpu"
+                    // InputLabelProps={{ shrink: true, disableAnimation: true }}
+                    // variant="outlined"
+                    placeholder="Search..."
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && onSearchSubmit()}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <Link
+                    href={Routes.SettingsPage()}
+                    passHref={true}
+                    className="hover:!no-underline"
+                  >
+                    <Button
+                      sx={{
+                        mr: { xs: 0, md: 2 },
+                        // mobile-menu-only entry; the desktop nav has the account dropdown instead
+                        display: { xs: "flex", md: "none" },
+                        "&:hover": { textDecoration: "none !important" },
+                        backgroundColor:
+                          Routes.SettingsPage().pathname === router.pathname
+                            ? "lightgray !important"
+                            : "transparent",
+                      }}
+                      color="inherit"
+                      onClick={collapseMobileMenu}
+                      className="w-full md:w-auto text-[#202020]"
+                    >
+                      Settings
+                    </Button>
+                  </Link>
                   <Button
                     sx={{
-                      ...(expanded && {
-                        mr: { xs: 0, md: 2 },
-                        display: { xs: "flex", md: "none" },
-                      }),
-                      ...(!expanded && {
-                        display: "none",
-                      }),
-                      "&:hover": { textDecoration: "none !important" },
+                      mr: { xs: 0, md: 2 },
+                      mb: { xs: 1, sm: 2, md: 0 },
+                      // mobile-menu-only entry; the desktop nav has the account dropdown instead
+                      display: { xs: "flex", md: "none" },
+                    }}
+                    color="inherit"
+                    onClick={handleLogout}
+                  >
+                    <Logout />
+                    <Box sx={{ ml: ".5rem" }}>Sign out</Box>
+                  </Button>
+
+                  <Button
+                    aria-label="Account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleMenu}
+                    color="inherit"
+                    endIcon={<ExpandMore />}
+                    sx={{
                       backgroundColor:
                         Routes.SettingsPage().pathname === router.pathname
                           ? "lightgray !important"
                           : "transparent",
-                    }}
-                    color="inherit"
-                    onClick={collapseMobileMenu}
-                    className="w-full md:w-auto text-[#202020]"
-                  >
-                    Settings
-                  </Button>
-                </Link>
-                <Button
-                  sx={{
-                    ...(expanded && {
-                      mr: { xs: 0, md: 2 },
-                      mb: { xs: 1, sm: 2, md: 0 },
-                      display: { xs: "flex", md: "none" },
-                    }),
-                    ...(!expanded && {
-                      display: "none",
-                    }),
-                  }}
-                  color="inherit"
-                  onClick={handleLogout}
-                >
-                  <Logout />
-                  <Box sx={{ ml: ".5rem" }}>Sign out</Box>
-                </Button>
-
-                <Button
-                  aria-label="Account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleMenu}
-                  color="inherit"
-                  endIcon={<ExpandMore />}
-                  sx={{
-                    backgroundColor:
-                      Routes.SettingsPage().pathname === router.pathname
-                        ? "lightgray !important"
-                        : "transparent",
-                    ...(expanded && {
                       display: { xs: "none", md: "flex" },
-                    }),
-                    ...(!expanded && {
-                      display: "flex",
-                    }),
-                  }}
-                >
-                  <Box className="account-dropdown">{session.username}</Box>
-                </Button>
+                    }}
+                  >
+                    <Box className="account-dropdown">{session.username}</Box>
+                  </Button>
 
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                  disableScrollLock={true}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      router.push(Routes.SettingsPage())
-                      handleClose()
-                    }}
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    disableScrollLock={true}
                   >
-                    <Settings />
-                    <Box sx={{ ml: ".5rem" }}>Settings</Box>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={async () => {
-                      handleClose()
-                      await handleLogout()
-                    }}
-                  >
-                    <Logout />
-                    <Box sx={{ ml: ".5rem" }}>Sign out</Box>
-                  </MenuItem>
-                </Menu>
-              </Box>
+                    <MenuItem
+                      onClick={() => {
+                        router.push(Routes.SettingsPage())
+                        handleClose()
+                      }}
+                    >
+                      <Settings />
+                      <Box sx={{ ml: ".5rem" }}>Settings</Box>
+                    </MenuItem>
+                    <MenuItem
+                      onClick={async () => {
+                        handleClose()
+                        await handleLogout()
+                      }}
+                    >
+                      <Logout />
+                      <Box sx={{ ml: ".5rem" }}>Sign out</Box>
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              </Collapse>
             </Toolbar>
           </AppBar>
         </ClickAwayListener>
