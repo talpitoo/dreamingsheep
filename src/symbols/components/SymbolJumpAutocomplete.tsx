@@ -1,31 +1,54 @@
 import { useQuery } from "@blitzjs/rpc"
 import { useRouter } from "next/router"
 import { Routes } from "@blitzjs/next"
-import { Autocomplete, Box, Paper, TextField } from "@mui/material"
+import {
+  Autocomplete,
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material"
 import { Symbol } from "db"
 import React from "react"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
 import getAutocompleteSymbols from "src/symbols/queries/getAutocompleteSymbols"
 
+interface SymbolJumpAutocompleteProps {
+  customOnly: boolean
+  onCustomOnlyChange: (checked: boolean) => void
+}
+
 // quick jump on the paginated Symbols page: picking a symbol navigates to
 // /symbols?id=<id>, which resolves its page and expands the card — the same
-// flow as following a symbol link from a dream
-export const SymbolJumpAutocomplete = () => {
+// flow as following a symbol link from a dream. The "custom symbols only"
+// checkbox hides the opted-in predefined/built-in symbols from the list below,
+// and from these options too — a jump target must exist in the filtered list,
+// or its page position could never resolve
+export const SymbolJumpAutocomplete = ({
+  customOnly,
+  onCustomOnlyChange,
+}: SymbolJumpAutocompleteProps) => {
   const user = useCurrentUser()
   const router = useRouter()
   const [{ symbols }, { isLoading }] = useQuery(
     getAutocompleteSymbols,
     {
       orderBy: { name: "asc" },
-      where: { OR: [{ relatedTo: { some: { id: user?.id } } }, { authorId: user?.id }] },
+      where: customOnly
+        ? { authorId: user?.id }
+        : { OR: [{ relatedTo: { some: { id: user?.id } } }, { authorId: user?.id }] },
       take: 200,
     },
-    { queryKey: ["get-symbols-autocomplete"] }
+    // the explicit key must include the filter, or toggling it would serve stale options
+    { queryKey: ["get-symbols-autocomplete", customOnly] }
   )
 
   return (
-    <Paper sx={{ mb: 7, p: 1 }}>
+    <Paper sx={{ mb: 7, p: 1, display: "flex", flexWrap: "wrap", alignItems: "center" }}>
       <Autocomplete
+        sx={{ flexGrow: 1, minWidth: "12rem" }}
         options={symbols as Symbol[]}
         autoHighlight
         handleHomeEndKeys
@@ -62,6 +85,17 @@ export const SymbolJumpAutocomplete = () => {
             InputProps={{ ...params.InputProps, disableUnderline: true }}
           />
         )}
+      />
+      <FormControlLabel
+        sx={{ mx: 0, whiteSpace: "nowrap" }}
+        control={
+          <Checkbox
+            size="small"
+            checked={customOnly}
+            onChange={(_, checked) => onCustomOnlyChange(checked)}
+          />
+        }
+        label={<Typography variant="body2">custom symbols only</Typography>}
       />
     </Paper>
   )

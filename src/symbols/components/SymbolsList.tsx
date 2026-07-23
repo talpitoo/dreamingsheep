@@ -7,7 +7,7 @@ import { Pagination, Paper, Box, Typography } from "@mui/material"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 
-export const SymbolsList = () => {
+export const SymbolsList = ({ customOnly }: { customOnly: boolean }) => {
   const router = useRouter()
   const [editSymbolId, setEditSymbolId] = useState<number | null>(null)
   const page = Number(router.query.page) || 1
@@ -19,6 +19,7 @@ export const SymbolsList = () => {
       take: ITEMS_PER_PAGE,
       // deep link from a dream carries only the symbol id — ask the server which page it lives on
       positionOfId: !router.query.page && deepLinkedSymbolId ? deepLinkedSymbolId : undefined,
+      customOnly,
     }
   )
 
