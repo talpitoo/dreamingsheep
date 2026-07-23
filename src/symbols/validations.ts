@@ -19,6 +19,8 @@ export const GetSymbolsWithUsage = z.object({
   // deep links from a dream only carry the symbol id — when set, the query also
   // returns that symbol's 1-based position so the client can jump to its page
   positionOfId: z.number().int().optional(),
+  // hide the opted-in predefined/built-in symbols, keeping only the user's own creations
+  customOnly: z.boolean().optional().default(false),
 })
 
 export const UpdateSymbol = z.object({

@@ -16,22 +16,26 @@ export interface SymbolWithUsage extends Symbol {
   dreams: DreamMinimal[]
 }
 
-// visible symbols: built-ins the user opted into (relatedTo) + the user's own creations;
+// visible symbols: built-ins the user opted into (relatedTo) + the user's own creations,
+// or only the latter when customOnly is set (the "custom symbols only" checkbox);
 // occurrences only count the user's OWN dreams, which is why the ordering happens in SQL —
 // Prisma 3 can't `orderBy` a filtered relation count (see issue #12)
-const visibleSymbolsSql = (userId: number) => Prisma.sql`
+const visibleSymbolsSql = (userId: number, customOnly: boolean) => Prisma.sql`
   FROM "Symbol" s
   LEFT JOIN "_DreamToSymbol" ds ON ds."B" = s."id"
   LEFT JOIN "Dream" d ON d."id" = ds."A" AND d."userId" = ${userId}
   WHERE s."authorId" = ${userId}
-    OR EXISTS (SELECT 1 FROM "_SymbolToUser" su WHERE su."A" = s."id" AND su."B" = ${userId})
+    OR (${!customOnly} AND EXISTS (SELECT 1 FROM "_SymbolToUser" su WHERE su."A" = s."id" AND su."B" = ${userId}))
   GROUP BY s."id"
 `
 
 export default resolver.pipe(
   resolver.zod(GetSymbolsWithUsage),
   resolver.authorize(),
-  async ({ skip, take, positionOfId }: z.infer<typeof GetSymbolsWithUsage>, ctx: Ctx) => {
+  async (
+    { skip, take, positionOfId, customOnly }: z.infer<typeof GetSymbolsWithUsage>,
+    ctx: Ctx
+  ) => {
     const userId = ctx.session.userId!
 
     // count, page and (optional) deep-link position share the same predicate and are
@@ -39,12 +43,12 @@ export default resolver.pipe(
     const [countRows, page, ranked] = await Promise.all([
       db.$queryRaw<{ count: number }[]>`
         SELECT COUNT(*)::int AS "count"
-        FROM (SELECT s."id" ${visibleSymbolsSql(userId)}) visible
+        FROM (SELECT s."id" ${visibleSymbolsSql(userId, customOnly)}) visible
       `,
       // only the current page leaves the database, sorted by per-user usage
       db.$queryRaw<{ id: number; occurrences: number }[]>`
         SELECT s."id", COUNT(d."id")::int AS "occurrences"
-        ${visibleSymbolsSql(userId)}
+        ${visibleSymbolsSql(userId, customOnly)}
         ORDER BY "occurrences" DESC, s."id" ASC
         LIMIT ${take} OFFSET ${skip}
       `,
@@ -53,7 +57,7 @@ export default resolver.pipe(
         : db.$queryRaw<{ position: number }[]>`
             SELECT "position" FROM (
               SELECT s."id", (ROW_NUMBER() OVER (ORDER BY COUNT(d."id") DESC, s."id" ASC))::int AS "position"
-              ${visibleSymbolsSql(userId)}
+              ${visibleSymbolsSql(userId, customOnly)}
             ) ranked
             WHERE "id" = ${positionOfId}
           `,

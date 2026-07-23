@@ -20,10 +20,17 @@ const SymbolsPage: BlitzPage = () => {
   const router = useRouter()
   const [createSymbolMutation, { isLoading: isCreateSymbolLoading }] = useMutation(createSymbol)
   const [showForm, setShowForm] = useState(false)
+  const [customOnly, setCustomOnly] = useState(false)
   const user = useCurrentUser()
 
   function goToLastPage() {
     router.push({ query: { refetch: "true" } })
+  }
+
+  function onCustomOnlyChange(checked: boolean) {
+    setCustomOnly(checked)
+    // the filter changes the page count — restart from page 1 (this also drops a stale ?id deep link)
+    router.push({ query: {} })
   }
 
   return (
@@ -62,8 +69,11 @@ const SymbolsPage: BlitzPage = () => {
           </Typography> */}
           <Suspense fallback={<LoadingSpiral />}>
             {/* quick jump — the list below is paginated, this finds a symbol directly */}
-            <SymbolJumpAutocomplete />
-            <SymbolsList />
+            <SymbolJumpAutocomplete
+              customOnly={customOnly}
+              onCustomOnlyChange={onCustomOnlyChange}
+            />
+            <SymbolsList customOnly={customOnly} />
           </Suspense>
           <p className="mt-6 text-right">
             <Button variant="contained" onClick={() => setShowForm(true)}>
