@@ -22,7 +22,7 @@ interface SymbolJumpAutocompleteProps {
 
 // quick jump on the paginated Symbols page: picking a symbol navigates to
 // /symbols?id=<id>, which resolves its page and expands the card — the same
-// flow as following a symbol link from a dream. The "custom symbols only"
+// flow as following a symbol link from a dream. The "custom only"
 // checkbox hides the opted-in predefined/built-in symbols from the list below,
 // and from these options too — a jump target must exist in the filtered list,
 // or its page position could never resolve
@@ -46,7 +46,9 @@ export const SymbolJumpAutocomplete = ({
   )
 
   return (
-    <Paper sx={{ mb: 7, p: 1, display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+    <Paper
+      sx={{ mb: 7, p: 1, px: "14px", display: "flex", flexWrap: "wrap", alignItems: "center" }}
+    >
       <Autocomplete
         sx={{ flexGrow: 1, minWidth: "12rem" }}
         options={symbols as Symbol[]}
@@ -87,7 +89,7 @@ export const SymbolJumpAutocomplete = ({
         )}
       />
       <FormControlLabel
-        sx={{ mx: 0, whiteSpace: "nowrap" }}
+        sx={{ ml: -14, mr: 0, whiteSpace: "nowrap" }}
         control={
           <Checkbox
             size="small"
@@ -95,7 +97,7 @@ export const SymbolJumpAutocomplete = ({
             onChange={(_, checked) => onCustomOnlyChange(checked)}
           />
         }
-        label={<Typography variant="body2">custom symbols only</Typography>}
+        label={<Typography variant="body2">custom only</Typography>}
       />
     </Paper>
   )
