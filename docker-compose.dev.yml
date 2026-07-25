@@ -1,0 +1,43 @@
+# Hot reload inside Docker — overlay on top of docker-compose.production.yml.
+# It swaps the `blitzjs-app` service from a baked `blitz build` + `blitz start`
+# image to `blitz dev` with the repo bind-mounted, so editing a file on the host
+# is picked up by the watcher — no rebuild, no restart.
+#
+#   docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f docker-compose.local.yml up -d
+#
+# (drop the -f docker-compose.local.yml if you don't need the S3 mock)
+#
+# The two named volumes below shadow the bind mount so container-owned
+# directories are NOT written back to your host checkout:
+#   /app/node_modules — the container's deps (Linux binaries, prisma client)
+#                       win over whatever the native route installed on the host
+#   /app/.next        — dev build cache, kept separate from a host `blitz build`
+#
+# ⚠️ After changing package.json or db/schema.prisma these volumes go stale:
+#   docker compose -f docker-compose.production.yml -f docker-compose.dev.yml build
+#   docker volume rm volume-node-modules-dreamingsheep volume-next-dreamingsheep
+# (they are recreated from the image on the next `up` — the DB volume is untouched)
+services:
+  blitzjs-app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      target: dev # stop before `blitz build` — see Dockerfile
+    image: dreamingsheep-blitzjs-app:dev # own tag, so it never clobbers the production image
+    command: ["blitz", "dev", "--hostname", "0.0.0.0"]
+    volumes:
+      - ./:/app # your working copy, live
+      - node_modules-dreamingsheep:/app/node_modules
+      - next-dreamingsheep:/app/.next
+    environment:
+      # inotify works fine on Linux bind mounts; set WATCHPACK_POLLING=true in your
+      # shell before `up` if edits aren't detected (macOS/Windows, or a networked FS)
+      WATCHPACK_POLLING: ${WATCHPACK_POLLING:-false}
+    restart: "no" # in dev, let a crash stay dead so you can read the error
+    tty: true # keeps the Blitz dev output colorized in `docker logs`
+
+volumes:
+  node_modules-dreamingsheep:
+    name: volume-node-modules-dreamingsheep
+  next-dreamingsheep:
+    name: volume-next-dreamingsheep

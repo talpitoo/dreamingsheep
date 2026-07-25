@@ -9,6 +9,9 @@
 # Or as an overlay on the full stack (app + postgres + s3 mock, everything in Docker):
 #   docker compose -f docker-compose.production.yml -f docker-compose.local.yml up -d
 #
+# Same, but with hot reload in the app container (see docker-compose.dev.yml):
+#   docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f docker-compose.local.yml up -d
+#
 # The app talks to the mock only when S3_ENDPOINT is set — see the
 # "Local S3 mock" block in .env.example. Production is unaffected.
 services:

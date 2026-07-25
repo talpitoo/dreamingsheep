@@ -67,7 +67,15 @@ npm run type:check   # tsc --noEmit
 npm run studio       # prisma studio
 blitz prisma migrate dev   # create/apply migrations locally
 blitz db seed              # seed symbols, demo users, demo dreams
+
+# everything in Docker (see README.md) — add -f docker-compose.dev.yml for hot reload
+docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f docker-compose.local.yml up -d
 ```
+
+The compose stack has two flavours: without `docker-compose.dev.yml` the app
+container serves a **baked production build** (edits need a rebuild); with it, the
+repo is bind-mounted and `blitz dev` hot-reloads. The `Dockerfile` has matching
+`dev` / `production` targets.
 
 Local seeded demo logins (localhost only): `zhuangzi@dreamingsheep.net` /
 `zhuangzi` (rich demo data), also `meh` and `dalecooper` users — see

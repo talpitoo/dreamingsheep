@@ -17,7 +17,7 @@ export interface SymbolWithUsage extends Symbol {
 }
 
 // visible symbols: built-ins the user opted into (relatedTo) + the user's own creations,
-// or only the latter when customOnly is set (the "custom symbols only" checkbox);
+// or only the latter when customOnly is set (the "custom only" checkbox);
 // occurrences only count the user's OWN dreams, which is why the ordering happens in SQL —
 // Prisma 3 can't `orderBy` a filtered relation count (see issue #12)
 const visibleSymbolsSql = (userId: number, customOnly: boolean) => Prisma.sql`
