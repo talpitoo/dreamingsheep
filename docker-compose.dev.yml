@@ -1,6 +1,6 @@
 # Hot reload inside Docker — overlay on top of docker-compose.production.yml.
-# It swaps the `blitzjs-app` service from a baked `blitz build` + `blitz start`
-# image to `blitz dev` with the repo bind-mounted, so editing a file on the host
+# It swaps the `blitzjs-app` service from a baked `next build` + `next start`
+# image to `next dev` with the repo bind-mounted, so editing a file on the host
 # is picked up by the watcher — no rebuild, no restart.
 #
 #   docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f docker-compose.local.yml up -d
@@ -11,7 +11,7 @@
 # directories are NOT written back to your host checkout:
 #   /app/node_modules — the container's deps (Linux binaries, prisma client)
 #                       win over whatever the native route installed on the host
-#   /app/.next        — dev build cache, kept separate from a host `blitz build`
+#   /app/.next        — dev build cache, kept separate from a host `next build`
 #
 # ⚠️ After changing package.json or db/schema.prisma these volumes go stale:
 #   docker compose -f docker-compose.production.yml -f docker-compose.dev.yml build
@@ -22,9 +22,9 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
-      target: dev # stop before `blitz build` — see Dockerfile
+      target: dev # stop before `next build` — see Dockerfile
     image: dreamingsheep-blitzjs-app:dev # own tag, so it never clobbers the production image
-    command: ["blitz", "dev", "--hostname", "0.0.0.0"]
+    command: ["npx", "next", "dev", "--hostname", "0.0.0.0"]
     volumes:
       - ./:/app # your working copy, live
       - node_modules-dreamingsheep:/app/node_modules
@@ -34,7 +34,7 @@ services:
       # shell before `up` if edits aren't detected (macOS/Windows, or a networked FS)
       WATCHPACK_POLLING: ${WATCHPACK_POLLING:-false}
     restart: "no" # in dev, let a crash stay dead so you can read the error
-    tty: true # keeps the Blitz dev output colorized in `docker logs`
+    tty: true # keeps the Next dev output colorized in `docker logs`
 
 volumes:
   node_modules-dreamingsheep:
