@@ -1,10 +1,12 @@
-import { gSSP } from "src/blitz-server"
+import { GetServerSideProps } from "next"
+import { getSession } from "src/auth/session"
 import Link from "next/link"
 import Head from "next/head"
 import Image from "next/image"
 import { InferGetServerSidePropsType } from "next"
 import { useRouter } from "next/router"
-import { BlitzPage, Routes } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
+import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import sheepDreamingsheep from "public/assets/sheep-dreamingsheep.png"
 import sheepDream from "public/assets/sheep-dream.png"
@@ -231,11 +233,12 @@ Home.getLayout = (page) => (
   </Layout>
 )
 
-export const getServerSideProps = gSSP(async ({ req, res, ctx }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   // logged-in users go straight to their journal. Server-side replacement for
   // `Home.redirectAuthenticatedTo`, which threw a client-side RedirectError on every
   // login/logo-click and raced the LoginForm's own router.push (console errors, issue #10)
-  if (ctx.session.userId) {
+  const session = await getSession(req as any, res as any, { skipCsrf: true })
+  if (session.userId) {
     return {
       redirect: { destination: Routes.DreamsPage().pathname, permanent: false },
     }
@@ -278,6 +281,6 @@ export const getServerSideProps = gSSP(async ({ req, res, ctx }) => {
       unicornDreamsCount,
     },
   }
-})
+}
 
 export default Home

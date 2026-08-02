@@ -1,4 +1,5 @@
-import { api } from "src/blitz-server"
+import type { NextApiRequest, NextApiResponse } from "next"
+import { getSession } from "src/auth/session"
 import puppeteer from "puppeteer"
 // https://github.com/puppeteer/puppeteer/blob/v14.1.0/docs/api.md#pagepdfoptions
 
@@ -41,12 +42,14 @@ async function htmlToImage(html = "", css = "") {
   return pdfBuffer
 }
 
-export default api(async (req, res, ctx) => {
-  if (!ctx.session.userId) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // CSRF stays enforced here — ExportDreams sends the correct `anti-csrf` header
+  const session = await getSession(req, res)
+  if (!session.userId) {
     res.status(401).end()
     return
   }
   const { html, css } = JSON.parse(req.body)
   const pdf = await htmlToImage(html, css)
   res.send(pdf)
-})
+}

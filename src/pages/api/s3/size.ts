@@ -1,4 +1,5 @@
-import { api } from "src/blitz-server"
+import type { NextApiRequest, NextApiResponse } from "next"
+import { getSession } from "src/auth/session"
 import { S3Client, ListObjectsCommand } from "@aws-sdk/client-s3"
 
 const s3Client = new S3Client({
@@ -12,29 +13,30 @@ const s3Client = new S3Client({
   ...(process.env.S3_ENDPOINT && { endpoint: process.env.S3_ENDPOINT, forcePathStyle: true }),
 })
 
-export default api(async (req, res, ctx) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" })
   }
 
-  if (!ctx.session.userId) {
+  const session = await getSession(req, res, { skipCsrf: true })
+  if (!session.userId) {
     return res.status(401).json({ error: "Unauthorized" })
   }
 
   try {
     const command = new ListObjectsCommand({
       Bucket: process.env.S3_BUCKET,
-      Prefix: `user-${ctx.session.userId}`,
+      Prefix: `user-${session.userId}`,
     })
 
     const list = await s3Client.send(command)
     const size = list.Contents?.reduce((total, { Size }) => total + (Size || 0), 0) || 0
 
-    console.log(`[GetTotalSizeSucceed] User ID: ${ctx.session.userId}, Size: ${size}`)
+    console.log(`[GetTotalSizeSucceed] User ID: ${session.userId}, Size: ${size}`)
 
     return res.status(200).json({ size })
   } catch (error) {
     console.error("[GetTotalSizeFailed] Error:", error)
     return res.status(500).json({ error: "Failed to get size" })
   }
-})
+}
