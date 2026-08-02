@@ -1,5 +1,6 @@
 import Image from "next/image"
-import { BlitzPage, Routes } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
+import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import sheepMail from "public/assets/sheep-mail.png"
 import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
@@ -7,7 +8,7 @@ import { Box, Container, Grid } from "@mui/material"
 import { useRouter } from "next/router"
 import VerifyUserForm from "src/auth/components/VerifyUserForm"
 import { useEffect } from "react"
-import { useSession } from "@blitzjs/auth"
+import { useSession } from "src/auth/client"
 
 const VerifyUserPage: BlitzPage = () => {
   const session = useSession()

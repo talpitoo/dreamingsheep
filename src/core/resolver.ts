@@ -20,8 +20,8 @@ function zod<S extends z.ZodType<any, any>>(schema: S) {
   return (input: z.input<S>): z.output<S> => schema.parse(input)
 }
 
-function authorize(role?: string | string[]) {
-  return (input: any, ctx: any) => {
+function authorize<T = any>(role?: string | string[]) {
+  return (input: T, ctx: any): T => {
     ctx.session.$authorize(role)
     return input
   }

@@ -1,5 +1,5 @@
-import { resolver } from "@blitzjs/rpc"
-import { Ctx } from "blitz"
+import { resolver } from "src/core/resolver"
+import { Ctx } from "src/core/types"
 import db from "db"
 import { CreateSymbol } from "src/symbols/validations"
 import { kebabCase } from "lodash/fp"

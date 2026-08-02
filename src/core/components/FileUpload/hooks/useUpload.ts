@@ -1,4 +1,4 @@
-import { getAntiCSRFToken } from "@blitzjs/auth"
+import { getAntiCSRFToken } from "src/auth/client"
 import { useCallback, useState } from "react"
 import { useFileUpload, FileUpload as FileUploadType } from "use-file-upload"
 import { MAX_FILE_SIZE } from "src/core/constants/general"

@@ -1,6 +1,6 @@
-import { generateToken, hash256 } from "@blitzjs/auth"
-import { SecurePassword } from "@blitzjs/auth/secure-password"
-import { AuthenticationError, NotFoundError } from "blitz"
+import { generateToken, hash256 } from "src/core/tokens"
+import { SecurePassword } from "src/auth/secure-password"
+import { AuthenticationError, NotFoundError } from "src/core/errors"
 import db, { User } from "db"
 
 const VERIFY_USER_TOKEN_EXPIRATION_IN_HOURS = 24

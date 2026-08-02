@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Routes } from ".blitz"
+import { Routes } from "src/routes"
 import React, { Fragment, Suspense } from "react"
 import { Typography, Container, Box } from "@mui/material"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"

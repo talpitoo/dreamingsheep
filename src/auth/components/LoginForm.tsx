@@ -1,13 +1,13 @@
 import Link from "next/link"
-import { Routes } from "@blitzjs/next"
-import { useMutation } from "@blitzjs/rpc"
+import { Routes } from "src/routes"
+import { useMutation } from "src/core/rpc-client"
 import { LabeledTextField } from "src/core/components/LabeledTextField"
 import { Form, FORM_ERROR } from "src/core/components/Form"
-import login from "src/auth/mutations/login"
+import { login } from "src/auth/client-mutations"
 import { Login } from "src/auth/validations"
 import React from "react"
 import { Card, CardContent } from "@mui/material"
-import { AuthenticationError } from "blitz"
+import { AuthenticationError } from "src/core/errors"
 import { User } from "db"
 
 type LoginFormProps = {

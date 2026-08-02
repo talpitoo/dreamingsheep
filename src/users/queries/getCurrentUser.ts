@@ -1,4 +1,4 @@
-import { Ctx } from "blitz"
+import { Ctx } from "src/core/types"
 import db from "db"
 
 export default async function getCurrentUser(_ = null, { session }: Ctx) {

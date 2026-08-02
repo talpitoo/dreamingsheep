@@ -1,4 +1,4 @@
-import { useMutation } from "@blitzjs/rpc"
+import { useMutation } from "src/core/rpc-client"
 import { Box, Button, Grid, Typography } from "@mui/material"
 import { forwardRef, useEffect, useMemo, useState } from "react"
 import { useUpload } from "./hooks"
@@ -6,7 +6,7 @@ import { Preview } from "./components"
 import { useFileUpload } from "use-file-upload"
 import { useFormContext } from "react-hook-form"
 import { SymbolWithUsage } from "src/symbols/queries/getSymbolsWithUsage"
-import updateSymbol from "src/symbols/mutations/updateSymbol"
+import { updateSymbol } from "src/symbols/client"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 
 const FileUpload = forwardRef<

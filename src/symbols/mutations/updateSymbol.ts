@@ -1,5 +1,5 @@
-import { resolver } from "@blitzjs/rpc"
-import { NotFoundError } from "blitz"
+import { resolver } from "src/core/resolver"
+import { NotFoundError } from "src/core/errors"
 import db from "db"
 import { UpdateSymbol } from "src/symbols/validations"
 

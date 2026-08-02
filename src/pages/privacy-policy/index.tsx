@@ -1,7 +1,7 @@
 import Head from "next/head"
 import Link from "next/link"
 import Image from "next/image"
-import { BlitzPage } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
 import { Fragment, Suspense } from "react"
 import Layout from "src/core/layouts/Layout"
 import { Card, CardContent, CardHeader, Container, Grid, Typography, Alert } from "@mui/material"

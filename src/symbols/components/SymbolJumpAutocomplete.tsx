@@ -1,6 +1,6 @@
-import { useQuery } from "@blitzjs/rpc"
+import { useQuery } from "src/core/rpc-client"
 import { useRouter } from "next/router"
-import { Routes } from "@blitzjs/next"
+import { Routes } from "src/routes"
 import {
   Autocomplete,
   Box,
@@ -13,7 +13,7 @@ import {
 import { Symbol } from "db"
 import React from "react"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
-import getAutocompleteSymbols from "src/symbols/queries/getAutocompleteSymbols"
+import { getAutocompleteSymbols } from "src/symbols/client"
 
 interface SymbolJumpAutocompleteProps {
   customOnly: boolean

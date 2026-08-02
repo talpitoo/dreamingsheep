@@ -1,8 +1,8 @@
-import { resolver } from "@blitzjs/rpc"
-import { SecurePassword } from "@blitzjs/auth/secure-password"
+import { resolver } from "src/core/resolver"
+import { SecurePassword } from "src/auth/secure-password"
 import { ChangePassword } from "src/auth/validations"
 import db from "db"
-import { AuthenticationError, NotFoundError } from "blitz"
+import { AuthenticationError, NotFoundError } from "src/core/errors"
 import { authenticateUser } from "../utils"
 
 class WrongCurrentPasswordError extends Error {

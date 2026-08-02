@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@blitzjs/rpc"
+import { useMutation, useQuery } from "src/core/rpc-client"
 import { Form } from "src/core/components/Form"
 export { FORM_ERROR } from "src/core/components/Form"
 import { Button, Grid, TextField, TextFieldProps } from "@mui/material"
@@ -15,11 +15,11 @@ import {
   useState,
 } from "react"
 import { FORM_ERROR } from "src/core/components/Form"
-import createSleepingTime from "src/sleepingTimes/mutations/createSleepingTime"
-import updateSleepingTime from "src/sleepingTimes/mutations/updateSleepingTime"
+import { createSleepingTime } from "src/sleepingTimes/client"
+import { updateSleepingTime } from "src/sleepingTimes/client"
 import { Controller, useFormContext } from "react-hook-form"
 import { DateTime } from "luxon"
-import getSleepingTime from "../queries/getSleepingTime"
+import { getSleepingTime } from "src/sleepingTimes/client"
 
 function getISODateString(date: Date | null) {
   if (date) {

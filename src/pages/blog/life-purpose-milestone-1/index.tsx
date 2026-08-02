@@ -1,4 +1,4 @@
-import { Routes } from ".blitz"
+import { Routes } from "src/routes"
 import Image from "next/image"
 import Link from "next/link"
 import { Fragment, Suspense } from "react"
@@ -10,7 +10,7 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
-import { BlitzPage } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
 
 const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
   return (

@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { useMutation } from "@blitzjs/rpc"
+import { useMutation } from "src/core/rpc-client"
 import {
   Button,
   Dialog,
@@ -13,7 +13,7 @@ import {
 } from "@mui/material"
 import { useInstantDreamDialog } from "src/contexts/CreateInstantSymbolContext"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
-import createSymbol from "src/symbols/mutations/createSymbol"
+import { createSymbol } from "src/symbols/client"
 import React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import sheepSymbol from "public/assets/sheep-symbols.png"

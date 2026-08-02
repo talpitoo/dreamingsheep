@@ -1,4 +1,4 @@
-import { resolver } from "@blitzjs/rpc"
+import { resolver } from "src/core/resolver"
 import db, { Prisma } from "db"
 
 interface GetSymbolsWithoutDreamsInput

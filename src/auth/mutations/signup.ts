@@ -1,5 +1,5 @@
-import { SecurePassword } from "@blitzjs/auth/secure-password"
-import { resolver } from "@blitzjs/rpc"
+import { SecurePassword } from "src/auth/secure-password"
+import { resolver } from "src/core/resolver"
 import db, { User } from "db"
 import { Signup } from "src/auth/validations"
 import { kebabCase } from "lodash/fp"

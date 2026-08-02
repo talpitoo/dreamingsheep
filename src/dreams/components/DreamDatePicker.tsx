@@ -2,8 +2,8 @@ import React, { useMemo, useState } from "react"
 import { DateTime } from "luxon"
 import { TextField } from "@mui/material"
 import { DatePicker, PickersDayProps } from "@mui/x-date-pickers"
-import { useQuery } from "@blitzjs/rpc"
-import getDreamsByMonth from "src/dreams/queries/getDreamsByMonth"
+import { useQuery } from "src/core/rpc-client"
+import { getDreamsByMonth } from "src/dreams/client"
 import { DreamsByMonth, renderDreamDay } from "src/dreams/components/DreamCalendarDay"
 
 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone

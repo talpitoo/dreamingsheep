@@ -1,4 +1,4 @@
-import { resolver } from "@blitzjs/rpc"
+import { resolver } from "src/core/resolver"
 import db, { User } from "db"
 import { DateTime, Duration } from "luxon"
 import { UserVerifiedError, generateVerifyUserToken, validateVerifyUserToken } from "../utils"

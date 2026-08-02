@@ -1,7 +1,7 @@
-import { resolver } from "@blitzjs/rpc"
+import { resolver } from "src/core/resolver"
 import db from "db"
 import { VerifyUser } from "../validations"
-import { Role } from "types"
+import { Role } from "src/core/types"
 import { UserVerifiedError, validateVerifyUserToken } from "../utils"
 import getSymbols from "src/symbols/queries/getSymbols"
 

@@ -1,9 +1,9 @@
-import { useQuery } from "@blitzjs/rpc"
+import { useQuery } from "src/core/rpc-client"
 import { Box, Card, CardContent, Checkbox, FormControlLabel, Typography } from "@mui/material"
 import React, { useEffect, useMemo, useState } from "react"
 import { Chart } from "react-google-charts"
 import { useWindowSize } from "usehooks-ts"
-import getSleepingTimes from "src/sleepingTimes/queries/getSleepingTimes"
+import { getSleepingTimes } from "src/sleepingTimes/client"
 import {
   CustomRange,
   Range,

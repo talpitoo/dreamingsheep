@@ -1,5 +1,5 @@
-import { Routes } from "@blitzjs/next"
-import { useQuery } from "@blitzjs/rpc"
+import { Routes } from "src/routes"
+import { useQuery } from "src/core/rpc-client"
 import { Box, Button, Chip, Collapse, Grid, Paper, Typography } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import Link from "next/link"
@@ -11,7 +11,7 @@ import Form from "src/core/components/Form"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import ToggleButtonField from "src/core/components/ToggleButtonField"
 import SymbolsAutocomplete from "src/dreams/components/SymbolsAutocomplete"
-import getDreams from "src/dreams/queries/getDreams"
+import { getDreams } from "src/dreams/client"
 import {
   buildDreamSearchWhere,
   parseDreamSearchQuery,
@@ -32,7 +32,7 @@ import {
   Range,
   resolveRangeBounds,
 } from "src/stats/helpers/range"
-import getSymbols from "src/symbols/queries/getSymbols"
+import { getSymbols } from "src/symbols/client"
 
 interface AdvancedStatsFormValues {
   q: string

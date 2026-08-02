@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Alert, IconButton } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import Link from "next/link"
-import { Routes } from "@blitzjs/next"
+import { Routes } from "src/routes"
 
 const COOKIE_NOTICE_KEY = "cookieNoticeAcknowledged"
 
