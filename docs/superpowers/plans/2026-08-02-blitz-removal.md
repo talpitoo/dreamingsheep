@@ -131,7 +131,13 @@ If **any** of Step 4–5 fails for framework reasons: repeat with `next@15.5.22`
 
 Edit the line below in this file, then commit.
 
-**SPIKE RESULT (fill in): next=\_**\_ , images config: domains OK? \_\_** , natives on Node 22: \_\_\_\_**
+**SPIKE RESULT (2026-08-02): next=16.2.12 ✅** (React 18.2 + MUI 5.14 + emotion `_document` SSR all build and serve; gSSP renders per-request; `images.domains` accepted). Natives on Node 22.23.2: sharp ✅, secure-password/sodium-native ✅, puppeteer 17 `page.pdf()` ✅, prisma 3.13 generate + client init ✅ (live query deferred — local DB credentials issue, see checkpoint notes).
+
+**⚠️ SPIKE FINDING — design adjustment (applied to Tasks 8 and 10):** Next 16's Pages Router **static generation waits for suspended trees** (a never-resolving server-side suspense throw hangs `next build`: 3 × 60 s attempts, then failure) — unlike Next 13, which rendered the Suspense fallback. Therefore the RPC hooks must **not suspend on the server**. Adjusted design, verified in the spike mini-app:
+
+- `useQuery`/`usePaginatedQuery` on the server render as **disabled, non-suspense** queries (`data: undefined`, no fetch, no throw); on the client they run with `suspense: true` as planned.
+- The only public-page query consumer is Footer's `useCurrentUser`, which already tolerates `null`/`undefined` (logged-out rendering) — safe with `undefined` SSR data.
+- Private pages (`authenticate = true`) must not render their body server-side at all (their inner components destructure query results). The `_app` AuthGuard gates them: **inside** `getLayout` (so header/footer still SSR), rendering `null` until mounted. First paint parity note: SSR shows layout chrome with an empty body instead of layout chrome with spinners — the spinners appear on mount.
 
 ```bash
 git add docs/superpowers/plans/2026-08-02-blitz-removal.md
@@ -1660,17 +1666,15 @@ export async function handleRpc(req: NextApiRequest, res: NextApiResponse) {
   const endpoint = String(req.query.endpoint ?? "")
   const resolverFn = rpcRegistry[endpoint]
   if (!resolverFn) {
-    res
-      .status(404)
-      .send(
-        superjson.stringify({
-          error: {
-            name: "NotFoundError",
-            message: `Unknown endpoint: ${endpoint}`,
-            statusCode: 404,
-          },
-        })
-      )
+    res.status(404).send(
+      superjson.stringify({
+        error: {
+          name: "NotFoundError",
+          message: `Unknown endpoint: ${endpoint}`,
+          statusCode: 404,
+        },
+      })
+    )
     return
   }
   try {
@@ -1718,7 +1722,7 @@ git commit -m "feat(core): rpc catch-all handler + explicit 32-endpoint registry
 
 - Produces:
   - `rpcQuery<T>(key: string): RpcStub<T>` / `rpcMutation<T>(key: string): RpcStub<T>` where `RpcStub<T> = { key: string; kind: "query" | "mutation"; __type?: T }`; input type `RpcInput<T> = Parameters<T>[0]`, result `RpcResult<T> = Awaited<ReturnType<T>>`
-  - `useQuery(stub, params, options?)` → `[data, rest]` (suspense by default; **server-side render throws a never-resolving promise** so Suspense fallbacks SSR exactly like Blitz; options passthrough must support at least `enabled`, `refetchOnWindowFocus`, `notifyOnChangeProps` — the three used in the codebase)
+  - `useQuery(stub, params, options?)` → `[data, rest]` (suspense by default on the client; **on the server the query is disabled and non-suspense** — `data` is `undefined`, nothing fetches, nothing throws (see the Task 1 SPIKE FINDING: Next 16 static generation hangs on suspended trees); options passthrough must support at least `enabled`, `refetchOnWindowFocus`, `notifyOnChangeProps` — the three used in the codebase)
   - `usePaginatedQuery(stub, params, options?)` — same plus `keepPreviousData: true`
   - `useMutation(stub)` → `[invoke, rest]` where `invoke(input) => Promise<result>` (throws deserialized errors)
   - `invalidateQuery(stub)` → `queryClient.invalidateQueries({ queryKey: [stub.key] })`
@@ -1924,29 +1928,32 @@ export function queryKeyFor(stub: RpcStub<any>, params: unknown): [string, strin
   return [stub.key, superjson.stringify(params ?? null)]
 }
 
-// SSR: throw a never-resolving promise so <Suspense> fallbacks render on the
-// server exactly like Blitz's useQuery did (verified by the Task 1 spike probe)
-function suspendOnServer() {
-  if (typeof window === "undefined") throw new Promise(() => undefined)
+// SSR: do NOT suspend on the server — Next 16 static generation waits for
+// suspended trees and would hang the build (Task 1 SPIKE FINDING). Server-side,
+// queries are disabled non-suspense renders (data undefined, no fetch); the
+// AuthGuard keeps private page bodies off the server so nothing destructures
+// undefined results there.
+const isServer = typeof window === "undefined"
+
+function queryOptions(options: any) {
+  return isServer ? { ...options, enabled: false, suspense: false } : { suspense: true, ...options }
 }
 
 export function useQuery<T>(stub: RpcStub<T>, params: RpcInput<T>, options: any = {}) {
-  suspendOnServer()
   const result = useRQQuery({
     queryKey: queryKeyFor(stub, params),
     queryFn: () => rpcFetch(stub.key, params),
-    ...options,
+    ...queryOptions(options),
   })
   return [result.data as RpcResult<T>, result] as const
 }
 
 export function usePaginatedQuery<T>(stub: RpcStub<T>, params: RpcInput<T>, options: any = {}) {
-  suspendOnServer()
   const result = useRQQuery({
     queryKey: queryKeyFor(stub, params),
     queryFn: () => rpcFetch(stub.key, params),
     keepPreviousData: true,
-    ...options,
+    ...queryOptions(options),
   })
   return [result.data as RpcResult<T>, result] as const
 }
@@ -2268,7 +2275,7 @@ nvm use 22
 # capture the type:check baseline first (Global Constraints):
 npm run type:check 2>&1 | tail -3 > /tmp/typecheck-baseline.txt || true
 yarn remove blitz @blitzjs/auth @blitzjs/next @blitzjs/rpc
-yarn add --exact next@<SPIKE RESULT version> react-error-boundary@4.1.2
+yarn add --exact next@16.2.12 react-error-boundary@4.1.2   # version locked by the Task 1 spike
 yarn add --dev --exact eslint-config-next@<same as next> tsx@4
 ```
 
@@ -2383,9 +2390,11 @@ export default function App({
               <CssBaseline />
               <AppErrorBoundary>
                 <CreateInstantSymbolProvider>
-                  <AuthGuard Component={Component}>
-                    {getLayout(<Component {...pageProps} />)}
-                  </AuthGuard>
+                  {getLayout(
+                    <AuthGuard Component={Component}>
+                      <Component {...pageProps} />
+                    </AuthGuard>
+                  )}
                 </CreateInstantSymbolProvider>
               </AppErrorBoundary>
             </ThemeProvider>
@@ -2431,6 +2440,13 @@ function AuthGuard({ Component, children }: { Component: AppPage; children: Reac
   }, [Component, session.userId])
 
   if (authError) throw authError
+  // Private pages never render their body on the server (SPIKE FINDING: their
+  // components destructure query results, and server-side query data is
+  // undefined) — the layout chrome still SSRs because AuthGuard sits inside
+  // getLayout. The body appears on mount, where suspense fallbacks take over.
+  if (Component.authenticate === true && !mounted) {
+    return null
+  }
   // suppressFirstRenderFlicker parity: Blitz hid the first paint of pages that set
   // this flag (Home uses it) until the client knows the session — keep that behavior
   if (Component.suppressFirstRenderFlicker && !mounted) {
