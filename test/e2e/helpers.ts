@@ -4,9 +4,9 @@ import puppeteer, { Browser, Page } from "puppeteer"
  * Shared plumbing for the puppeteer E2E suite.
  *
  * Prerequisites (local machine):
- *   1. `nvm use 18 && npm run dev` — app running (default http://localhost:3000,
+ *   1. `nvm use 22 && npm run dev` — app running (default http://localhost:3000,
  *      override with E2E_BASE_URL)
- *   2. a seeded dev database (`blitz db seed`) — the flows log in as the demo
+ *   2. a seeded dev database (`npm run db:seed`) — the flows log in as the demo
  *      user zhuangzi and rely on the seeded dreams (e.g. "The Butterfly Dream")
  *
  * The flows clean up after themselves (created dreams/symbols are deleted,
@@ -24,7 +24,7 @@ export async function ensureServerUp() {
   } catch (error) {
     throw new Error(
       `dreamingsheep is not running at ${BASE} — start it first:\n` +
-        `  nvm use 18 && npm run dev   (with a seeded DB: blitz db seed)\n` +
+        `  nvm use 22 && npm run dev   (with a seeded DB: npm run db:seed)\n` +
         `or point E2E_BASE_URL at a running instance.`
     )
   }

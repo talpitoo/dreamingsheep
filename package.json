@@ -52,7 +52,7 @@
     "migrate:dev": "node --env-file=.env.local node_modules/.bin/prisma migrate dev",
     "migrate:deploy": "node --env-file=.env.local node_modules/.bin/prisma migrate deploy",
     "db:seed": "node --env-file=.env.local node_modules/.bin/tsx db/run-seed.ts",
-    "db:seed:after-schema": "node --env-file=.env.local node_modules/.bin/tsx db/seedAfterDbSchemaUpdate.ts"
+    "db:seed:after-schema": "node --env-file=.env.local node_modules/.bin/tsx db/run-seed-after-schema.ts"
   },
   "prisma": {
     "schema": "db/schema.prisma",
