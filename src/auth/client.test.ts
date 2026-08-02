@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { readPublicDataFromCookie, getAntiCSRFToken } from "./client"
 import { encodePublicDataCookie, COOKIE_PUBLIC_DATA, COOKIE_CSRF } from "./session/public-data"
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe("auth client cookie readers", () => {
   it("parses publicData from the readable cookie", () => {

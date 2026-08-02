@@ -3,7 +3,9 @@ import superjson from "superjson"
 import { rpcFetch, queryKeyFor, rpcQuery } from "./rpc-client"
 import { AuthenticationError } from "./errors"
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe("rpcFetch", () => {
   it("POSTs superjson params with the anti-csrf header and revives Dates in results", async () => {

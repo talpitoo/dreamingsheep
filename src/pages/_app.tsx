@@ -1,9 +1,9 @@
-import { withBlitz } from "src/blitz-client"
 import Script from "next/script"
 import Image from "next/image"
-import { useQueryErrorResetBoundary } from "@blitzjs/rpc"
-
-import { AppProps, ErrorBoundary, ErrorFallbackProps, ErrorComponent } from "@blitzjs/next"
+import type { AppProps } from "next/app"
+import { useRouter } from "next/router"
+import { ErrorBoundary, FallbackProps } from "react-error-boundary"
+import { QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query"
 
 import "src/styles/fonts.css"
 import "src/styles/index.css"
@@ -11,7 +11,7 @@ import "src/styles/index.css"
 import LoginForm from "src/auth/components/LoginForm"
 import CreateInstantSymbolProvider from "src/contexts/CreateInstantSymbolContext"
 import Theme from "src/styles/Theme"
-import React from "react"
+import React, { useEffect, useState } from "react"
 
 import CssBaseline from "@mui/material/CssBaseline"
 import { ThemeProvider } from "@mui/material/styles"
@@ -22,25 +22,29 @@ import { Alert, Container, Grid, Box } from "@mui/material"
 import sheepSignup from "public/assets/sheep-signup.png"
 import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
 import CustomErrorContainer from "src/core/components/CustomErrorContainer"
-import { AuthenticationError, AuthorizationError } from "blitz"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { AuthenticationError, AuthorizationError } from "src/core/errors"
+import { getQueryClient } from "src/core/rpc-client"
+import { useSession } from "src/auth/client"
+import { ErrorStatus } from "src/core/components/ErrorStatus"
+import type { AppPage } from "src/core/types"
 import { CacheProvider, EmotionCache } from "@emotion/react"
 import Head from "next/head"
 import createEmotionCache from "src/createEmotionCache"
 
 const clientSideEmotionCache = createEmotionCache()
+const queryClient = getQueryClient()
 
 export interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
+  Component: AppProps["Component"] & AppPage
 }
 
-export default withBlitz(function App({
+export default function App({
   Component,
   emotionCache = clientSideEmotionCache,
   pageProps,
 }: MyAppProps) {
   const getLayout = Component.getLayout || ((page) => page)
-  const queryClient = new QueryClient()
 
   return (
     <>
@@ -69,23 +73,76 @@ export default withBlitz(function App({
           <CacheProvider value={emotionCache}>
             <ThemeProvider theme={Theme}>
               <CssBaseline />
-              <ErrorBoundary
-                FallbackComponent={RootErrorFallback}
-                onReset={useQueryErrorResetBoundary().reset}
-              >
+              <AppErrorBoundary>
                 <CreateInstantSymbolProvider>
-                  {getLayout(<Component {...pageProps} />)}
+                  {getLayout(
+                    <AuthGuard Component={Component}>
+                      <Component {...pageProps} />
+                    </AuthGuard>
+                  )}
                 </CreateInstantSymbolProvider>
-              </ErrorBoundary>
+              </AppErrorBoundary>
             </ThemeProvider>
           </CacheProvider>
         </LocalizationProvider>
       </QueryClientProvider>
     </>
   )
-})
+}
 
-function RootErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
+function AppErrorBoundary({ children }: { children: React.ReactNode }) {
+  const { reset } = useQueryErrorResetBoundary()
+  return (
+    <ErrorBoundary FallbackComponent={RootErrorFallback} onReset={reset}>
+      {children}
+    </ErrorBoundary>
+  )
+}
+
+// Honors the Blitz-era page statics. authenticate=true throws AuthenticationError
+// from render (after mount, when the session cookie is readable) so the SAME
+// ErrorBoundary login fallback appears as before; redirectAuthenticatedTo pushes
+// away logged-in visitors of the signup/verify/forgot/reset pages.
+function AuthGuard({ Component, children }: { Component: AppPage; children: React.ReactNode }) {
+  const session = useSession()
+  const router = useRouter()
+  const [authError, setAuthError] = useState<Error | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (Component.authenticate === true && !session.userId) {
+      setAuthError(new AuthenticationError())
+    } else if (authError && session.userId) {
+      setAuthError(null)
+    }
+    if (Component.redirectAuthenticatedTo && session.userId) {
+      const to = Component.redirectAuthenticatedTo
+      void router.push(typeof to === "function" ? to() : to)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [Component, session.userId])
+
+  if (authError) throw authError
+  // Private pages never render their body on the server (spike finding: their
+  // components destructure query results, and server-side query data is
+  // undefined) — the layout chrome still SSRs because AuthGuard sits inside
+  // getLayout. The body appears on mount, where suspense fallbacks take over.
+  if (Component.authenticate === true && !mounted) {
+    return null
+  }
+  // suppressFirstRenderFlicker parity: Blitz hid the first paint of pages that
+  // set this flag (Home uses it) until the client knows the session
+  if (Component.suppressFirstRenderFlicker && !mounted) {
+    return <div style={{ visibility: "hidden" }}>{children}</div>
+  }
+  return <>{children}</>
+}
+
+function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   if (error instanceof AuthenticationError) {
     return (
       <Layout>
@@ -138,7 +195,7 @@ function RootErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     return (
       <Layout>
         <CustomErrorContainer>
-          <ErrorComponent
+          <ErrorStatus
             statusCode={error.statusCode}
             title="Sorry, you are not authorized to access this"
           />
@@ -152,7 +209,10 @@ function RootErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   return (
     <Layout>
       <CustomErrorContainer>
-        <ErrorComponent statusCode={error.statusCode || 400} title={error.message || error.name} />
+        <ErrorStatus
+          statusCode={(error as { statusCode?: number }).statusCode || 400}
+          title={error.message || error.name}
+        />
       </CustomErrorContainer>
     </Layout>
   )

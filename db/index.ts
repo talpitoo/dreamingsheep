@@ -1,8 +1,10 @@
-import { enhancePrisma } from "blitz"
 import { PrismaClient } from "@prisma/client"
 
-const EnhancedPrisma = enhancePrisma(PrismaClient)
-
 export * from "@prisma/client"
-// eslint-disable-next-line import/no-anonymous-default-export
-export default new EnhancedPrisma()
+
+// hot-reload-safe singleton (replaces Blitz's enhancePrisma)
+const globalForPrisma = global as unknown as { prisma?: PrismaClient }
+const prisma = globalForPrisma.prisma ?? new PrismaClient()
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+
+export default prisma

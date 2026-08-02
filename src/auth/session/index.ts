@@ -57,7 +57,11 @@ function secretKey(): string {
 
 const isSecure = () => process.env.NODE_ENV === "production"
 
-type Req = IncomingMessage & { cookies?: Record<string, string>; method?: string; headers: any }
+type Req = IncomingMessage & {
+  cookies?: Partial<Record<string, string>>
+  method?: string
+  headers: any
+}
 type Res = ServerResponse & { getHeader: any; setHeader: any }
 
 export async function getSession(
