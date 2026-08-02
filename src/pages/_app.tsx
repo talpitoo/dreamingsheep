@@ -24,7 +24,7 @@ import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
 import CustomErrorContainer from "src/core/components/CustomErrorContainer"
 import { AuthenticationError, AuthorizationError } from "src/core/errors"
 import { getQueryClient } from "src/core/rpc-client"
-import { useSession } from "src/auth/client"
+import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { ErrorStatus } from "src/core/components/ErrorStatus"
 import type { AppPage } from "src/core/types"
 import { CacheProvider, EmotionCache } from "@emotion/react"
@@ -114,12 +114,16 @@ function AuthGuard({ Component, children }: { Component: AppPage; children: Reac
   }, [])
 
   useEffect(() => {
-    if (Component.authenticate === true && !session.userId) {
+    // read the cookie directly: during hydration the store still reports the
+    // (empty) server snapshot, and deciding on it would throw the login
+    // fallback for perfectly logged-in visitors on a full page load
+    const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
+    if (Component.authenticate === true && !userId) {
       setAuthError(new AuthenticationError())
-    } else if (authError && session.userId) {
+    } else if (authError && userId) {
       setAuthError(null)
     }
-    if (Component.redirectAuthenticatedTo && session.userId) {
+    if (Component.redirectAuthenticatedTo && userId) {
       const to = Component.redirectAuthenticatedTo
       void router.push(typeof to === "function" ? to() : to)
     }
