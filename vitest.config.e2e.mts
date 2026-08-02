@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config"
 
 // E2E tests: drive the real app in headless Chromium (puppeteer).
 // Prerequisites: `npm run dev` running (localhost:3000 by default, override
-// with E2E_BASE_URL) against a locally seeded DB (`blitz db seed`).
+// with E2E_BASE_URL) against a locally seeded DB (`npm run db:seed`).
 export default defineConfig({
   resolve: {
     alias: {

@@ -27,13 +27,21 @@ comment there before starting work (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Phase 2: Framework migration
 
-- [ ] Migrate from BlitzJS to Next.js App Router ([#4](https://github.com/talpitoo/dreamingsheep/issues/4))
-- [ ] Replace BlitzJS auth with NextAuth.js ([#5](https://github.com/talpitoo/dreamingsheep/issues/5))
-- [ ] Env files: move production off `.env.local` to `.env.production.local` + `APP_ENV` ([#23](https://github.com/talpitoo/dreamingsheep/issues/23)) — parked behind [#4](https://github.com/talpitoo/dreamingsheep/issues/4) to avoid deploy-script regressions
-- [ ] Finish TypeScript strict mode **after** the migration ([#3](https://github.com/talpitoo/dreamingsheep/issues/3)):
-      five strict-family flags are already enabled; `noImplicitAny` (~58 errors) and
-      `strictFunctionTypes` (3) remain — parked so contributions don't end up in a
-      merge-conflict graveyard with [#4](https://github.com/talpitoo/dreamingsheep/issues/4) (see the note in [`tsconfig.json`](tsconfig.json))
+- [x] **Remove BlitzJS** — one-take migration to plain Next.js 16 (pages router) + Node 22,
+      landed 2026-08 (design: [docs/superpowers/specs/2026-08-02-blitz-removal-design.md](docs/superpowers/specs/2026-08-02-blitz-removal-design.md)).
+      This completes the "remove Blitz" half of [#4](https://github.com/talpitoo/dreamingsheep/issues/4);
+      the App Router move remains open below.
+- [x] Replace BlitzJS auth ([#5](https://github.com/talpitoo/dreamingsheep/issues/5)) — resolved with a
+      **custom session layer** (`src/auth/session/`, same Session table, no password resets)
+      instead of NextAuth: Auth.js v5 was still beta, and the credentials provider forces JWT
+      sessions (server-side revocation would be lost). OAuth providers stay a nice-to-have.
+- [ ] Migrate to the Next.js **App Router** — the remaining half of [#4](https://github.com/talpitoo/dreamingsheep/issues/4)
+- [ ] Env files: move production off `.env.local` to `.env.production.local` + `APP_ENV` ([#23](https://github.com/talpitoo/dreamingsheep/issues/23)) —
+      the blocking half is solved (prisma/seeds load `.env.local` via `node --env-file` npm scripts);
+      the rename itself is still parked
+- [ ] Finish TypeScript strict mode ([#3](https://github.com/talpitoo/dreamingsheep/issues/3)) — **unblocked**
+      now that the migration landed: five strict-family flags are already enabled;
+      `noImplicitAny` (~58 errors) and `strictFunctionTypes` remain (see the note in [`tsconfig.json`](tsconfig.json))
 
 ## Phase 3: Community features
 

@@ -11,7 +11,7 @@ The dev server is often already running — check first:
 
 ```sh
 curl -s -o /dev/null -w "%{http_code}" http://localhost:3000   # 200 → running
-nvm use 18 && npm run dev                                       # otherwise (needs seeded DB: blitz db seed)
+nvm use 22 && npm run dev                                       # otherwise (needs seeded DB: npm run db:seed)
 ```
 
 `next dev` hot-reloads the working tree, so edits are live without restarts

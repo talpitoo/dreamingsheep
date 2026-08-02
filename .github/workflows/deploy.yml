@@ -1,7 +1,7 @@
 name: Deploy to production
 
 # Mirrors the previous .gitlab-ci.yml deploy job: SSHes into the EC2 instance,
-# pulls latest code, builds, and restarts the BlitzJS app via nohup.
+# pulls latest code, builds, and restarts the Next.js app via nohup.
 
 on:
   # Manual trigger from the Actions tab
@@ -38,7 +38,7 @@ jobs:
             source ~/.nvm/nvm.sh
 
             echo 'Killing processes...'
-            pkill -f blitz || true
+            pkill -f next || true
             pkill -f nest || true
             pkill -f node || true
             sleep 2
@@ -50,7 +50,7 @@ jobs:
             git pull
 
             echo 'Building dreamingsheep...'
-            nvm use 18
+            nvm use 22
             npm install -g yarn
             yarn install
             rm -rf .next
@@ -58,7 +58,7 @@ jobs:
             cp public/assets/title-dreamingsheep.png public/assets/sheep-dreamingsheep.png .next/static/media/
 
             echo 'Starting dreamingsheep...'
-            nohup bash -c 'cd ~/dreamingsheep && source ~/.nvm/nvm.sh && nvm use 18 && yarn start' > ~/dreamingsheep/nohup.out 2>&1 &
+            nohup bash -c 'cd ~/dreamingsheep && source ~/.nvm/nvm.sh && nvm use 22 && yarn start' > ~/dreamingsheep/nohup.out 2>&1 &
             disown -a
 
             echo 'Deploy complete!'

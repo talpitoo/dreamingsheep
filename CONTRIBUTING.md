@@ -19,7 +19,7 @@ src/
 ├── symbols/       # Dream symbols management
 ├── stats/         # Statistics and charts
 ├── settings/      # User settings, export
-└── pages/         # Next.js (Blitz) pages
+└── pages/         # Next.js pages
 db/
 ├── schema.prisma  # Database schema
 ├── migrations/    # Prisma migrations
@@ -52,8 +52,8 @@ test/e2e/          # Puppeteer end-to-end tests
 ## 🧑‍💻 Code guidelines
 
 - **Dependencies are frozen** — no version bumps or new libraries without
-  prior discussion in an issue; the BlitzJS + MUI + Tailwind + Prisma combo is
-  pinned deliberately (Node 18 included)
+  prior discussion in an issue; the Next.js + MUI + Tailwind + Prisma combo is
+  pinned deliberately (Node 22 included)
 - **TypeScript**: strict types, avoid `any`; interfaces over types for object shapes
 - **React**: functional components with hooks; small, focused components;
   Suspense for loading states

@@ -1,16 +1,22 @@
 # src/ — app architecture & conventions
 
-BlitzJS `2.0.0-beta.31` on Next 13 **pages router**. Domain-driven layout:
-`src/<entity>/{queries,mutations,components,validations.ts}`. Shared UI in
-`src/core/`. See root [CLAUDE.md](../CLAUDE.md) for the frozen-deps policy.
+Plain **Next.js 16 pages router** on Node 22 (Blitz removed 2026-08 — design in
+[docs/superpowers/specs/2026-08-02-blitz-removal-design.md](../docs/superpowers/specs/2026-08-02-blitz-removal-design.md)).
+Domain-driven layout: `src/<entity>/{queries,mutations,components,validations.ts}`.
+Shared UI + the owned RPC/session core in `src/core/` and `src/auth/session/`.
+See root [CLAUDE.md](../CLAUDE.md) for the frozen-deps policy.
 
-## Blitz RPC pattern
+## RPC pattern (owned core, Blitz-shaped)
 
-- Queries/mutations are plain files auto-exposed as RPC:
-  `resolver.pipe(resolver.zod(Schema), resolver.authorize(), async (input, ctx) => …)`.
+- Queries/mutations are plain files served over `POST /api/rpc/<filename>` by
+  `src/pages/api/rpc/[endpoint].ts`:
+  `resolver.pipe(resolver.zod(Schema), resolver.authorize(), async (input, ctx) => …)`
+  with `resolver` from `src/core/resolver`.
   **Every file in a `queries/`/`mutations/` folder is a public HTTP endpoint** —
   even a bare exported function; it must carry `resolver.authorize()` and do its
-  own scoping, because client-supplied `where`/`id` inputs are attacker-controlled.
+  own scoping, because client-supplied `where`/`id` inputs are attacker-controlled —
+  **and it must be registered in `src/core/rpc-registry.ts`** (a unit test,
+  `rpc-registry.test.ts`, fails the build-time suite if the two drift).
 - **Every dream/symbol/sleepingTime query AND mutation is scoped to the
   logged-in user** — e.g. `getDreams` injects `where["userId"]`, `deleteDream`
   deletes `{ id, userId }`, `updateDream` checks ownership first. Symbols
@@ -23,16 +29,25 @@ BlitzJS `2.0.0-beta.31` on Next 13 **pages router**. Domain-driven layout:
   a raw SQL top-3 of built-in symbols) — **never pass dream rows as page props**;
   they end up serialized in the public HTML (see issue #11). The
   `test/e2e/isolation.e2e.test.ts` suite guards these rules with two users.
-- Client side: `useQuery` / `usePaginatedQuery` / `useMutation` from `@blitzjs/rpc`.
+- Client side: `useQuery` / `usePaginatedQuery` / `useMutation` / `invalidateQuery`
+  from `src/core/rpc-client` (Blitz-shaped tuples, suspense on by default,
+  superjson wire format so `Date` params survive). Components never import
+  resolver files — they import the typed stubs from `src/<entity>/client`
+  (`src/auth/client-mutations` for auth). Session state: `useSession()` /
+  `getAntiCSRFToken()` from `src/auth/client`.
 - `getDreams` accepts a Prisma-shaped `{ where, orderBy, skip, take }` built on
   the **client** (see search page) — reuse it before writing a new endpoint.
 - Zod schemas for form/mutation payloads live in `src/<entity>/validations.ts`.
 
 ## Pages (src/pages/)
 
-- Every page follows the same skeleton: `BlitzPage` component +
+- Every page follows the same skeleton: a `BlitzPage`-typed component (the
+  historical alias of `AppPage` from `src/core/types`) +
   `Page.authenticate = true|false` + `Page.getLayout = <Layout title=…>` +
-  `Suspense fallback={<LoadingSpiral />}`.
+  `Suspense fallback={<LoadingSpiral />}`. The `_app` AuthGuard honors
+  `authenticate`/`redirectAuthenticatedTo` and keeps private page bodies
+  client-only (server-side query data is `undefined` by design). Route helpers
+  come from `src/routes.ts` (hand-written manifest, tested against the pages dir).
 - Shared visual pattern: sheep PNG (`public/assets/sheep-<page>.png`) in a
   `md={2}/md={8}` MUI Grid, then an `<h1 className="heading">` with a
   handwritten title PNG (`title-<page>.png`) + `sr-only` text.
