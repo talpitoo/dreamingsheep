@@ -24,8 +24,18 @@ export function formatClock(value: number) {
   return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`
 }
 
-// One entry per day (always daily, no bucketing). Days without BOTH bedtime and
-// wake-up time stay uncolored (null -> gap in the chart).
+// One entry per day (always daily, no bucketing). A chart column for day D is
+// the NIGHT ENDING on D: the wake-up recorded on D, paired with the matching
+// bedtime. In the everyday flow the two live on different rows ("now" pressed
+// at night on yesterday's journal page, wake-up this morning on today's), so
+// the bedtime is resolved in this order:
+//   1. day D's own bedtime before 18:00 — went to bed after midnight (or a
+//      daytime sleep), recorded on the wake day itself
+//   2. day D-1's evening bedtime — the 95% case (split rows)
+//   3. day D's own evening bedtime — legacy/backfilled same-row entries;
+//      physically the previous calendar evening, rendered as a negative offset
+// Nights that can't be completed (bedtime pressed but no wake-up yet, or
+// vice versa) stay uncolored (null -> gap in the chart).
 export function setSleepChartData(
   range: Range,
   sleepingTimes: SleepingTime[],
@@ -62,16 +72,31 @@ export function setSleepChartData(
   const cursor = windowStart.clone()
   while (cursor <= windowEnd) {
     const key = cursor.format("YYYY-MM-DD")
+    const previousKey = cursor.clone().subtract(1, "days").format("YYYY-MM-DD")
     const label = cursor.format("MMM D")
-    const sleepingTime = byDay[key]
+    const today = byDay[key]
+    const yesterday = byDay[previousKey]
 
     let bed: number | null = null
     let wake: number | null = null
-    if (sleepingTime?.bedtime && sleepingTime?.wakeUpTime) {
-      bed = normalizeBedtime(toHours(sleepingTime.bedtime))
-      wake = toHours(sleepingTime.wakeUpTime)
+    // did the sleep start on the previous calendar day? (drives the tooltip span)
+    let startedPreviousDay = false
+    if (today?.wakeUpTime) {
+      wake = toHours(today.wakeUpTime)
+      const ownHours = today.bedtime ? toHours(today.bedtime) : null
+      const previousEveningHours =
+        yesterday?.bedtime && toHours(yesterday.bedtime) >= 18 ? toHours(yesterday.bedtime) : null
+      if (ownHours !== null && ownHours < 18) {
+        bed = ownHours // after-midnight or daytime bedtime on the wake day itself
+      } else if (previousEveningHours !== null) {
+        bed = previousEveningHours - 24 // yesterday evening (the split-row flow)
+        startedPreviousDay = true
+      } else if (ownHours !== null) {
+        bed = normalizeBedtime(ownHours) // legacy same-row evening entry
+        startedPreviousDay = true
+      }
       // implausible ranges (wake before bed) stay uncolored instead of breaking the chart
-      if (wake <= bed) {
+      if (bed !== null && wake <= bed) {
         bed = null
         wake = null
       }
@@ -81,9 +106,10 @@ export function setSleepChartData(
       hasData = true
       minHours = Math.min(minHours, bed)
       maxHours = Math.max(maxHours, wake)
-      const tooltip = `${cursor.format("LL")}\nbedtime ${formatClock(bed)}\nwake-up ${formatClock(
-        wake
-      )}`
+      const nightLabel = startedPreviousDay
+        ? `${cursor.clone().subtract(1, "days").format("MMM D")} → ${cursor.format("MMM D, YYYY")}`
+        : cursor.format("LL")
+      const tooltip = `${nightLabel}\nbedtime ${formatClock(bed)}\nwake-up ${formatClock(wake)}`
       rows.push(
         style === "bars"
           ? [label, bed, bed, wake, wake, tooltip]

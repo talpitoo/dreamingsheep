@@ -117,8 +117,12 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   (persisted in `sessionStorage`): floating bars (CandlestickChart trick:
   low=open=bedtime, close=high=wake-up) or a mid-sleep line with interval-area
   band. Clock y-axis via `{v, f}` ticks; evening bedtimes are plotted as
-  negative offsets from midnight (`sleepChartData.ts`); days missing either
-  value render as gaps. Data via `getSleepingTimes` (plural query).
+  negative offsets from midnight (`sleepChartData.ts`). Each column is the night
+  ENDING on that day: yesterday evening's bedtime pairs with this morning's wake-up
+  (split rows — the everyday flow), with same-day after-midnight and legacy same-row
+  entries handled too; incomplete nights (either half missing) render as gaps. Data
+  via `getSleepingTimes` (fetched one extra day before the window so the first
+  night finds its bedtime).
 
 ## Testing
 

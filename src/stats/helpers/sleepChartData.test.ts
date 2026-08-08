@@ -56,6 +56,47 @@ describe("setSleepChartData", () => {
     expect(row[3]).toBe(7.25) // 07:15
     expect(row[5]).toContain("bedtime 23:00")
     expect(row[5]).toContain("wake-up 07:15")
+    // an evening bedtime physically happened the previous calendar day
+    expect(row[5]).toContain("→")
+  })
+
+  it("REGRESSION: pairs yesterday's evening bedtime with this morning's wake-up (split rows)", () => {
+    // the everyday flow: "now" pressed at 23:40 on yesterday's journal page,
+    // wake-up "now" pressed at 07:30 this morning on today's page — two rows
+    const { data } = setSleepChartData(
+      "week",
+      [sleepingTime(1, [23, 40], null), sleepingTime(0, null, [7, 30])],
+      "bars"
+    )
+    const rows = data.slice(1) as any[][]
+    const today = rows[rows.length - 1]!
+    expect(today[1]).toBeCloseTo(23 + 40 / 60 - 24) // 23:40 -> -0h20
+    expect(today[3]).toBe(7.5) // 07:30
+    expect(today[5]).toContain("→") // tooltip shows the night span, e.g. "Jul 1 → Jul 2"
+    expect(today[5]).toContain("bedtime 23:40")
+    expect(today[5]).toContain("wake-up 07:30")
+    // the bed day itself has nothing to plot — the night belongs to the wake day
+    const yesterday = rows[rows.length - 2]!
+    expect(yesterday.slice(1)).toEqual([null, null, null, null, null])
+  })
+
+  it("prefers the wake day's own after-midnight bedtime over yesterday's evening one", () => {
+    const { data } = setSleepChartData(
+      "week",
+      [sleepingTime(1, [23, 0], null), sleepingTime(0, [0, 30], [7, 30])],
+      "bars"
+    )
+    const rows = data.slice(1) as any[][]
+    const today = rows[rows.length - 1]!
+    expect(today[1]).toBe(0.5) // bed after midnight, recorded on the wake day
+    expect(today[5]).not.toContain("→") // same calendar day, no span
+  })
+
+  it("a night in progress (bedtime pressed, no wake-up yet) stays unplotted", () => {
+    const result = setSleepChartData("week", [sleepingTime(0, [23, 15], null)], "bars")
+    const rows = result.data.slice(1) as any[][]
+    rows.forEach((row) => expect(row.slice(1)).toEqual([null, null, null, null, null]))
+    expect(result.hasData).toBe(false)
   })
 
   it("supports the vampire: a 09:00->17:00 sleep stays above the midnight line", () => {
@@ -65,12 +106,12 @@ describe("setSleepChartData", () => {
     expect(row[3]).toBe(17)
   })
 
-  it("leaves days uncolored when bedtime or wake-up is missing, or the range is implausible", () => {
+  it("leaves days uncolored when a night can't be completed, or the range is implausible", () => {
     const rows = setSleepChartData(
       "week",
       [
-        sleepingTime(2, [22, 15], null), // bedtime only
-        sleepingTime(1, null, [7, 0]), // wake-up only
+        sleepingTime(4, [22, 15], null), // bedtime only, no wake-up the next day
+        sleepingTime(1, null, [7, 0]), // wake-up only, no bedtime the evening before
         sleepingTime(0, [3, 0], [2, 0]), // wake before bed (post-midnight both)
       ],
       "bars"
