@@ -55,7 +55,7 @@ npm install -g yarn
 
 ### ⟳ Create your env file
 
-5. Copy the example and fill in your values — see [.env.example](.env.example) for every variable (database URL, session/JWT secrets, AWS S3, Gmail OAuth2, reCAPTCHA):
+5. Copy the example and fill in your values — see [.env.example](.env.example) for every variable (database URL, session secret, AWS S3, Gmail OAuth2, reCAPTCHA):
 
 ```sh
 cp .env.example .env.local
@@ -66,7 +66,6 @@ cp .env.example .env.local
 ```sh
 DATABASE_URL=postgresql://postgres:<YOUR_DB_PASSWORD>@localhost:5432/dreamingsheep
 SESSION_SECRET_KEY=<paste the output of: openssl rand -hex 16>
-JWT_SECRET=<paste the output of: openssl rand -hex 64>
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;AWS, Gmail and reCAPTCHA can stay empty — sign in with the seeded demo user instead of signing up.
@@ -141,7 +140,6 @@ cp .env.example .env.local
 ```sh
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dreamingsheep
 SESSION_SECRET_KEY=<paste the output of: openssl rand -hex 16>
-JWT_SECRET=<paste the output of: openssl rand -hex 64>
 # ...and uncomment the six KEY=value lines of the "Local S3 mock" block, so symbol
 # image uploads work out of the box (keep the ## description lines commented —
 # docker compose parses this file strictly)
@@ -255,7 +253,6 @@ cp .env.example .env.local
 ```sh
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dreamingsheep
 SESSION_SECRET_KEY=<paste the output of: openssl rand -hex 16>
-JWT_SECRET=<paste the output of: openssl rand -hex 64>
 # ...and uncomment the six KEY=value lines of the "Local S3 mock" block, so symbol
 # image uploads work out of the box (keep the ## description lines commented —
 # docker compose parses this file strictly)
