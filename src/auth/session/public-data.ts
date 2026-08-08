@@ -20,3 +20,19 @@ export function decodePublicDataCookie(raw: string | undefined | null) {
     return null
   }
 }
+
+// Shared browser-side cookie reader (single home so the cookie names above and
+// the code that reads them can never drift apart).
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+export function readCookieValue(name: string): string {
+  if (typeof document === "undefined") return ""
+  const hit = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`))
+  return hit ? safeDecode(hit.slice(name.length + 1)) : ""
+}

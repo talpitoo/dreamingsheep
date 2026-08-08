@@ -5,7 +5,7 @@ import { useUpload } from "./hooks"
 import { Preview } from "./components"
 import { useFileUpload } from "use-file-upload"
 import { useFormContext } from "react-hook-form"
-import { SymbolWithUsage } from "src/symbols/queries/getSymbolsWithUsage"
+import type { SymbolWithUsage } from "src/symbols/queries/getSymbolsWithUsage"
 import { updateSymbol } from "src/symbols/client"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 

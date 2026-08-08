@@ -4,6 +4,7 @@ import {
   useQuery as useRQQuery,
 } from "@tanstack/react-query"
 import superjson from "superjson"
+import { COOKIE_CSRF, readCookieValue } from "src/auth/session/public-data"
 import { deserializeError } from "./errors"
 
 // ---- stubs -------------------------------------------------------------------
@@ -30,27 +31,13 @@ export function getQueryClient(): QueryClient {
 }
 
 // ---- transport ---------------------------------------------------------------
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value)
-  } catch {
-    return value
-  }
-}
-
-function readCookieValue(name: string): string {
-  if (typeof document === "undefined") return ""
-  const hit = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`))
-  return hit ? safeDecode(hit.slice(name.length + 1)) : ""
-}
-
 export async function rpcFetch(key: string, params: unknown): Promise<any> {
   const res = await fetch(`/api/rpc/${key}`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "anti-csrf": readCookieValue("dreamingsheep_sAntiCsrfToken"),
+      "anti-csrf": readCookieValue(COOKIE_CSRF),
     },
     body: superjson.stringify(params ?? null),
   })

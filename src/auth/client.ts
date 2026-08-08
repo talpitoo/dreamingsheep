@@ -1,20 +1,11 @@
 import { useSyncExternalStore } from "react"
-import { decodePublicDataCookie, COOKIE_CSRF, COOKIE_PUBLIC_DATA } from "./session/public-data"
+import {
+  decodePublicDataCookie,
+  readCookieValue,
+  COOKIE_CSRF,
+  COOKIE_PUBLIC_DATA,
+} from "./session/public-data"
 import { __setSessionNotifier } from "src/core/rpc-client"
-
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value)
-  } catch {
-    return value
-  }
-}
-
-function readCookieValue(name: string): string {
-  if (typeof document === "undefined") return ""
-  const hit = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`))
-  return hit ? safeDecode(hit.slice(name.length + 1)) : ""
-}
 
 export function readPublicDataFromCookie(): Record<string, unknown> {
   return decodePublicDataCookie(readCookieValue(COOKIE_PUBLIC_DATA)) ?? {}

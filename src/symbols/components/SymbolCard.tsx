@@ -3,7 +3,7 @@ import Image from "next/image"
 import { useRouter } from "next/router"
 import { useMutation } from "src/core/rpc-client"
 import { Routes } from "src/routes"
-import { SymbolWithUsage } from "src/symbols/queries/getSymbolsWithUsage"
+import type { SymbolWithUsage } from "src/symbols/queries/getSymbolsWithUsage"
 import classnames from "src/utils/classnames"
 import { Fragment, useEffect, useRef, useState } from "react"
 import {
