@@ -1,5 +1,6 @@
 import Image from "next/image"
-import { BlitzPage, ErrorComponent } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
+import { ErrorStatus as ErrorComponent } from "src/core/components/ErrorStatus"
 import { Fragment } from "react"
 import Layout from "src/core/layouts/Layout"
 import { Container, Grid, Box } from "@mui/material"

@@ -1,6 +1,6 @@
-import { resolver } from "@blitzjs/rpc"
+import { resolver } from "src/core/resolver"
 import { Login } from "../validations"
-import { Role } from "types"
+import { Role } from "src/core/types"
 import { authenticateUser, generateVerifyUserToken } from "../utils"
 
 export default resolver.pipe(resolver.zod(Login), async ({ email, password }, ctx) => {

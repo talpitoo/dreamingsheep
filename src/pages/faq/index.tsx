@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
-import { BlitzPage, Routes } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
+import { Routes } from "src/routes"
 import { Fragment, Suspense } from "react"
 import Layout from "src/core/layouts/Layout"
 import {

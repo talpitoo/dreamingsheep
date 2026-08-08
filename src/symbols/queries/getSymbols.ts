@@ -1,5 +1,6 @@
-import { resolver } from "@blitzjs/rpc"
-import { Ctx, paginate } from "blitz"
+import { resolver } from "src/core/resolver"
+import { Ctx } from "src/core/types"
+import { paginate } from "src/core/paginate"
 import db, { Prisma } from "db"
 
 interface GetSymbolsInput

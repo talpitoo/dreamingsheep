@@ -1,9 +1,10 @@
-import { useQuery } from "@blitzjs/rpc"
+import { useQuery } from "src/core/rpc-client"
+import moment from "moment"
 import { Box, Card, CardContent, Checkbox, FormControlLabel, Typography } from "@mui/material"
 import React, { useEffect, useMemo, useState } from "react"
 import { Chart } from "react-google-charts"
 import { useWindowSize } from "usehooks-ts"
-import getSleepingTimes from "src/sleepingTimes/queries/getSleepingTimes"
+import { getSleepingTimes } from "src/sleepingTimes/client"
 import {
   CustomRange,
   Range,
@@ -61,8 +62,9 @@ export interface SleepChartProps {
   custom?: CustomRange | null
 }
 
-// full-width bedtime/wake-up chart: bottom edge = bedtime, top edge = wake-up
-// time, per day; days with incomplete tracking stay uncolored
+// full-width bedtime/wake-up chart: one column per night, anchored to its
+// wake-up day — yesterday's bedtime + this morning's wake-up form one span
+// (bottom edge = bedtime, top edge = wake-up); incomplete nights stay uncolored
 export const SleepChart = ({ range, custom }: SleepChartProps) => {
   const [style, setStyle] = useState<SleepChartStyle>("bars")
   const [key, setkey] = useState(0)
@@ -92,7 +94,14 @@ export const SleepChart = ({ range, custom }: SleepChartProps) => {
     {
       orderBy: { sleepingAt: "asc" },
       where: {
-        ...(bounds && { sleepingAt: bounds }),
+        ...(bounds && {
+          sleepingAt: {
+            ...bounds,
+            // one extra day before the window: a charted night ends on its wake
+            // day, so the first visible night needs the previous evening's row
+            gte: moment(bounds.gte).subtract(1, "days").toISOString(),
+          },
+        }),
       },
     },
     { keepPreviousData: true }

@@ -1,5 +1,5 @@
-import { resolver } from "@blitzjs/rpc"
-import { Ctx } from "blitz"
+import { resolver } from "src/core/resolver"
+import { Ctx } from "src/core/types"
 import db from "db"
 
 export default resolver.pipe(resolver.authorize(), async (_, ctx: Ctx) => {

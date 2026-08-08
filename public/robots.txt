@@ -1,4 +1,4 @@
-# /api/ is deliberately NOT disallowed: Googlebot's renderer needs the Blitz RPC
+# /api/ is deliberately NOT disallowed: Googlebot's renderer needs the RPC
 # calls (e.g. /api/rpc/getCurrentUser) to render pages — blocking them made the
 # root error boundary replace the page and Google indexed the error sheep.
 # The rpc endpoints are POST-only (GET returns 404), so there is nothing to crawl.

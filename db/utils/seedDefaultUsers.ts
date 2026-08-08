@@ -1,4 +1,4 @@
-import { SecurePassword } from "@blitzjs/auth/secure-password"
+import { SecurePassword } from "src/auth/secure-password"
 import db from "db"
 
 /**

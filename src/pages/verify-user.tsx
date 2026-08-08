@@ -1,5 +1,6 @@
 import Image from "next/image"
-import { BlitzPage, Routes } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
+import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import sheepMail from "public/assets/sheep-mail.png"
 import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
@@ -7,14 +8,18 @@ import { Box, Container, Grid } from "@mui/material"
 import { useRouter } from "next/router"
 import VerifyUserForm from "src/auth/components/VerifyUserForm"
 import { useEffect } from "react"
-import { useSession } from "@blitzjs/auth"
+import { readPublicDataFromCookie } from "src/auth/client"
 
 const VerifyUserPage: BlitzPage = () => {
-  const session = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (!session.username || !session.verifyUserToken) {
+    // read the cookie directly: this effect runs once on mount, and on a full
+    // page load that is the hydration frame where useSession still reports the
+    // empty server snapshot — deciding on it bounced users Home when they
+    // refreshed /verify-user while waiting for the OTP email
+    const publicData = readPublicDataFromCookie()
+    if (!publicData.username || !publicData.verifyUserToken) {
       router.push(Routes.Home())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,10 +1,10 @@
 import Image from "next/image"
-import { useQuery } from "@blitzjs/rpc"
+import { useQuery } from "src/core/rpc-client"
 import { Button, Dialog, DialogActions, DialogContent } from "@mui/material"
 
 import { Fragment, useMemo, useState } from "react"
-import getDreams from "src/dreams/queries/getDreams"
-import getSymbolsWithUsage from "src/symbols/queries/getSymbolsWithUsage"
+import { getDreams } from "src/dreams/client"
+import { getSymbolsWithUsage } from "src/symbols/client"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import { setChartsData } from "src/stats/helpers/chartsData"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
@@ -34,7 +34,7 @@ import {
   titleStatsBase64,
   titleSymbolsBase64,
 } from "./helper"
-import { getAntiCSRFToken } from "@blitzjs/auth"
+import { getAntiCSRFToken } from "src/auth/client"
 import { Config } from "src/config"
 
 export const ExportDreams = () => {

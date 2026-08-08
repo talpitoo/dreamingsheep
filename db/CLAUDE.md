@@ -17,7 +17,7 @@ Postgres. Schema path is set in `package.json` (`"prisma": { "schema": "db/schem
 - **Symbol** — `builtIn` distinguishes predefined/system symbols from
   user-created ones (`authorId`). `code` is unique.
 - **SleepingTime** — bedtime/wake-up per day (opt-in via `trackSleepingTime`).
-- Session/Token/Otp — Blitz auth plumbing.
+- Session/Token/Otp — auth plumbing (owned session layer, `src/auth/session/`; the Session table kept its Blitz-era shape on purpose).
 
 ## Migration workflow
 
@@ -25,8 +25,8 @@ Local (dev):
 
 ```sh
 # 1. edit db/schema.prisma
-blitz prisma migrate dev --name <snake_case_name>   # generates db/migrations/<ts>_<name>/migration.sql
-blitz db seed                                        # if reseeding is needed
+npm run migrate:dev -- --name <snake_case_name>   # generates db/migrations/<ts>_<name>/migration.sql
+npm run db:seed                                        # if reseeding is needed
 ```
 
 Commit the generated migration folder. Keep migrations **additive** where
@@ -47,12 +47,12 @@ On the EC2 box, before deploying a release that contains a new migration:
 ~/backup.sh                        # 1. extra backup (or: pg_dump -U postgres dreamingsheep > backup/backup-dreamingsheep-manual.sql)
 cd ~/dreamingsheep && git pull     # 2. get the committed migration files
 npx prisma generate                # 3. refresh the client (also runs during build)
-blitz prisma migrate deploy        # 4. apply pending migrations
+npm run migrate:deploy        # 4. apply pending migrations
 # 5. then the usual build/restart (tag push → GitHub Action, or the dream* aliases)
 ```
 
-- Use **`blitz prisma migrate deploy`**, not bare `npx prisma migrate deploy` —
-  the Blitz CLI loads `.env.local` (where `DATABASE_URL` lives); plain Prisma
+- Use **`npm run migrate:deploy`**, not bare `npx prisma migrate deploy` —
+  the npm scripts load `.env.local` via Node's `--env-file` (where `DATABASE_URL` lives); plain Prisma
   only reads `.env`.
 - `migrate deploy` only applies already-committed migration files and is a no-op
   when nothing is pending — safe to run on every deploy.
@@ -61,8 +61,8 @@ blitz prisma migrate deploy        # 4. apply pending migrations
   harmless, no down-migration needed.
 - If a schema change needs a one-off data backfill/reseed, the established
   pattern is a dedicated seed file run **once**:
-  `blitz db seed --file=db/seedAfterDbSchemaUpdate.ts` (never the default
-  `blitz db seed` on production — it would recreate demo users/dreams).
+  `npm run db:seed:after-schema` (never the default
+  `npm run db:seed` on production — it would recreate demo users/dreams).
 
 ## Seeds
 

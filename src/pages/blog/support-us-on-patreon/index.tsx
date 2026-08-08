@@ -9,7 +9,7 @@ import blogPatreon from "public/assets/blog-patreon-new.jpg"
 import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
-import { BlitzPage } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
 
 const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
   return (

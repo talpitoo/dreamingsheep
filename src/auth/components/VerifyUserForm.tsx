@@ -1,14 +1,14 @@
-import { useMutation } from "@blitzjs/rpc"
+import { useMutation } from "src/core/rpc-client"
 import { LabeledTextField } from "src/core/components/LabeledTextField"
 import { Form, FORM_ERROR } from "src/core/components/Form"
-import verifyUser from "src/auth/mutations/verifyUser"
+import { verifyUser } from "src/auth/client-mutations"
 import { VerifyUser } from "src/auth/validations"
 import React, { useState } from "react"
 import { Card, CardHeader, CardContent, Typography } from "@mui/material"
-import resendOtp from "../mutations/resendOtp"
+import { resendOtp } from "src/auth/client-mutations"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { Routes } from "@blitzjs/next"
+import { Routes } from "src/routes"
 
 type VerifyUserFormProps = {
   onSuccess?: () => void

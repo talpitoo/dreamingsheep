@@ -1,8 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
-import { useSession } from "@blitzjs/auth"
+import { useSession } from "src/auth/client"
 import { useRouter } from "next/router"
-import { useMutation } from "@blitzjs/rpc"
+import { useMutation } from "src/core/rpc-client"
 import {
   AppBar,
   Box,
@@ -16,11 +16,11 @@ import {
   Toolbar,
   useMediaQuery,
 } from "@mui/material"
-import logout from "src/auth/mutations/logout"
+import { logout } from "src/auth/client-mutations"
 import React, { Fragment, useEffect, useState } from "react"
 import logo from "public/assets/logo-dreamingsheep-white.png"
 import title from "public/assets/title-dreamingsheep.png"
-import { Routes } from ".blitz"
+import { Routes } from "src/routes"
 import { Logout, Search, Settings, ExpandMore } from "@mui/icons-material"
 import { useTheme } from "@mui/material/styles"
 

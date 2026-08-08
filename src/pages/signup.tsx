@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { useRouter } from "next/router"
-import { BlitzPage, Routes } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
+import { Routes } from "src/routes"
 import { SignupForm } from "src/auth/components/SignupForm"
 import Layout from "src/core/layouts/Layout"
 import sheepSignup from "public/assets/sheep-signup.png"

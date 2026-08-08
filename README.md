@@ -9,7 +9,7 @@ An online dream journal — log dreams, tag them with symbols, find patterns.
 
 | #                                                              | route                       | you need installed      | hot reload                    | first run |
 | -------------------------------------------------------------- | --------------------------- | ----------------------- | ----------------------------- | --------- |
-| [1 💻](#-route-1--natively-nodejs--postgresql-on-your-machine) | **natively**                | Node.js 18 + PostgreSQL | ✅ instant                    | ~5 min    |
+| [1 💻](#-route-1--natively-nodejs--postgresql-on-your-machine) | **natively**                | Node.js 22 + PostgreSQL | ✅ instant                    | ~5 min    |
 | [2 🐋](#-route-2--everything-in-docker-production-like)        | **Docker, production-like** | Docker only             | ❌ rebuild after every change | ~10 min   |
 | [3 🔥](#-route-3--everything-in-docker-with-hot-reload)        | **Docker, hot reload**      | Docker only             | ✅ instant                    | ~10 min   |
 
@@ -29,11 +29,11 @@ and 🧪 [testing](#-testing).
 
 ## 💻 Route 1 — natively (Node.js + PostgreSQL on your machine)
 
-The everyday development setup: `blitz dev` on your machine, hot reload out of the box.
+The everyday development setup: `npm run dev` on your machine, hot reload out of the box.
 
 ### Install the prerequisites
 
-1. Install **Node.js** (e.g. [this guide](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04)) — the project is pinned to **Node 18**.
+1. Install **Node.js** (e.g. [this guide](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04)) — the project is pinned to **Node 22**.
 2. Install **PostgreSQL** (e.g. [this guide](https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-20-04-quickstart)).
 3. Open a PostgreSQL shell as the default `postgres` user and give it a password:
 
@@ -49,8 +49,7 @@ ALTER USER postgres WITH PASSWORD '<YOUR_DB_PASSWORD>';
 4. Install the two global CLIs:
 
 ```sh
-nvm use 18
-npm install -g blitz    # https://blitzjs.com/docs/get-started
+nvm use 22
 npm install -g yarn
 ```
 
@@ -77,7 +76,7 @@ JWT_SECRET=<paste the output of: openssl rand -hex 64>
 6. Install the dependencies:
 
 ```sh
-nvm use 18
+nvm use 22
 yarn install
 npx prisma generate
 ```
@@ -86,8 +85,8 @@ npx prisma generate
 8. Create the database schema and fill it with demo data:
 
 ```sh
-blitz prisma migrate dev   # creates + applies the migrations
-blitz db seed              # demo users + symbols + dreams
+npm run migrate:dev   # creates + applies the migrations
+npm run db:seed              # demo users + symbols + dreams
 ```
 
 ### Run it
@@ -95,7 +94,7 @@ blitz db seed              # demo users + symbols + dreams
 9. Start the dev server:
 
 ```sh
-blitz dev                  # or: npm run dev
+npm run dev
 ```
 
 10. Open [localhost:3000](http://localhost:3000) and log in with the seeded demo user **`zhuangzi@dreamingsheep.net`** / **`zhuangzi`**.
@@ -116,7 +115,7 @@ blitz dev                  # or: npm run dev
 ## 🐋 Route 2 — everything in Docker, production-like
 
 App, PostgreSQL and the S3 mock all run in containers. The source is **copied into
-the image** and `blitz build` runs at build time, exactly like the real deployment
+the image** and `npm run build` runs at build time, exactly like the real deployment
 — which also means **every code change needs an image rebuild**. If you're writing
 code, take [route 3](#-route-3--everything-in-docker-with-hot-reload) instead.
 
@@ -180,8 +179,8 @@ docker compose -f docker-compose.production.yml -f docker-compose.local.yml up -
 
 ```sh
 docker exec -it docker-dreamingsheep bash
-blitz prisma migrate deploy   # applies the committed migrations (non-interactive)
-blitz db seed                 # demo users + symbols + dreams
+npm run migrate:deploy   # applies the committed migrations (non-interactive)
+npm run db:seed                 # demo users + symbols + dreams
 exit
 ```
 
@@ -214,7 +213,7 @@ docker compose -f docker-compose.production.yml -f docker-compose.local.yml down
 
 ```
 REPOSITORY                  TAG      SIZE
-dreamingsheep-blitzjs-app   latest   11GB
+dreamingsheep-blitzjs-app   latest   11GB   (image name is historical — the app is plain Next.js now)
 postgres                    13.4     533MB
 minio/minio                 latest   241MB   (S3 mock)
 minio/mc                    latest   117MB   (S3 mock init)
@@ -227,7 +226,7 @@ minio/mc                    latest   117MB   (S3 mock init)
 ## 🔥 Route 3 — everything in Docker, with hot reload
 
 Same containers as route 2, but your working copy is **bind-mounted** into the app
-container and it runs `blitz dev` — save a file on the host and the container
+container and it runs `npm run dev` — save a file on the host and the container
 recompiles it in a second or two. **Build the image once**, then never again
 (until dependencies change). No Node.js or PostgreSQL on your machine.
 
@@ -292,12 +291,12 @@ docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f doc
 
 ```sh
 docker exec -it docker-dreamingsheep bash
-blitz prisma migrate deploy   # applies the committed migrations (non-interactive)
-blitz db seed                 # demo users + symbols + dreams
+npm run migrate:deploy   # applies the committed migrations (non-interactive)
+npm run db:seed                 # demo users + symbols + dreams
 exit
 ```
 
-8. Watch it compile (first page load takes a moment — that's `blitz dev` building on demand):
+8. Watch it compile (first page load takes a moment — that's `npm run dev` building on demand):
 
 ```sh
 docker logs -f docker-dreamingsheep
@@ -313,12 +312,12 @@ docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f doc
 
 ### What still needs a restart or a rebuild
 
-| you changed…                                         | what to do                                                                                                      |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| anything in `src/`, `mailers/`, `test/` …            | nothing — hot reload handles it                                                                                 |
-| `.env.local`, `next.config.js`, `tailwind.config.js` | `docker compose -f docker-compose.production.yml -f docker-compose.dev.yml restart blitzjs-app`                 |
-| `db/schema.prisma`                                   | `docker exec -it docker-dreamingsheep npx prisma generate`, then `blitz prisma migrate deploy` in the container |
-| `package.json` / `yarn.lock`                         | rebuild + drop the stale volumes (below)                                                                        |
+| you changed…                                         | what to do                                                                                                 |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| anything in `src/`, `mailers/`, `test/` …            | nothing — hot reload handles it                                                                            |
+| `.env.local`, `next.config.js`, `tailwind.config.js` | `docker compose -f docker-compose.production.yml -f docker-compose.dev.yml restart blitzjs-app`            |
+| `db/schema.prisma`                                   | `docker exec -it docker-dreamingsheep npx prisma generate`, then `npm run migrate:deploy` in the container |
+| `package.json` / `yarn.lock`                         | rebuild + drop the stale volumes (below)                                                                   |
 
 ```sh
 # after a dependency change: rebuild, drop the stale volumes, start again
@@ -332,10 +331,10 @@ docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f doc
 <details>
 <summary>Good to know (how the bind mount works, file watching, caveats)</summary>
 
-- [docker-compose.dev.yml](docker-compose.dev.yml) is an **overlay**: always pass it _after_ `docker-compose.production.yml`, which contributes PostgreSQL and the base app service. It selects the `dev` target of the [Dockerfile](Dockerfile) — the same dependency layers as production, minus `blitz build`.
+- [docker-compose.dev.yml](docker-compose.dev.yml) is an **overlay**: always pass it _after_ `docker-compose.production.yml`, which contributes PostgreSQL and the base app service. It selects the `dev` target of the [Dockerfile](Dockerfile) — the same dependency layers as production, minus `npm run build`.
 - Two container-owned directories are shadowed by named volumes so the container's Linux binaries and caches never leak into your host checkout: `/app/node_modules` and `/app/.next`. Everything else under `/app` is your live working copy.
 - **File watching**: inotify over a Linux bind mount works out of the box. If edits are somehow _not_ picked up (macOS/Windows Docker Desktop, or the repo on a networked filesystem), start the stack with polling: `WATCHPACK_POLLING=true docker compose … up -d`.
-- **Dev, not production**: first page loads are slower and bundles are unminified — that's `blitz dev` doing its job. Use [route 2](#-route-2--everything-in-docker-production-like) to sanity-check a real build.
+- **Dev, not production**: first page loads are slower and bundles are unminified — that's `npm run dev` doing its job. Use [route 2](#-route-2--everything-in-docker-production-like) to sanity-check a real build.
 - ⚠️ **DB password**: the compose PostgreSQL initializes from `POSTGRES_PASSWORD` (default `postgres`), baked into the volume on **first initialization only** — changing it later requires `docker volume rm volume-postgres-dreamingsheep`, which wipes the database.
 
 </details>
@@ -363,7 +362,7 @@ docker compose -f docker-compose.production.yml down --rmi all
 
 Companions for [route 1](#-route-1--natively-nodejs--postgresql-on-your-machine):
 run only the _services_ in Docker while the app runs on your machine with
-`blitz dev`. (Routes 2 and 3 already include both.)
+`npm run dev`. (Routes 2 and 3 already include both.)
 
 **S3 mock** — symbol image uploads without an AWS account (issue
 [#13](https://github.com/talpitoo/dreamingsheep/issues/13)).
@@ -389,7 +388,7 @@ S3_BUCKET=dreamingsheep-local
 NEXT_PUBLIC_S3_BUCKET=http://localhost:9000/dreamingsheep-local
 ```
 
-3. Restart the dev server (`blitz dev`) and create a custom symbol with a picture on the Symbols page. Browse the bucket at [localhost:9001](http://localhost:9001) (login `test` / `test1234`).
+3. Restart the dev server (`npm run dev`) and create a custom symbol with a picture on the Symbols page. Browse the bucket at [localhost:9001](http://localhost:9001) (login `test` / `test1234`).
 4. **Production is unaffected**: the S3 client only switches endpoints when `S3_ENDPOINT` is set — leave it unset outside local development.
 
 **PostgreSQL** — if you'd rather not install it natively, run just the database
@@ -408,7 +407,7 @@ docker compose -f docker-compose.production.yml up -d postgres
 - `npm run test:e2e` — end-to-end tests (Vitest + puppeteer) driving the real app in
   headless Chromium: login, dream/symbol CRUD, search, settings toggles and their
   effect on the Stats page, public pages. Requires a **running dev server**
-  (`npm run dev`, or set `E2E_BASE_URL`) and a **seeded local DB** (`blitz db seed`
+  (`npm run dev`, or set `E2E_BASE_URL`) and a **seeded local DB** (`npm run db:seed`
   — the flows log in as the demo user and clean up after themselves).
 - CI (`.github/workflows/test.yml`) runs lint, type-check and unit tests on every
   PR; the E2E suite is local-only for now.

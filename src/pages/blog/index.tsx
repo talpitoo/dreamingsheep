@@ -1,9 +1,9 @@
-import { gSSP } from "src/blitz-server"
+import { GetServerSideProps } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { InferGetServerSidePropsType } from "next"
 import { useRouter } from "next/router"
-import { BlitzPage } from "@blitzjs/next"
+import { AppPage as BlitzPage } from "src/core/types"
 import Layout from "src/core/layouts/Layout"
 import {
   Card,
@@ -134,7 +134,7 @@ BlogPage.getLayout = (page) => (
   </Layout>
 )
 
-export const getServerSideProps = gSSP(async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const blogs = getBlogs()
 
   return {
@@ -142,6 +142,6 @@ export const getServerSideProps = gSSP(async ({ req, res }) => {
       blogs,
     },
   }
-})
+}
 
 export default BlogPage

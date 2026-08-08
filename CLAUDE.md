@@ -2,7 +2,7 @@
 
 Context file for AI agents (Claude Code & friends). Granular docs live next to the
 code: [db/CLAUDE.md](db/CLAUDE.md) (schema, migrations, seeds, production DB runbook)
-and [src/CLAUDE.md](src/CLAUDE.md) (Blitz patterns, forms, charts, page conventions).
+and [src/CLAUDE.md](src/CLAUDE.md) (RPC/session core, forms, charts, page conventions).
 
 ## What this is
 
@@ -28,29 +28,34 @@ Product philosophy (distilled from the blog under `src/pages/blog/`):
 ## ⚠️ Frozen dependencies policy (long-term goal — respect this)
 
 **All dependencies stay exactly as pinned in `package.json`, frozen in time —
-including Node 18 — unless the maintainer personally tests and approves a new
+including Node 22 — unless the maintainer personally tests and approves a new
 dependency that is truly required.** This is a peculiar, carefully balanced combo:
 
-- **BlitzJS `2.0.0-beta.31`** (deliberately _not_ the latest Blitz) on
-  **Next 13.4.5** (pages router)
+- **Next 16.2** (pages router — App Router is a future roadmap item) on **Node 22**;
+  Blitz was removed 2026-08 in one take (design:
+  [docs/superpowers/specs/2026-08-02-blitz-removal-design.md](docs/superpowers/specs/2026-08-02-blitz-removal-design.md))
+  and replaced by a small **owned core**: `src/core/` (resolver, paginate, errors,
+  rpc handler/client, Routes) + `src/auth/session/` (DB-backed sessions, CSRF) —
+  ~900 lines, unit-tested; treat it as security-critical code
 - **MUI 5 + Tailwind 3** mixed together (yes, both; `sx` and utility classes coexist)
-- **Prisma 3.13** + Postgres, React 18, react-google-charts 4 + d3 7
+- **Prisma 3.13** + Postgres, React 18, react-google-charts 4 + d3 7,
+  @tanstack/react-query 4 (what the rpc-client wraps), superjson on the RPC wire
 - Three date libs coexist: moment (stats), luxon (pickers), date-fns — don't
   consolidate them, don't add a fourth
 
 Do **not** bump versions, add libraries, or "modernize" as a side effect of a
 feature. Prefer reusing existing components/queries over introducing anything new
-(backend additions especially — the maintainer is frontend-focused). A future
-migration to plain Next.js App Router + NextAuth exists on the roadmap but is
-**out of scope** until explicitly started.
+(backend additions especially — the maintainer is frontend-focused). The future
+migration to the Next.js App Router remains on the roadmap and is **out of scope**
+until explicitly started.
 
 ## Stack & layout
 
-- Blitz app: pages in `src/pages/` (file-based routing), domain logic in
+- Next.js app: pages in `src/pages/` (file-based routing), domain logic in
   `src/<entity>/{queries,mutations,components,validations.ts}` — entities:
   `dreams`, `symbols`, `users`, `sleepingTimes`, plus `auth`, `stats`, `settings`,
   `contact`, `core` (shared components/layouts/helpers).
-- DB: `db/schema.prisma`, migrations in `db/migrations/`, seeds via `blitz db seed`.
+- DB: `db/schema.prisma`, migrations in `db/migrations/`, seeds via `npm run db:seed`.
 - Blog articles and FAQ are **hardcoded TSX pages** (no CMS/markdown), e.g.
   `src/pages/blog/<slug>/index.tsx`.
 - Icon font: "lucidicon" CSS classes (`lucidicon-eye`, `lucidicon-unicorn`, …);
@@ -60,13 +65,14 @@ migration to plain Next.js App Router + NextAuth exists on the roadmap but is
 ## Commands
 
 ```sh
-npm run dev          # blitz dev → localhost:3000
-npm run build        # blitz build
+npm run dev          # next dev → localhost:3000
+npm run build        # next build
 npm run lint         # eslint
 npm run type:check   # tsc --noEmit
-npm run studio       # prisma studio
-blitz prisma migrate dev   # create/apply migrations locally
-blitz db seed              # seed symbols, demo users, demo dreams
+npm run studio       # prisma studio (loads .env.local via node --env-file)
+npm run migrate:dev  # create/apply migrations locally
+npm run migrate:deploy       # apply committed migrations (production runbook)
+npm run db:seed              # seed symbols, demo users, demo dreams
 
 # everything in Docker (see README.md) — add -f docker-compose.dev.yml for hot reload
 docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f docker-compose.local.yml up -d
@@ -74,7 +80,7 @@ docker compose -f docker-compose.production.yml -f docker-compose.dev.yml -f doc
 
 The compose stack has two flavours: without `docker-compose.dev.yml` the app
 container serves a **baked production build** (edits need a rebuild); with it, the
-repo is bind-mounted and `blitz dev` hot-reloads. The `Dockerfile` has matching
+repo is bind-mounted and `npm run dev` hot-reloads. The `Dockerfile` has matching
 `dev` / `production` targets.
 
 Local seeded demo logins (localhost only): `zhuangzi@dreamingsheep.net` /
@@ -86,22 +92,23 @@ Local seeded demo logins (localhost only): `zhuangzi@dreamingsheep.net` /
 Production = a single AWS EC2 box (Ubuntu/ARM): nginx reverse-proxies
 :443 → localhost:3000 (with a `maintenance.html` served on 502/503/504),
 Postgres runs **locally on the same box**, app config in `.env.local`
-(never committed), Blitz app kept alive via `nohup` + shell aliases
+(never committed), Next.js app kept alive via `nohup` + shell aliases
 (`dream`, `dreamkill`, `dream-restart`, `dreamlog`, `dreamcheck`).
 
 Release flow: bump `"version"` in `package.json` → commit `new version vX.Y.Z`
 → tag `vX.Y.Z` → push tag. GitHub Actions
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) then SSHes into the
 box, `git pull`, `yarn install`, `yarn build`, restarts. **It does NOT run DB
-migrations** — those are applied manually with `blitz prisma migrate deploy`
-(never `migrate dev` in production; note it must be the _blitz_ CLI, which loads
-`.env.local`). Full DB runbook in [db/CLAUDE.md](db/CLAUDE.md). The maintainer
+migrations** — those are applied manually with `npm run migrate:deploy`
+(never `migrate dev` in production; the npm script loads `.env.local` via
+Node's `--env-file` — bare `npx prisma` still reads only `.env`). Full DB
+runbook in [db/CLAUDE.md](db/CLAUDE.md). The maintainer
 keeps a private devops cheatsheet (AWS/EC2/S3 setup, nginx config, Gmail OAuth,
 DNS, backups) outside this repo — ask rather than guess for infra details.
 
 ## Roadmap (see ROADMAP.md)
 
-Phase 1: Tailwind-v4 migration of `sx={{}}` (maintainer-led), tests, TS strict.
-Phase 2: BlitzJS → Next.js App Router + NextAuth (**not now**).
+Phase 1: Tailwind-v4 migration of `sx={{}}` (maintainer-led), tests, TS strict (#3, now unblocked).
+Phase 2: Blitz removal **done** (2026-08); the Next.js App Router move remains (**not now**).
 Phase 3: interactive charts (in progress — issues #6/#7), AI dream interpreter,
 public export API.

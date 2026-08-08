@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { useQuery } from "@blitzjs/rpc"
+import { useQuery } from "src/core/rpc-client"
 import {
   Typography,
   FormLabel,
@@ -14,8 +14,8 @@ import { Symbol } from "db"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
-import getSymbols from "src/symbols/queries/getSymbols"
-import getSymbolsWithoutDreams from "src/symbols/queries/getSymbolsWithoutDreams"
+import { getSymbols } from "src/symbols/client"
+import { getSymbolsWithoutDreams } from "src/symbols/client"
 import { useElementSize } from "usehooks-ts"
 
 interface SymbolsRadioListProps {

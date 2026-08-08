@@ -1,5 +1,5 @@
-import { generateToken, hash256 } from "@blitzjs/auth"
-import { resolver } from "@blitzjs/rpc"
+import { generateToken, hash256 } from "src/core/tokens"
+import { resolver } from "src/core/resolver"
 import db, { User } from "db"
 import { ForgotPassword } from "../validations"
 

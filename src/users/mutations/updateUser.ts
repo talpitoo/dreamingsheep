@@ -1,8 +1,8 @@
-import { resolver } from "@blitzjs/rpc"
-import { Ctx } from "blitz"
+import { resolver } from "src/core/resolver"
+import { Ctx } from "src/core/types"
 import db from "db"
 import { UpdateUser } from "src/users/validations"
-import { Role } from "types"
+import { Role } from "src/core/types"
 
 export default resolver.pipe(
   resolver.zod(UpdateUser),

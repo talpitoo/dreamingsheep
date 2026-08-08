@@ -1,7 +1,7 @@
 import Link from "next/link"
-import { useMutation } from "@blitzjs/rpc"
+import { useMutation } from "src/core/rpc-client"
 import { useRouter } from "next/router"
-import { Routes } from "@blitzjs/next"
+import { Routes } from "src/routes"
 import {
   Box,
   Button,
@@ -19,8 +19,8 @@ import classnames from "src/utils/classnames"
 import { Dream, DreamTime, DreamType, RecallTime, Symbol } from "db"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { DreamForm, FORM_ERROR } from "./DreamForm"
-import updateDream from "src/dreams/mutations/updateDream"
-import deleteDream from "src/dreams/mutations/deleteDream"
+import { updateDream } from "src/dreams/client"
+import { deleteDream } from "src/dreams/client"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import {
   getClassnameByTime,

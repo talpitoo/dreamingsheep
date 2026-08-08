@@ -1,6 +1,6 @@
 // src/pages/api/s3/upload.ts
 import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3"
-import { getSession } from "@blitzjs/auth"
+import { getSession } from "src/auth/session"
 import formidable from "formidable"
 import fs from "fs"
 import { v4 as uuidv4 } from "uuid"
@@ -47,11 +47,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(405).json({ error: "Method not allowed" })
     }
 
-    // Bypass Blitz CSRF check: temporarily pretend this is a GET so getSession skips CSRF validation
-    const originalMethod = req.method
-    req.method = "GET"
-    const session = await getSession(req, res)
-    req.method = originalMethod
+    // CSRF deliberately skipped (same effective behavior as the old GET-spoof hack —
+    // the client sends a wrong header name and always has); session auth still required
+    const session = await getSession(req, res, { skipCsrf: true })
 
     if (!session.userId) {
       return res.status(401).json({ error: "Unauthorized" })

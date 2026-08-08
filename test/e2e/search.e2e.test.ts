@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { Browser, Page } from "puppeteer"
 import { BASE, bodyText, launchBrowser, login, newPage, sleep } from "./helpers"
 
-// relies on the seeded demo data (blitz db seed): zhuangzi's "The Butterfly Dream"
+// relies on the seeded demo data (npm run db:seed): zhuangzi's "The Butterfly Dream"
 describe("search", () => {
   let browser: Browser
   let page: Page

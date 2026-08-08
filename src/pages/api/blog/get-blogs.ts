@@ -1,4 +1,3 @@
-import { api } from "src/blitz-server"
 import { NextApiHandler } from "next"
 import fs from "fs"
 import path from "path"
@@ -59,4 +58,4 @@ const handler: NextApiHandler = async (_, res) => {
   res.send(blogs)
 }
 
-export default api(handler)
+export default handler
