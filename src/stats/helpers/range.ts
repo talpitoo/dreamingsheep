@@ -14,6 +14,7 @@ export const STATS_CUSTOM_RANGE_STORAGE_KEY = "dreamingsheep.stats.customRange"
 export const ADVANCED_STATS_FILTERS_STORAGE_KEY = "dreamingsheep.stats.advancedFilters"
 export const ADVANCED_STATS_PANEL_STORAGE_KEY = "dreamingsheep.stats.advancedPanel"
 export const SLEEP_CHART_STYLE_STORAGE_KEY = "dreamingsheep.stats.sleepChartStyle"
+export const SYMBOL_CHART_CUSTOM_ONLY_STORAGE_KEY = "dreamingsheep.stats.symbolChartCustomOnly"
 
 export const DEFAULT_RANGE: Range = "month"
 

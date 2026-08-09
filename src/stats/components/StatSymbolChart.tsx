@@ -1,11 +1,21 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
-import { Card, CardContent, Container, Typography } from "@mui/material"
+import {
+  Box,
+  Card,
+  CardContent,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Typography,
+} from "@mui/material"
+import { SYMBOL_CHART_CUSTOM_ONLY_STORAGE_KEY } from "src/stats/helpers/range"
 
 export interface StatSymbolChartProps {
   data: {
     symbol: string
     count: number
+    builtIn?: boolean
   }[]
   isPdf?: boolean
 }
@@ -24,12 +34,31 @@ function truncateLabel(label: string, maxLength: number): string {
 
 export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
   const chartRef = useRef<HTMLDivElement>(null)
+  const [customOnly, setCustomOnly] = useState(false)
+
+  // restore the last checkbox state within this browser session (sleep chart pattern)
+  useEffect(() => {
+    setCustomOnly(window.sessionStorage.getItem(SYMBOL_CHART_CUSTOM_ONLY_STORAGE_KEY) === "true")
+  }, [])
+
+  function changeCustomOnly(checked: boolean) {
+    setCustomOnly(checked)
+    window.sessionStorage.setItem(SYMBOL_CHART_CUSTOM_ONLY_STORAGE_KEY, String(checked))
+  }
+
+  // "custom only" hides the built-in symbols so the user's own creations get the room;
+  // purely client-side — the aggregated data already carries each symbol's builtIn flag.
+  // The PDF export has no checkbox and always renders the full set
+  const chartData = useMemo(
+    () => (customOnly && !isPdf ? data.filter((entry) => !entry.builtIn) : data),
+    [data, customOnly, isPdf]
+  )
 
   useEffect(() => {
     const svgEl = d3.select(chartRef.current)
     svgEl.selectAll("*").remove()
-    if (data.length > 0) {
-      const dataset = { children: data }
+    if (chartData.length > 0) {
+      const dataset = { children: chartData }
 
       const diameter = 200
 
@@ -72,7 +101,7 @@ export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
         .text((d) => truncateLabel(d.data.symbol, d.r / 3))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data])
+  }, [chartData])
 
   if (isPdf) {
     return <div ref={chartRef} style={{ display: "flex", justifyContent: "center" }}></div>
@@ -80,7 +109,19 @@ export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
   return (
     <Card className="translate-x-0 translate-y-0 transform-gpu">
       <CardContent className="bg-white">
-        <Typography variant="subtitle1">symbols</Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="subtitle1">symbols</Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={customOnly}
+                onChange={(_, checked) => changeCustomOnly(checked)}
+              />
+            }
+            label={<Typography variant="body2">custom only</Typography>}
+          />
+        </Box>
         <Container ref={chartRef} sx={{ display: "flex", justifyContent: "center" }}></Container>
       </CardContent>
     </Card>

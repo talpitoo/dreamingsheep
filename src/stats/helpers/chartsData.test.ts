@@ -69,7 +69,15 @@ describe("setChartsData", () => {
       dream(0, { symbols: [dao] }),
       dream(1, { symbols: [dao, dao2] }),
     ])
-    expect(charts.symbol).toContainEqual({ symbol: "dao", count: 2 })
-    expect(charts.symbol).toContainEqual({ symbol: "dao", count: 1 })
+    expect(charts.symbol).toContainEqual(expect.objectContaining({ symbol: "dao", count: 2 }))
+    expect(charts.symbol).toContainEqual(expect.objectContaining({ symbol: "dao", count: 1 }))
+  })
+
+  it("carries each symbol's builtIn flag so the symbol chart can filter custom-only", () => {
+    const water = { id: 1, name: "water", builtIn: true }
+    const dao = { id: 2, name: "dao", builtIn: false }
+    const charts = setChartsData("week", [dream(0, { symbols: [water, dao] })])
+    expect(charts.symbol).toContainEqual({ symbol: "water", count: 1, builtIn: true })
+    expect(charts.symbol).toContainEqual({ symbol: "dao", count: 1, builtIn: false })
   })
 })
