@@ -83,6 +83,8 @@ export function setChartsData(
         symbolCount[symbol.id] = {
           symbol: symbol.name,
           count: 1,
+          // the symbol chart's "custom only" checkbox filters on this client-side
+          builtIn: symbol.builtIn,
         }
       }
     })
