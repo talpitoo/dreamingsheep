@@ -117,12 +117,15 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   (persisted in `sessionStorage`): floating bars (CandlestickChart trick:
   low=open=bedtime, close=high=wake-up) or a mid-sleep line with interval-area
   band. Clock y-axis via `{v, f}` ticks; evening bedtimes are plotted as
-  negative offsets from midnight (`sleepChartData.ts`). Each column is the night
-  ENDING on that day: yesterday evening's bedtime pairs with this morning's wake-up
-  (split rows — the everyday flow), with same-day after-midnight and legacy same-row
-  entries handled too; incomplete nights (either half missing) render as gaps. Data
-  via `getSleepingTimes` (fetched one extra day before the window so the first
-  night finds its bedtime).
+  negative offsets from midnight (`sleepChartData.ts`). Rows are NIGHT-ANCHORED
+  (spec: 2026-08-09-sleep-night-anchoring-design.md): row N's bedtime belongs to
+  the night N→N+1 whatever the clock says (23:00 = before midnight, 02:00 = after);
+  each chart column pairs day D's wake-up with day D−1's bedtime (legacy same-row
+  entries as fallback); incomplete nights render as gaps. The bedtime "now" button
+  files after-midnight presses (before noon) to the previous day's row with a 🌙
+  toast — picker-typed values always respect the viewed page. Data via
+  `getSleepingTimes` (fetched one extra day before the window so the first night
+  finds its bedtime).
 
 ## Testing
 

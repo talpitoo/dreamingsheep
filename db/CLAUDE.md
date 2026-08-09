@@ -16,7 +16,9 @@ Postgres. Schema path is set in `package.json` (`"prisma": { "schema": "db/schem
   m2m `symbols`. Cascade-deletes with the user.
 - **Symbol** — `builtIn` distinguishes predefined/system symbols from
   user-created ones (`authorId`). `code` is unique.
-- **SleepingTime** — bedtime/wake-up per day (opt-in via `trackSleepingTime`).
+- **SleepingTime** — bedtime/wake-up per day (opt-in via `trackSleepingTime`); rows
+  are night-anchored: day N's bedtime belongs to the night N→N+1 even when the
+  clock value is after midnight (see docs/superpowers/specs/2026-08-09-sleep-night-anchoring-design.md).
 - Session/Token/Otp — auth plumbing (owned session layer, `src/auth/session/`; the Session table kept its Blitz-era shape on purpose).
 
 ## Migration workflow
