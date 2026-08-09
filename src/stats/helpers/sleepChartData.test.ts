@@ -80,16 +80,32 @@ describe("setSleepChartData", () => {
     expect(yesterday.slice(1)).toEqual([null, null, null, null, null])
   })
 
-  it("prefers the wake day's own after-midnight bedtime over yesterday's evening one", () => {
+  it("REGRESSION: an after-midnight bedtime on yesterday's row is that night's bedtime", () => {
+    // the maintainer's convention: at 2 AM you record the bedtime on YESTERDAY's
+    // page — row N describes the night N -> N+1 regardless of the clock value
     const { data } = setSleepChartData(
       "week",
-      [sleepingTime(1, [23, 0], null), sleepingTime(0, [0, 30], [7, 30])],
+      [sleepingTime(1, [2, 0], null), sleepingTime(0, null, [8, 0])],
       "bars"
     )
     const rows = data.slice(1) as any[][]
     const today = rows[rows.length - 1]!
-    expect(today[1]).toBe(0.5) // bed after midnight, recorded on the wake day
-    expect(today[5]).not.toContain("→") // same calendar day, no span
+    expect(today[1]).toBe(2) // 02:00, after midnight -> positive hours
+    expect(today[3]).toBe(8) // 6 hours of sleep
+    expect(today[5]).toContain("→") // still labelled as the night span
+    expect(today[5]).toContain("bedtime 02:00")
+  })
+
+  it("yesterday's bedtime wins over a stray value on the wake day's own row", () => {
+    // row-anchoring: the wake day's own bedtime belongs to the NEXT night
+    const { data } = setSleepChartData(
+      "week",
+      [sleepingTime(1, [23, 0], null), sleepingTime(0, [22, 30], [7, 30])],
+      "bars"
+    )
+    const rows = data.slice(1) as any[][]
+    const today = rows[rows.length - 1]!
+    expect(today[1]).toBe(-1) // yesterday 23:00, not today's 22:30
   })
 
   it("a night in progress (bedtime pressed, no wake-up yet) stays unplotted", () => {

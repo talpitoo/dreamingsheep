@@ -24,16 +24,15 @@ export function formatClock(value: number) {
   return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`
 }
 
-// One entry per day (always daily, no bucketing). A chart column for day D is
-// the NIGHT ENDING on D: the wake-up recorded on D, paired with the matching
-// bedtime. In the everyday flow the two live on different rows ("now" pressed
-// at night on yesterday's journal page, wake-up this morning on today's), so
-// the bedtime is resolved in this order:
-//   1. day D's own bedtime before 18:00 — went to bed after midnight (or a
-//      daytime sleep), recorded on the wake day itself
-//   2. day D-1's evening bedtime — the 95% case (split rows)
-//   3. day D's own evening bedtime — legacy/backfilled same-row entries;
-//      physically the previous calendar evening, rendered as a negative offset
+// One entry per day (always daily, no bucketing). Rows are NIGHT-ANCHORED
+// (spec: docs/superpowers/specs/2026-08-09-sleep-night-anchoring-design.md):
+// row N's bedtime belongs to the night N -> N+1 regardless of its clock value
+// (23:00 = before midnight, 02:00 = after midnight of N's night). A chart
+// column for wake-day D pairs D's wake-up with, in order:
+//   1. day D-1's bedtime — ANY clock value (>= 18:00 renders as a negative
+//      offset before midnight; < 18:00 renders positive, after midnight)
+//   2. day D's own bedtime — legacy/backfilled same-row entries and same-day
+//      daytime sleeps (>= 18:00 renders negative with a night-span tooltip)
 // Nights that can't be completed (bedtime pressed but no wake-up yet, or
 // vice versa) stay uncolored (null -> gap in the chart).
 export function setSleepChartData(
@@ -84,16 +83,15 @@ export function setSleepChartData(
     if (today?.wakeUpTime) {
       wake = toHours(today.wakeUpTime)
       const ownHours = today.bedtime ? toHours(today.bedtime) : null
-      const previousEveningHours =
-        yesterday?.bedtime && toHours(yesterday.bedtime) >= 18 ? toHours(yesterday.bedtime) : null
-      if (ownHours !== null && ownHours < 18) {
-        bed = ownHours // after-midnight or daytime bedtime on the wake day itself
-      } else if (previousEveningHours !== null) {
-        bed = previousEveningHours - 24 // yesterday evening (the split-row flow)
+      const previousHours = yesterday?.bedtime ? toHours(yesterday.bedtime) : null
+      if (previousHours !== null) {
+        // the night's own row: evening values wrap to negative, after-midnight stay positive
+        bed = normalizeBedtime(previousHours)
         startedPreviousDay = true
       } else if (ownHours !== null) {
-        bed = normalizeBedtime(ownHours) // legacy same-row evening entry
-        startedPreviousDay = true
+        // legacy same-row entry (evening = previous calendar night) or same-day daytime sleep
+        bed = normalizeBedtime(ownHours)
+        startedPreviousDay = ownHours >= 18
       }
       // implausible ranges (wake before bed) stay uncolored instead of breaking the chart
       if (bed !== null && wake <= bed) {

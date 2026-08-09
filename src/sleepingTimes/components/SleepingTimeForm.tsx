@@ -1,7 +1,7 @@
-import { useMutation, useQuery } from "src/core/rpc-client"
+import { rpcFetch, useMutation, useQuery } from "src/core/rpc-client"
 import { Form } from "src/core/components/Form"
 export { FORM_ERROR } from "src/core/components/Form"
-import { Button, Grid, TextField, TextFieldProps } from "@mui/material"
+import { Button, Grid, Snackbar, TextField, TextFieldProps } from "@mui/material"
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
 import { TimePicker, TimePickerProps } from "@mui/x-date-pickers/TimePicker"
@@ -20,6 +20,7 @@ import { updateSleepingTime } from "src/sleepingTimes/client"
 import { Controller, useFormContext } from "react-hook-form"
 import { DateTime } from "luxon"
 import { getSleepingTime } from "src/sleepingTimes/client"
+import { BEDTIME_NIGHT_CUTOFF_HOUR, bedtimeNightTarget } from "src/sleepingTimes/helpers"
 
 function getISODateString(date: Date | null) {
   if (date) {
@@ -48,10 +49,16 @@ interface TimePickerFieldProps
   onChangeSubmit: (value: Date) => void
   /** adds an inline "now" button; how the current time snaps to the 5-minute grid */
   nowRounding?: "floor" | "ceil"
+  /**
+   * intercepts the "now" button only (never picker-typed values): return true
+   * when the value was handled elsewhere — the field and the default submit
+   * are then left untouched (used by the after-midnight bedtime shift)
+   */
+  onNowPressed?: (value: Date) => boolean | Promise<boolean>
 }
 
 const TimePickerField = forwardRef<Partial<TimePickerProps<Date, Date>>, TimePickerFieldProps>(
-  ({ name, renderInput, onChangeSubmit, nowRounding, ...props }, ref) => {
+  ({ name, renderInput, onChangeSubmit, nowRounding, onNowPressed, ...props }, ref) => {
     const [isOpen, setIsOpen] = useState(false)
     const [timePickerValue, setTimePickerValue] = useState<Date | null>(null)
     const {
@@ -102,11 +109,16 @@ const TimePickerField = forwardRef<Partial<TimePickerProps<Date, Date>>, TimePic
                                 // keep the tap from focusing/opening the picker (mobile
                                 // variant opens its dialog on any click into the field)
                                 onMouseDown={(event) => event.preventDefault()}
-                                onClick={(event) => {
+                                onClick={async (event) => {
                                   event.stopPropagation()
                                   const nowValue = nowOnFiveMinuteGrid(nowRounding)
-                                  onChange(nowValue)
-                                  onChangeSubmit(nowValue)
+                                  const handled = onNowPressed
+                                    ? await onNowPressed(nowValue)
+                                    : false
+                                  if (!handled) {
+                                    onChange(nowValue)
+                                    onChangeSubmit(nowValue)
+                                  }
                                 }}
                               >
                                 now
@@ -141,6 +153,39 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
   })
   const [createSleepingTimeMutation] = useMutation(createSleepingTime)
   const [updateSleepingTimeMutation] = useMutation(updateSleepingTime)
+  const [toast, setToast] = useState<string | null>(null)
+
+  // night-anchoring (see the spec): a bedtime "now" press belongs to the night
+  // derived from the CLOCK — before noon means you're up past midnight and the
+  // value files to the previous day's row. Returns true when handled here so
+  // the viewed day's field stays untouched.
+  async function saveBedtimeToNight(value: Date): Promise<boolean> {
+    const targetDay = bedtimeNightTarget(value)
+    if (!targetDay || targetDay === currentDate) return false
+    try {
+      const existing = await rpcFetch("getSleepingTime", { where: { sleepingAt: targetDay } })
+      if (!existing) {
+        await createSleepingTimeMutation({
+          bedtime: getISODateString(value),
+          wakeUpTime: null,
+          sleepingAt: targetDay,
+        })
+      } else {
+        await updateSleepingTimeMutation({
+          bedtime: getISODateString(value),
+          wakeUpTime: getISODateString(existing.wakeUpTime),
+          sleepingAt: targetDay,
+          id: existing.id,
+        })
+      }
+      const prefix =
+        DateTime.fromJSDate(value).hour < BEDTIME_NIGHT_CUTOFF_HOUR ? "after midnight — " : ""
+      setToast(`🌙 ${prefix}saved as ${DateTime.fromISO(targetDay).toFormat("MMM d")}'s bedtime`)
+    } catch (error: any) {
+      setToast(`could not save the bedtime: ${error.toString()}`)
+    }
+    return true
+  }
 
   return (
     <Fragment>
@@ -196,6 +241,7 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
                 className="translate-x-0 translate-y-0 transform-gpu"
                 minutesStep={5}
                 nowRounding="ceil"
+                onNowPressed={saveBedtimeToNight}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -231,6 +277,13 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
           </Grid>
         </Form>
       )}
+      <Snackbar
+        open={!!toast}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
+        message={toast}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </Fragment>
   )
 }
