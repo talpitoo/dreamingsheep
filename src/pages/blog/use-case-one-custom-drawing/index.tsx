@@ -81,7 +81,7 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                   a custom symbol for each, and you&apos;re all set.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  This means that <em>dreamingsheep</em> isn&apos;t confined to dream journaling
+                  This means that <em>dreamingsheep</em>&#32;isn&apos;t confined to dream journaling
                   alone. You can easily transform it into your very own travel journal, chronicling
                   your spacetime adventures.
                 </Typography>

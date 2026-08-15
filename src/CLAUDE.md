@@ -149,3 +149,9 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
 - Comments reference old GitLab issue URLs (the project migrated to GitHub).
 - `moment` is used in stats, `luxon` in date pickers, `date-fns` elsewhere —
   keep using whichever the file already imports.
+- **Next 16.2's SWC eats the leading space of any JSX text node that contains an
+  HTML entity** — `<Link>…</Link> page … don&apos;t …` renders as `</a>page`
+  (tsc/Babel keep it, so the source looks fine and Prettier won't touch it).
+  Write the space as `&#32;` glued to the tag (`</Link>&#32;page …`); `{" "}`
+  does **not** work — Prettier collapses it back to a literal space whenever the
+  text fits on the line. Trailing spaces and entity-free text nodes are fine.

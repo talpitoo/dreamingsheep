@@ -86,9 +86,9 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   one-person passion project that has been quietly humming along since 2023, and
                   opening it up feels like the natural next step — already{" "}
                   <Link href={Routes.ArticlePageSupportUsOnPatreon()}>hinted at back in 2024</Link>{" "}
-                  when we mused about <em>dreamingsheep</em> one day becoming a self-sustaining AI
-                  in the &lsquo;astral&rsquo; cloud. Well, the cloud part is happening — minus the
-                  sentience (for now).
+                  when we mused about <em>dreamingsheep</em>&#32;one day becoming a self-sustaining
+                  AI in the &lsquo;astral&rsquo; cloud. Well, the cloud part is happening — minus
+                  the sentience (for now).
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   Here&apos;s what changes (and what doesn&apos;t):
