@@ -78,8 +78,8 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                   transparent about how <em>dreamingsheep</em> handles your data.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  <strong>Nothing has changed</strong> about what we collect or how we use it — we
-                  &apos;ve just documented it properly. Think of it as finally writing down the
+                  <strong>Nothing has changed</strong>&#32;about what we collect or how we use it.
+                  We&apos;ve just documented it properly. Think of it as finally writing down the
                   dream you&apos;ve been meaning to log for months.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
@@ -89,7 +89,7 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                   <ul>
                     <li>
                       We collect your <strong>email</strong> (for login) and your{" "}
-                      <strong>dream entries</strong> (because that&apos;s literally what the app
+                      <strong>dream entries</strong>&#32;(because that&apos;s literally what the app
                       does)
                     </li>
                     <li>We don&apos;t sell, share, or secretly analyze your dreams</li>

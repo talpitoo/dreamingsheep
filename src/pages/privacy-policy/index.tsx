@@ -296,7 +296,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
                   Not only we stalk your dreams, we are going to steal your soul{" "}
                   <span className="lucidicon lucidicon-scream"></span> bwahaha! Jokes aside, we are
                   too busy fulfilling our own dreams but if you are a Paranoid Android¹{" "}
-                  <span className="lucidicon lucidicon-c-3po"></span> and don&apos;t trust us,
+                  <span className="lucidicon lucidicon-c-3po"></span>&#32;and don&apos;t trust us,
                   it&apos;s best to keep your journal in a notebook.
                 </Typography>
 

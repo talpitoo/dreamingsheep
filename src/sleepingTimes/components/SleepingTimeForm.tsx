@@ -11,6 +11,7 @@ import {
   JSXElementConstructor,
   PropsWithoutRef,
   ReactElement,
+  ReactNode,
   useEffect,
   useState,
 } from "react"
@@ -153,7 +154,7 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
   })
   const [createSleepingTimeMutation] = useMutation(createSleepingTime)
   const [updateSleepingTimeMutation] = useMutation(updateSleepingTime)
-  const [toast, setToast] = useState<string | null>(null)
+  const [toast, setToast] = useState<ReactNode>(null)
 
   // night-anchoring (see the spec): a bedtime "now" press belongs to the night
   // derived from the CLOCK — before noon means you're up past midnight and the
@@ -180,7 +181,12 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
       }
       const prefix =
         DateTime.fromJSDate(value).hour < BEDTIME_NIGHT_CUTOFF_HOUR ? "after midnight — " : ""
-      setToast(`🌙 ${prefix}saved as ${DateTime.fromISO(targetDay).toFormat("MMM d")}'s bedtime`)
+      setToast(
+        <span className="flex items-center gap-2">
+          <span className="lucidicon-starry-night h-5 w-5 text-xl"></span>
+          {`${prefix}saved as ${DateTime.fromISO(targetDay).toFormat("MMM d")}'s bedtime`}
+        </span>
+      )
     } catch (error: any) {
       setToast(`could not save the bedtime: ${error.toString()}`)
     }

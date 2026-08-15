@@ -69,7 +69,7 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
                   {" "}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  You can add <em>dreamingsheep</em> to your home screen and use it just like an
+                  You can add <em>dreamingsheep</em>&#32;to your home screen and use it just like an
                   app, minus the tracking of your personal data, which is an inseparable part of the
                   app ecosystem. We&apos;re going to <em>“steal your soul”</em> anyway{" "}
                   <span className="lucidicon lucidicon-smiley-smiley"></span>, as explicitly stated

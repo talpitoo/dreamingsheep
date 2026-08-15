@@ -89,7 +89,7 @@ const ArticlePageBackstoryTheBeginnings: BlitzPage = () => {
                   due respect to other dreamjournaling software, for what i intended, they were
                   either too generic or new age-y{" "}
                   <span className="lucidicon lucidicon-dolphin"></span>. I needed less{" "}
-                  <em>“fallen out tooth mean X, black crow means Y”</em> and more statistical
+                  <em>“fallen out tooth mean X, black crow means Y”</em>&#32;and more statistical
                   analysis, a way to discover the emerging patterns in the subconscious. I wanted a
                   neu(t)ral tool that would leave the leading role in dream interpretation to the
                   user&apos;s intuition.

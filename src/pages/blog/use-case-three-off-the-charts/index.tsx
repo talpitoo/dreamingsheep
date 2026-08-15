@@ -10,6 +10,7 @@ import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
 import Image from "next/image"
 import sheepStats from "public/assets/sheep-stats.png"
+import screenshotUseCaseThree from "public/assets/screenshot-use-case-three-off-the-charts.png"
 import Link from "next/link"
 
 const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
@@ -55,10 +56,10 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
               <CardHeader subheader="Thu Jul 2 2026" className="py-0" />
               <CardContent>
                 <Image
-                  src={sheepStats}
-                  alt="the stats sheep contemplating a pie chart"
-                  width={384}
-                  height={384}
+                  src={screenshotUseCaseThree}
+                  alt="Advanced charting on the Stats page"
+                  width={736}
+                  height={736}
                   className="w-full h-auto"
                 />
                 <Typography variant="body1" sx={{ mb: 2 }}>
@@ -66,8 +67,10 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   Way back in{" "}
-                  <Link href={Routes.ArticlePageUseCaseTwoAddToHomeScreen()}>use case two</Link> we
-                  told you to{" "}
+                  <Link href={Routes.ArticlePageUseCaseTwoAddToHomeScreen()}>
+                    Use case two: Add to home screen
+                  </Link>{" "}
+                  we told you to{" "}
                   <em>&quot;keep an eye on the Stats page as those charts come to life&quot;</em>.
                   Consider this the awakening¹.
                 </Typography>
@@ -76,7 +79,7 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   <Link href={Routes.SettingsPage()}>&#47;settings</Link>. Flip it, wander over to{" "}
                   <Link href={Routes.StatsPage()}>&#47;stats</Link>, and your dream garden turns
                   into a criss-cross laboratory: type a keyword, toggle a mood, handpick a symbol —
-                  and every chart on the page redraws around your question, while you watch.
+                  and every chart on the page redraws around your question.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   What kind of questions, you ask? The kind only you can ask about your own dreams:
@@ -105,17 +108,19 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   Speaking of sleep: remember the <em>&quot;(future-feature)&quot;</em> note next to
                   the bedtime/wake-up opt-in on the Settings page? The future has officially
                   arrived. Track your bedtime and wake-up time on the{" "}
-                  <Link href={Routes.DreamsPage()}>&#47;dreams</Link> page and Stats greets you with
-                  a full-width sleep chart — bedtime at the bottom, wake-up at the top, your night
-                  colored in between. Nights you don&apos;t track simply stay blank; the sheep
+                  <Link href={Routes.DreamsPage()}>&#47;dreams</Link>&#32;page and Stats greets you
+                  with a full-width sleep chart — bedtime at the bottom, wake-up at the top, your
+                  night colored in between. Nights you don&apos;t track simply stay blank; the sheep
                   doesn&apos;t judge².
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   And in case you are wondering: no, we still won&apos;t tell you what any of it{" "}
                   <em>means</em>. As promised in{" "}
-                  <Link href={Routes.ArticlePageBackstoryTheBeginnings()}>the backstory</Link>,
-                  dreamingsheep remains a neu(t)ral tool — the charts do the showing, your intuition
-                  does the interpreting.
+                  <Link href={Routes.ArticlePageBackstoryTheBeginnings()}>
+                    Backstory - the beginnings
+                  </Link>
+                  , <em>dreamingsheep</em> remains a neu(t)ral tool: the charts do the showing, your
+                  intuition does the interpreting.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   Now go log a dream, flip the switch, and cross-examine your subconscious. Sweet
@@ -130,7 +135,7 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   <br />
                   <small>
                     2 - night-shift workers and <span className="lucidicon-dracula"></span> vampires
-                    are fully supported — for you, the midnight line is merely a suggestion
+                    are fully supported (for you, the midnight line is merely a suggestion)
                   </small>
                 </Typography>
               </CardContent>
