@@ -16,11 +16,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # NOTE: pinned to the first releases that run on node24 (actions declare their
+      # own runtime in action.yml; node20 is deprecated on GitHub runners). setup-node
+      # v5 auto-caches when package.json has a `packageManager` field — ours has none,
+      # and `cache: yarn` below stays explicit either way.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: yarn

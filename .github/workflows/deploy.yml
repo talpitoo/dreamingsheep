@@ -17,11 +17,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # NOTE: these two are pinned to the first releases that run on node24
+      # (actions declare their own runtime in action.yml; node20 is deprecated on
+      # GitHub runners). Nothing else changed in either release.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
