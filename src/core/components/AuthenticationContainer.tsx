@@ -11,9 +11,18 @@ import CookieNotice from "./CookieNotice"
 
 interface AuthenticationContainerProps {
   imageComponent: ReactNode
+  // opt-in extra content on top of the login card — the landing page injects its
+  // h1 + intro there; every other page omits it and renders exactly as before
+  headerComponent?: ReactNode
+  // same idea, below the submit button — the landing page puts the swiper's demo button there
+  footerComponent?: ReactNode
 }
 
-export const AuthenticationContainer = ({ imageComponent }: AuthenticationContainerProps) => {
+export const AuthenticationContainer = ({
+  imageComponent,
+  headerComponent,
+  footerComponent,
+}: AuthenticationContainerProps) => {
   const session = useSession()
   const router = useRouter()
 
@@ -47,6 +56,8 @@ export const AuthenticationContainer = ({ imageComponent }: AuthenticationContai
             />
             <Box sx={{ marginBottom: { xs: "2rem", sm: "0" } }}>
               <LoginForm
+                headerComponent={headerComponent}
+                footerComponent={footerComponent}
                 onSuccess={(user) =>
                   router.push(user.verified ? Routes.DreamsPage() : Routes.VerifyUserPage())
                 }

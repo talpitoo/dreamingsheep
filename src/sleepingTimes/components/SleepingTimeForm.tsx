@@ -183,7 +183,7 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
         DateTime.fromJSDate(value).hour < BEDTIME_NIGHT_CUTOFF_HOUR ? "after midnight — " : ""
       setToast(
         <span className="flex items-center gap-2">
-          <span className="lucidicon-starry-night h-5 w-5 text-xl"></span>
+          <span className="lucidicon-starry-night h-5 w-5 text-lg"></span>
           {`${prefix}saved as ${DateTime.fromISO(targetDay).toFormat("MMM d")}'s bedtime`}
         </span>
       )

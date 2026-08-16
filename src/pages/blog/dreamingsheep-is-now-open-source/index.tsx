@@ -81,14 +81,22 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   <strong>Why?</strong> Because dreams are more fun when shared. Your actual dreams
-                  remain yours alone (we promise, see the{" "}
-                  <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link>). This is a small,
-                  one-person passion project that has been quietly humming along since 2023, and
-                  opening it up feels like the natural next step — already{" "}
-                  <Link href={Routes.ArticlePageSupportUsOnPatreon()}>hinted at back in 2024</Link>{" "}
-                  when we mused about <em>dreamingsheep</em>&#32;one day becoming a self-sustaining
-                  AI in the &lsquo;astral&rsquo; cloud. Well, the cloud part is happening — minus
-                  the sentience (for now).
+                  remain yours alone (see the{" "}
+                  <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link>). This is a
+                  one-person passion project, 20+ years of hard procrastination and casual work (
+                  <Link href={Routes.ArticlePageBackstoryTheBeginnings()}>
+                    Backstory - the beginnings
+                  </Link>{" "}
+                  and{" "}
+                  <Link href={Routes.ArticlePageLifePurposeMilestoneOne()}>
+                    Life purpose, milestone #1
+                  </Link>
+                  ), which finally came alive online in 2023. Opening it up feels like the natural
+                  next step — already{" "}
+                  <Link href={Routes.ArticlePageSupportUsOnPatreon()}>hinted at</Link> when we mused
+                  about <em>dreamingsheep</em>&#32;one day becoming a self-sustaining AI in the
+                  &lsquo;astral&rsquo; cloud. Well, the cloud part is happening — minus the
+                  sentience (for now).
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   Here&apos;s what changes (and what doesn&apos;t):
@@ -127,9 +135,8 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   A small disclaimer: the maintainer (
                   <Link href="https://github.com/talpitoo">@talpitoo</Link>) is primarily a frontend
-                  developer, so backend PRs may take a little longer to review and will be greeted
-                  with the occasional <em>&quot;wait, what does this do again?&quot;</em>. Be
-                  patient, document well, and we&apos;ll get there together.
+                  developer, so backend PRs may take a little longer to review. Be patient, document
+                  well, and we&apos;ll get there together.
                 </Typography>
 
                 <Typography variant="body1" sx={{ mb: 2 }}>

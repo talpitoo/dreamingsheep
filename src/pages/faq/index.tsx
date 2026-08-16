@@ -152,11 +152,11 @@ const FaqPage: BlitzPage = () => {
                 </Box>
                 {/* NOTE: A/B video https://www.youtube-nocookie.com/embed/UwJvuo37dMw */}
                 <Typography variant="body1" sx={{ mt: 2 }}>
-                  Still don&apos;t believe us? Read more in{" "}
+                  Still don&apos;t believe us? Read more in the{" "}
                   <Link href={Routes.ArticlePagePrivacyPolicyAndTermsOfServiceUpdate()}>
-                    the Privacy Policy and Terms of Service update
-                  </Link>
-                  , or head straight to the{" "}
+                    Privacy Policy and Terms of Service update
+                  </Link>{" "}
+                  on the blog, or head straight to the{" "}
                   <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link>.
                 </Typography>
               </CardContent>

@@ -111,9 +111,7 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                   <Link href={Routes.TermsOfServicePage()}>Terms of Service</Link>, and as always —
                   sweet dreams!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  Meh!
-                </Typography>
+                <Typography variant="body1">Meh!</Typography>
               </CardContent>
             </Card>
           </Grid>

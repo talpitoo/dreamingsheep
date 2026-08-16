@@ -10,11 +10,11 @@ import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import sheepDreamingsheep from "public/assets/sheep-dreamingsheep.png"
 import sheepDream from "public/assets/sheep-dream.png"
-import { Box, Container, Grid, Card, CardHeader, CardContent, Typography } from "@mui/material"
+import { Box, Container, Grid, Card, CardContent, Typography } from "@mui/material"
 import moment from "moment"
 import { DreamType } from "db"
 import db from "db"
-import SwiperScreenshots from "src/core/components/SwiperScreenshots"
+import SwiperScreenshots, { SwiperDemoButton } from "src/core/components/SwiperScreenshots"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { Fragment, Suspense } from "react"
@@ -78,26 +78,20 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 className="w-full h-auto"
               />
             }
-          />
-        </Suspense>
-
-        <Grid container>
-          <Grid item md={2}></Grid>
-          <Grid item md={8}>
-            <Card className="bg-mui-secondary-light mt-20 mb-6">
-              <CardHeader
-                title="An online journal for your dreams and beyond¹"
-                sx={{ paddingBottom: "0" }}
-                component="h1"
-              />
-              <CardContent>
-                <Typography variant="body1">
-                  <em>Dreamingsheep</em> is an online journal for your dreams and beyond¹. For a
-                  short introduction please watch the explainer video² and click through the{" "}
+            // landing page only: the h1 + intro ride along inside the login card so
+            // they are server-rendered (no JS needed to read them)
+            headerComponent={
+              <Fragment>
+                <h1 className="text-2xl font-normal mb-4">
+                  An online journal for your dreams and beyond¹
+                </h1>
+                <p className="mb-4">
+                  <em>Dreamingsheep</em> is an online journal for your dreams and beyond¹. To learn
+                  more, click through the{" "}
                   <Link href="#demo" scroll={false}>
                     #demo
-                  </Link>{" "}
-                  below. To learn more, read the <em>Five Ws</em> on the{" "}
+                  </Link>
+                  ² below, read the <em>Five Ws</em> on the{" "}
                   <Link href={Routes.FaqPage()} passHref={true}>
                     FAQ
                   </Link>{" "}
@@ -106,34 +100,26 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                     Blog
                   </Link>
                   .
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+                </p>
+              </Fragment>
+            }
+            // the swiper's own "demo" button, relocated under the login button — it still
+            // drives the #demo swiper further down via its swiper-button-next-custom class
+            footerComponent={<SwiperDemoButton />}
+          />
+        </Suspense>
+
+        <Grid container>
+          <SwiperScreenshots />
+          {/* the explainer-video iframe that lived here (commented out) for years now plays for
+              real in the blog: /blog/the-explainer-video-is-still-in-the-works
+              NOTE: old/removed A/B video https://www.youtube-nocookie.com/embed/UwJvuo37dMw
+              NOTE full embed snippet https://gitlab.com/talpitoo/dreamingsheep/-/issues/116 */}
         </Grid>
 
         <Grid container>
-          <Grid item md={12} sx={{ width: "100%", mb: 3 }}>
-            <Box className="ratio ratio-16x9">
-              <iframe
-                width="560"
-                height="315"
-                src="https://www.youtube-nocookie.com/embed/0HE04S0hykE?si=tSgG3rIuNmFGnsW0&amp;controls=0"
-                title="YouTube video player: Faye Wong - Dreams - The Cranberries Cover"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              ></iframe>
-            </Box>
-            {/* NOTE: old/removed A/B video https://www.youtube-nocookie.com/embed/UwJvuo37dMw */}
-            {/* NOTE full embed snippet https://gitlab.com/talpitoo/dreamingsheep/-/issues/116 */}
-          </Grid>
-        </Grid>
-
-        <Grid container>
-          <Grid item md={1}></Grid>
-          <Grid item md={10}>
+          <Grid item md={2}></Grid>
+          <Grid item md={8}>
             <Card className="bg-mui-secondary-light">
               <CardContent>
                 <Typography variant="body1" sx={{ mb: 2 }}>
@@ -188,7 +174,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                     and the world will be as one.⁵
                   </em>
                 </Typography>
-                <Box sx={{ textAlign: "center", mb: { xs: -5, lg: -10 } }}>
+                <Box sx={{ textAlign: "center" }}>
                   <Image
                     src={sheepDream}
                     alt="dream sheep"
@@ -198,23 +184,19 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                   />
                 </Box>
 
-                <SwiperScreenshots />
-
                 <hr />
                 <Typography variant="body1">
                   <small>1 - Jupiter and beyond the infinite (2001: A Space Odyssey)</small>
                   <br />
-                  <small>2 - obviously, the explainer video is in the works</small>
+                  <small>
+                    2 - forget about the latest iPhones or Pixels, Nexus 5/10 rulez (note for geeks)
+                  </small>
                   <br />
                   <small>3 - Blade Runner</small>
                   <br />
                   <small>4 - different version of this already perfect</small>
                   <br />
                   <small>5 - Imagine - John Lennon</small>
-                  <br />
-                  <small>
-                    6 - forget about the latest iPhones or Pixels, Nexus 5/10 rulez (note for geeks)
-                  </small>
                 </Typography>
               </CardContent>
             </Card>
@@ -225,7 +207,10 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
   )
 }
 
-Home.suppressFirstRenderFlicker = true // TODO (future-feature): experiment with the perceived loading speed and keep or refactor it later.
+// NOTE: suppressFirstRenderFlicker was dropped here — it wrapped the whole page in
+// `visibility: hidden` until mount, which hid the h1/intro copy from JS-less visitors.
+// Nothing is left to hide: getServerSideProps redirects logged-in users away, so this
+// page only ever renders its anonymous state, identically on server and client.
 Home.getLayout = (page) => (
   <Layout childrenContainerClassName="py-6">
     {/* title="dreamingsheep" */}
