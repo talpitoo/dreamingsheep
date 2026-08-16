@@ -12,6 +12,11 @@ import { User } from "db"
 
 type LoginFormProps = {
   onSuccess?: (user: Omit<User, "hashedPassword">) => void
+  // static content rendered above the form, inside the card — server-rendered,
+  // so it stays readable without JS (the landing page's h1 + intro)
+  headerComponent?: React.ReactNode
+  // static content rendered under the submit button, above the forgot/signup links
+  footerComponent?: React.ReactNode
 }
 
 export const LoginForm = (props: LoginFormProps) => {
@@ -20,6 +25,7 @@ export const LoginForm = (props: LoginFormProps) => {
   return (
     <Card sx={{ textAlign: "left" }}>
       <CardContent>
+        {props.headerComponent}
         <Form
           submitText="Log in"
           schema={Login}
@@ -65,6 +71,7 @@ export const LoginForm = (props: LoginFormProps) => {
             className="translate-x-0 translate-y-0 transform-gpu"
           />
         </Form>
+        {props.footerComponent && <div className="pt-5">{props.footerComponent}</div>}
         <p className="text-right pt-4">
           <Link href={Routes.ForgotPasswordPage()}>Forgot your password?</Link>
         </p>

@@ -37,6 +37,9 @@ export const Routes = {
   ),
   ArticlePageSupportUsOnPatreon: route("/blog/support-us-on-patreon"),
   ArticlePageTheBrainstorming: route("/blog/the-brainstorming"),
+  ArticlePageTheExplainerVideoIsStillInTheWorks: route(
+    "/blog/the-explainer-video-is-still-in-the-works"
+  ),
   ArticlePageUseCaseOneCustomDrawing: route("/blog/use-case-one-custom-drawing"),
   ArticlePageUseCaseThreeOffTheCharts: route("/blog/use-case-three-off-the-charts"),
   ArticlePageUseCaseTwoAddToHomeScreen: route("/blog/use-case-two-add-to-home-screen"),

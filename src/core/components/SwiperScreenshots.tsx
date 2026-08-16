@@ -21,20 +21,39 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import "swiper/css"
 // import "swiper/css/navigation"
 
+// The demo/next button is rendered OUTSIDE this component (the landing page slots it
+// into the login card, see src/pages/index.tsx). Swiper resolves `navigation.nextEl`
+// from the selector string below with a document-wide query, so the button drives the
+// swiper from anywhere in the DOM — keep the class and the selector in sync.
+export const SWIPER_NEXT_CLASS = "swiper-button-next-custom"
+
+export const SwiperDemoButton = () => (
+  <Button
+    variant="outlined"
+    fullWidth
+    className={SWIPER_NEXT_CLASS}
+    endIcon={<SwapHorizIcon className="opacity-80" />}
+  >
+    demo
+  </Button>
+)
+
 export const SwiperScreenshots = () => {
   const [firstSwiper, setFirstSwiper] = useState<any>(null)
   const [secondSwiper, setSecondSwiper] = useState<any>(null)
   // NOTE https://github.com/nolimits4web/swiper/issues/5500, useState(null); useState<Swiper | null>(null);
 
   return (
+    // lg breaks out of the 1152px Container content box (-mx-6 on both sides) so the
+    // 1.5x-enlarged devices get their full 1200px
     <Box
-      className="xsmax:scale-75 xsmax:-mx-8 smmax:-mx-2 relative w-[320px] h-[240px] lg:w-[800px] lg:h-[600px] mx-auto mb-8 lg:mb-4"
+      className="xsmax:scale-75 xsmax:-mx-8 smmax:-mx-2 sm:mt-8 md:mt-0 relative w-[320px] h-[240px] md:w-[800px] md:h-[600px] lg:w-[1200px] lg:h-[900px] mx-auto lg:-mx-6 mb-8 md:mb-4"
       id="demo"
     >
-      <Box className="w-[320px] h-[240px] lg:w-[800px] lg:h-[600px]">
-        <Image src={nexus10} alt="nexus 10" width={800} height={600} className="w-full h-full" />
+      <Box className="w-[320px] h-[240px] md:w-[800px] md:h-[600px] lg:w-[1200px] lg:h-[900px]">
+        <Image src={nexus10} alt="nexus 10" width={1200} height={900} className="w-full h-full" />
       </Box>
-      <Box className="absolute top-[36px] left-[46px] lg:top-[87px] lg:left-[114px] w-[242px] h-[151px] lg:w-[607px] lg:h-[379px] overflow-hidden">
+      <Box className="absolute top-[36px] left-[46px] md:top-[87px] md:left-[114px] lg:top-[130.5px] lg:left-[171px] w-[242px] h-[151px] md:w-[607px] md:h-[379px] lg:w-[910.5px] lg:h-[568.5px] overflow-hidden">
         <Swiper
           modules={[Navigation, Controller]}
           navigation={{
@@ -51,8 +70,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotDreamsTablet01}
               alt="dreams screenshot"
-              width={607}
-              height={379}
+              width={911}
+              height={569}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -60,8 +79,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotDreamsTablet02}
               alt="dreams screenshot #2"
-              width={607}
-              height={379}
+              width={911}
+              height={569}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -69,8 +88,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotSymbolsTablet}
               alt="symbols screenshot"
-              width={607}
-              height={379}
+              width={911}
+              height={569}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -78,8 +97,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotStatsTablet}
               alt="stats screenshot"
-              width={607}
-              height={379}
+              width={911}
+              height={569}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -87,8 +106,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotSearchTablet}
               alt="search screenshot"
-              width={607}
-              height={379}
+              width={911}
+              height={569}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -96,17 +115,17 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotSettingsTablet01}
               alt="settings screenshot"
-              width={607}
-              height={379}
+              width={911}
+              height={569}
               className="w-full h-full"
             />
           </SwiperSlide>
         </Swiper>
       </Box>
-      <Box className="absolute top-0 w-[320px] h-[240px] lg:w-[800px] lg:h-[600px] pointer-events-none z-10">
-        <Image src={nexus5} alt="nexus 5" width={800} height={600} className="w-full h-full" />
+      <Box className="absolute top-0 w-[320px] h-[240px] md:w-[800px] md:h-[600px] lg:w-[1200px] lg:h-[900px] pointer-events-none z-10">
+        <Image src={nexus5} alt="nexus 5" width={1200} height={900} className="w-full h-full" />
       </Box>
-      <Box className="absolute top-[87px] left-[12px] lg:top-[216px] lg:left-[27px] w-[69px] h-[125px] lg:w-[178px] lg:h-[316px] overflow-hidden z-10">
+      <Box className="absolute top-[87px] left-[12px] md:top-[216px] md:left-[27px] lg:top-[324px] lg:left-[40.5px] w-[69px] h-[125px] md:w-[178px] md:h-[316px] lg:w-[267px] lg:h-[474px] overflow-hidden z-10">
         <Swiper
           onSwiper={setSecondSwiper}
           controller={{ control: firstSwiper }}
@@ -125,8 +144,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotDreamsMobile01}
               alt="dreams screenshot"
-              width={178}
-              height={316}
+              width={267}
+              height={474}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -134,8 +153,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotDreamsMobile02}
               alt="dreams screenshot #2"
-              width={178}
-              height={316}
+              width={267}
+              height={474}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -143,8 +162,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotSymbolsMobile}
               alt="symbols screenshot"
-              width={178}
-              height={316}
+              width={267}
+              height={474}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -152,8 +171,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotStatsMobile}
               alt="stats screenshot"
-              width={178}
-              height={316}
+              width={267}
+              height={474}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -161,8 +180,8 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotSearchMobile}
               alt="search screenshot"
-              width={178}
-              height={316}
+              width={267}
+              height={474}
               className="w-full h-full"
             />
           </SwiperSlide>
@@ -170,27 +189,17 @@ export const SwiperScreenshots = () => {
             <Image
               src={screenshotSettingsMobile01}
               alt="settings screenshot"
-              width={178}
-              height={316}
+              width={267}
+              height={474}
               className="w-full h-full"
             />
           </SwiperSlide>
         </Swiper>
       </Box>
-      <Box className="absolute bottom-0 right-0 z-10 mr-5 -mb-3 lg:m-5">
-        {/* <Button variant="outlined" className="swiper-button-prev-custom mr-4">
-          prev
-        </Button> */}
-        <Button
-          variant="contained"
-          className="swiper-button-next-custom"
-          endIcon={<SwapHorizIcon className="opacity-80" />}
-        >
-          demo
-        </Button>
-        <Typography variant="body1" className="absolute top-0 right-0 -m-2">
-          ⁶
-        </Typography>
+      {/* the button that used to live here moved into the login card (SwiperDemoButton);
+          footnote 6 stays with the devices it refers to */}
+      <Box className="absolute bottom-0 right-0 z-10 mr-5 -mb-3 md:m-5">
+        <Typography variant="body1">²</Typography>
       </Box>
     </Box>
   )
