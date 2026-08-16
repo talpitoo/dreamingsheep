@@ -40,22 +40,30 @@ jobs:
             set -e
             source ~/.nvm/nvm.sh
 
+            # NOTE: fetch + reset --hard, NOT `git pull`. Next rewrites next-env.d.ts on
+            # every run and dev/build disagree about line 3 (`.next/dev/types/routes.d.ts`
+            # vs `.next/types/routes.d.ts`), so after each build the box has a dirty tree
+            # and `git pull` aborts with "local changes would be overwritten". Nothing on
+            # this box is ever edited by hand, so the remote is always the truth.
+            echo 'Git pull code...'
+            cd /home/ubuntu/dreamingsheep
+            git fetch --all --tags
+            git checkout main
+            git reset --hard origin/main
+
+            # the app keeps serving until here: anything that fails above (network, git,
+            # yarn) now leaves the site up instead of dead behind a maintenance page
+            echo 'Building dreamingsheep...'
+            nvm use 22
+            npm install -g yarn
+            yarn install
+
             echo 'Killing processes...'
             pkill -f next || true
             pkill -f nest || true
             pkill -f node || true
             sleep 2
 
-            echo 'Git pull code...'
-            cd /home/ubuntu/dreamingsheep
-            git fetch --all --tags
-            git checkout main
-            git pull
-
-            echo 'Building dreamingsheep...'
-            nvm use 22
-            npm install -g yarn
-            yarn install
             rm -rf .next
             yarn build
             cp public/assets/title-dreamingsheep.png public/assets/sheep-dreamingsheep.png .next/static/media/
