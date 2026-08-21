@@ -177,7 +177,7 @@ export const Stats = () => {
     <Fragment>
       <Container>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
             <Box
               sx={{
@@ -202,7 +202,7 @@ export const Stats = () => {
         </Grid>
 
         <Grid container sx={{ mb: 2 }}>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
             <h1 className="heading">
               <Image src={titleStats} alt="Stats" width="77" height="55" />
@@ -318,7 +318,7 @@ export const Stats = () => {
         </Grid>
 
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
             {/* opted in: everything centers around the filtered advanced chart + its facets;
                 the sleep chart (range-driven, independent of the filters) slots in between

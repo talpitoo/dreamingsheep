@@ -199,7 +199,7 @@ const DreamsPage: BlitzPage = () => {
     <Fragment>
       <Container>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={5} md={3} lg={4}>
             <Box
               sx={{
@@ -246,7 +246,7 @@ const DreamsPage: BlitzPage = () => {
         </Grid>
 
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
             <h1 className="heading inline-flex items-center">
               <Image src={titleDreams} alt="Dreams" width="100" height="55" />{" "}

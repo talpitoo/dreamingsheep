@@ -53,7 +53,7 @@ const FaqPage: BlitzPage = () => {
         </Suspense>
 
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
             <h1 className="heading">
               <Image src={titleFaq} alt="FAQ" width="68" height="55" />
@@ -201,6 +201,95 @@ const FaqPage: BlitzPage = () => {
                     Blog
                   </Link>
                   .
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-mui-secondary-light mb-4">
+              <CardHeader
+                title="Can i attach images to dreams?"
+                sx={{ paddingBottom: "0" }}
+                component="h2"
+              />
+              <CardContent>
+                <Typography variant="body1">
+                  Yes. Create a custom symbol <span className="lucidicon-tag"></span> and attach
+                  your own drawing or image to capture the essence precisely. More in{" "}
+                  <Link href={Routes.ArticlePageUseCaseOneCustomDrawing()}>
+                    Use case one: Custom drawing
+                  </Link>
+                  .
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-mui-secondary-light mb-4">
+              <CardHeader
+                title="What if a symbol or dream type is missing?"
+                sx={{ paddingBottom: "0" }}
+                component="h2"
+              />
+              <CardContent>
+                <Typography variant="body1">
+                  Make your own. Missing the five (or six) senses among the built-in symbols? Create
+                  a custom symbol for each, and you are all set. The same goes for a missing dream
+                  type (or really any other category): tag your déjà vu, float-tank or insomnia
+                  experiences with a custom symbol and filter by them in Search and Stats.
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-mui-secondary-light mb-4">
+              <CardHeader
+                title="How can i use dreamingsheep on my phone?"
+                sx={{ paddingBottom: "0" }}
+                component="h2"
+              />
+              <CardContent>
+                <Typography variant="body1">
+                  There is no app to download (and that is a feature). Add <em>dreamingsheep</em> to
+                  your home screen <span className="lucidicon-device"></span> and it behaves just
+                  like one, minus the tracking that comes with the app ecosystem. Keep your phone by
+                  the pillow and record a few keywords right away while your memories are fresh.
+                  Step-by-step instructions in{" "}
+                  <Link href={Routes.ArticlePageUseCaseTwoAddToHomeScreen()}>
+                    Use case two: Add to home screen
+                  </Link>
+                  .
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-mui-secondary-light mb-4">
+              <CardHeader
+                title="How do i analyze my dream patterns?"
+                sx={{ paddingBottom: "0" }}
+                component="h2"
+              />
+              <CardContent>
+                <Typography variant="body1">
+                  The Stats page charts your moods, themes, recall and sleep out of the box. For
+                  criss-cross questions flip the Advanced charting switch in Settings and every
+                  chart redraws around your filters. Walkthrough in{" "}
+                  <Link href={Routes.ArticlePageUseCaseThreeOffTheCharts()}>
+                    Use case three: Off the charts
+                  </Link>
+                  . What it all means is left to your intuition.
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-mui-secondary-light mb-4">
+              <CardHeader
+                title="Can i export my dream journal?"
+                sx={{ paddingBottom: "0" }}
+                component="h2"
+              />
+              <CardContent>
+                <Typography variant="body1">
+                  Of course, your dreams are yours. Head to the{" "}
+                  <Link href={Routes.SettingsPage()}>Settings</Link> page and download your dreams,
+                  symbols and stats as a PDF, ready to print.
                 </Typography>
               </CardContent>
             </Card>

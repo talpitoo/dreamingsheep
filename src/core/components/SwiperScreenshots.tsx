@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Box, Button, Typography } from "@mui/material"
+import { Box, Button, IconButton, Typography } from "@mui/material"
 import nexus5 from "public/assets/nexus5.png"
 import nexus10 from "public/assets/nexus10.png"
 import screenshotDreamsTablet01 from "public/assets/screenshot-dreams-tablet-01.png"
@@ -14,27 +14,23 @@ import screenshotSymbolsMobile from "public/assets/screenshot-symbols-mobile.png
 import screenshotStatsMobile from "public/assets/screenshot-stats-mobile.png"
 import screenshotSearchMobile from "public/assets/screenshot-search-mobile.png"
 import screenshotSettingsMobile01 from "public/assets/screenshot-settings-mobile-01.png"
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz"
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
+import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import React, { useState } from "react"
 import { Navigation, Controller } from "swiper"
 import { Swiper, SwiperSlide } from "swiper/react"
 import "swiper/css"
 // import "swiper/css/navigation"
 
-// The demo/next button is rendered OUTSIDE this component (the landing page slots it
-// into the login card, see src/pages/index.tsx). Swiper resolves `navigation.nextEl`
-// from the selector string below with a document-wide query, so the button drives the
-// swiper from anywhere in the DOM — keep the class and the selector in sync.
-export const SWIPER_NEXT_CLASS = "swiper-button-next-custom"
-
+// Rendered by the landing page inside the login card (AuthenticationContainer's
+// footerComponent slot). A plain anchor: the browser handles the #demo jump itself
+// (html { scroll-behavior: smooth } animates it), so it works before hydration and
+// with JS disabled — no coupling to the swiper. The ² is the literal U+00B2 glyph,
+// superscript by its own shape, so the button's uppercase/font styles can't flatten
+// it; it anchors footnote 2 (the Nexus note) to the label.
 export const SwiperDemoButton = () => (
-  <Button
-    variant="outlined"
-    fullWidth
-    className={SWIPER_NEXT_CLASS}
-    endIcon={<SwapHorizIcon className="opacity-80" />}
-  >
-    demo
+  <Button variant="outlined" fullWidth href="#demo">
+    demo²
   </Button>
 )
 
@@ -47,7 +43,7 @@ export const SwiperScreenshots = () => {
     // lg breaks out of the 1152px Container content box (-mx-6 on both sides) so the
     // 1.5x-enlarged devices get their full 1200px
     <Box
-      className="xsmax:scale-75 xsmax:-mx-8 smmax:-mx-2 sm:mt-8 md:mt-0 relative w-[320px] h-[240px] md:w-[800px] md:h-[600px] lg:w-[1200px] lg:h-[900px] mx-auto lg:-mx-6 mb-8 md:mb-4"
+      className="xsmax:scale-75 sm:mt-8 md:mt-0 relative w-[320px] h-[240px] md:w-[800px] md:h-[600px] lg:w-[1200px] lg:h-[900px] mx-auto lg:-mx-6 mb-8 md:mb-4"
       id="demo"
     >
       <Box className="w-[320px] h-[240px] md:w-[800px] md:h-[600px] lg:w-[1200px] lg:h-[900px]">
@@ -196,8 +192,24 @@ export const SwiperScreenshots = () => {
           </SwiperSlide>
         </Swiper>
       </Box>
-      {/* the button that used to live here moved into the login card (SwiperDemoButton);
-          footnote 6 stays with the devices it refers to */}
+      {/* prev/next drive the tablet swiper (Navigation binds the two selector classes
+          configured above); the phone follows via the Controller link */}
+      <IconButton
+        aria-label="previous screenshot"
+        color="primary"
+        className="swiper-button-prev-custom absolute -left-12 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white shadow-md"
+      >
+        <ChevronLeftIcon />
+      </IconButton>
+      <IconButton
+        aria-label="next screenshot"
+        color="primary"
+        className="swiper-button-next-custom absolute -right-12 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white shadow-md"
+      >
+        <ChevronRightIcon />
+      </IconButton>
+      {/* footnote 2's marker stays with the devices it describes (the demo button in the
+          login card carries the other one) */}
       <Box className="absolute bottom-0 right-0 z-10 mr-5 -mb-3 md:m-5">
         <Typography variant="body1">²</Typography>
       </Box>

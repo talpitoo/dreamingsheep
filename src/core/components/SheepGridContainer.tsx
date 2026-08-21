@@ -10,7 +10,7 @@ interface SheepGridContainerProps {
 export const SheepGridContainer = ({ imageComponent }: SheepGridContainerProps) => {
   return (
     <Grid container>
-      <Grid item md={2} />
+      <Grid item md={2} className="grid-spacer-md-2" />
       <Grid item xs={12} sm={6} md={4}>
         <Box
           sx={{

@@ -63,7 +63,7 @@ const BlogPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
           />
         </Suspense>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
             <h1 className="heading">
               <Image src={titleBlog} alt="Blog" width={63} height={55} />

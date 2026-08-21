@@ -46,7 +46,7 @@ const TermsOfServicePage: BlitzPage = () => {
           />
         </Suspense>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
             <h1 className="heading">
               <Image src={titleTermsOfService} alt="Terms of Service" width="221" height="55" />
@@ -233,7 +233,7 @@ const TermsOfServicePage: BlitzPage = () => {
         </Grid>
 
         <Grid container>
-          <Grid item md={3} />
+          <Grid item md={3} className="grid-spacer-md-3" />
           <Grid item md={6}>
             <Alert severity="warning" sx={{ marginTop: "1rem" }}>
               <strong>Remember:</strong> <em>dreamingsheep</em> is a labor of love, not a
