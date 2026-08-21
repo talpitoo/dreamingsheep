@@ -47,7 +47,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
           />
         </Suspense>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
             <h1 className="heading">
               <Image src={titlePrivacyPolicy} alt="Privacy policy" width="195" height="55" />
@@ -325,7 +325,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
           </Grid>
         </Grid>
         <Grid container>
-          <Grid item md={3} />
+          <Grid item md={3} className="grid-spacer-md-3" />
           <Grid item md={6}>
             <Alert severity="warning" sx={{ marginTop: "1rem" }}>
               If you are a serious person and still consider taking legal action against

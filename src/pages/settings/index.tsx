@@ -36,7 +36,7 @@ export const Settings = () => {
     <Fragment>
       <Container>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
             <Box
               sx={{
@@ -60,7 +60,7 @@ export const Settings = () => {
           </Grid>
         </Grid>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
             <h1 className="heading">
               <Image src={titleSettings} alt="Settings" width="130" height="55" />

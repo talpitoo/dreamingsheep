@@ -25,7 +25,7 @@ const Page404: BlitzPage = () => {
 
       <Container>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
             <Box
               sx={{
@@ -53,7 +53,7 @@ const Page404: BlitzPage = () => {
           </Grid>
         </Grid>
         <Grid container>
-          <Grid item md={2} />
+          <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
             <ErrorComponent statusCode={statusCode} title={`${title} | dreamingsheep`} />
           </Grid>

@@ -37,7 +37,7 @@ const SymbolsPage: BlitzPage = () => {
   return (
     <Container>
       <Grid container>
-        <Grid item md={2} />
+        <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} sm={6} md={4}>
           <Box
             sx={{
@@ -57,7 +57,7 @@ const SymbolsPage: BlitzPage = () => {
       </Grid>
 
       <Grid container>
-        <Grid item md={2} />
+        <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} md={8}>
           <h1 className="heading">
             <Image src={titleSymbols} alt="Symbols" width="151" height="55" />

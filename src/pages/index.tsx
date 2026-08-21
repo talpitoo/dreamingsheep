@@ -87,11 +87,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 </h1>
                 <p className="mb-4">
                   <em>Dreamingsheep</em> is an online journal for your dreams and beyond¹. To learn
-                  more, click through the{" "}
-                  <Link href="#demo" scroll={false}>
-                    #demo
-                  </Link>
-                  ² below, read the <em>Five Ws</em> on the{" "}
+                  more, read the <em>Five Ws</em> on the{" "}
                   <Link href={Routes.FaqPage()} passHref={true}>
                     FAQ
                   </Link>{" "}
@@ -103,13 +99,13 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 </p>
               </Fragment>
             }
-            // the swiper's own "demo" button, relocated under the login button — it still
-            // drives the #demo swiper further down via its swiper-button-next-custom class
+            // scrolls down to the #demo collage (plain anchor, so it works without JS);
+            // the collage has its own prev/next arrows now
             footerComponent={<SwiperDemoButton />}
           />
         </Suspense>
 
-        <Grid container>
+        <Grid container className="justify-center">
           <SwiperScreenshots />
           {/* the explainer-video iframe that lived here (commented out) for years now plays for
               real in the blog: /blog/the-explainer-video-is-still-in-the-works
@@ -118,7 +114,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
         </Grid>
 
         <Grid container>
-          <Grid item md={2}></Grid>
+          <Grid item md={2} className="grid-spacer-md-2"></Grid>
           <Grid item md={8}>
             <Card className="bg-mui-secondary-light">
               <CardContent>

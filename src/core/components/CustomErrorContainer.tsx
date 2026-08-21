@@ -22,7 +22,7 @@ const CustomErrorContainer = ({ children }: CustomErrorContainerProps) => {
         <meta name="robots" content="noindex" />
       </Head>
       <Grid container>
-        <Grid item md={2} />
+        <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} sm={6} md={4}>
           <Box
             sx={{
@@ -50,7 +50,7 @@ const CustomErrorContainer = ({ children }: CustomErrorContainerProps) => {
         </Grid>
       </Grid>
       <Grid container>
-        <Grid item md={2} />
+        <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} md={8}>
           {children}
         </Grid>
