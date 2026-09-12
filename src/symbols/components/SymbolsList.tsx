@@ -73,7 +73,7 @@ export const SymbolsList = ({ customOnly }: { customOnly: boolean }) => {
         <>
           {count === 0 ? (
             <Paper className="bg-mui-secondary-light">
-              <Box sx={{ p: 2 }}>
+              <Box className="p-4">
                 <Typography variant="body1" gutterBottom className="mb-0">
                   You haven&apos;t created any symbols yet.
                 </Typography>
@@ -92,7 +92,7 @@ export const SymbolsList = ({ customOnly }: { customOnly: boolean }) => {
           )}
 
           {count > 0 && (
-            <Paper sx={{ display: "inline-block" }}>
+            <Paper className="inline-block">
               <Pagination
                 count={Math.ceil(count / ITEMS_PER_PAGE)}
                 page={page}

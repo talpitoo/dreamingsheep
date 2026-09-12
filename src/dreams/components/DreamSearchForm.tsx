@@ -69,13 +69,13 @@ export function DreamSearchForm<S extends z.ZodType<any, any>>({
   return (
     <Fragment>
       <Form<S> {...props} id="search-dream" initialValues={initialValues}>
-        <Paper sx={{ mb: 2, pl: "14px", display: "flex", alignItems: "center" }}>
+        <Paper className="mb-4 pl-[14px] flex items-center">
           {/* the 14px comes from the Paper, so no ml here — mr still spaces the buttons off */}
-          <SearchKeywordField sx={{ mr: 1, flex: 1 }} name="q" placeholder="Search..." />
+          <SearchKeywordField className="mr-2 flex-1" name="q" placeholder="Search..." />
           <ButtonGroup size="large">
             <Button variant="outlined" endIcon={<KeyboardArrowDown />} onClick={toggle}>
-              <Settings sx={{ display: { xs: "inline", sm: "none" } }} />{" "}
-              <Box sx={{ display: { xs: "none", sm: "inline" } }}>Filters</Box>
+              <Settings className="inline sm:hidden" />{" "}
+              <Box className="hidden sm:inline">Filters</Box>
             </Button>
             <Button variant="contained" type="submit" form="search-dream">
               <Search />
@@ -86,7 +86,7 @@ export function DreamSearchForm<S extends z.ZodType<any, any>>({
         {/* Collapse (same animation as the stats page's advanced panel) keeps the fields
             mounted, so toggling never loses in-progress filter values */}
         <Collapse in={isExpanded(openState)}>
-          <Paper sx={{ mb: 2, p: 2 }}>
+          <Paper className="mb-4 p-4">
             <ToggleButtonField
               label="favorite"
               name="favorite"

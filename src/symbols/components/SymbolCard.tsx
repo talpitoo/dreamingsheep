@@ -85,17 +85,12 @@ const SymbolCard = (props: SymbolCardProps) => {
             )
           }
           action={
-            <Typography
-              variant="body1"
-              sx={{ fontSize: "1.875rem", marginRight: "0.5rem" }}
-              className="text-gray-400"
-            >
+            <Typography variant="body1" className="text-gray-400 text-[1.875rem] mr-2">
               {Number(symbol.occurrences)}
             </Typography>
           }
           title={symbol.name}
-          sx={{ paddingBottom: "0" }}
-          className="text-2xl"
+          className="text-2xl pb-0"
         />
         {isEdit && (
           <CardContent>
@@ -119,7 +114,7 @@ const SymbolCard = (props: SymbolCardProps) => {
                 onAfterUpdate={onAfterUpdate}
               />
 
-              <Typography variant="body1" sx={{ mt: 2 }}>
+              <Typography variant="body1" className="mt-4">
                 {Number(symbol.occurrences)}{" "}
                 {symbol.occurrences === 1 ? "occurrence" : "occurrences"}
               </Typography>
@@ -145,15 +140,7 @@ const SymbolCard = (props: SymbolCardProps) => {
           </CardContent>
         )}
         <CardActions
-          className={`p-4 flex-column ${isEdit ? "pt-0" : ""}`}
-          sx={{
-            ...(isEdit && {
-              display: { xs: "block", sm: "flex" },
-            }),
-            ...(!isEdit && {
-              display: "flex",
-            }),
-          }}
+          className={classnames("p-4 flex-column", isEdit ? "pt-0 block sm:flex" : "flex")}
         >
           <Box
             className={`flex-row flex-wrap grow text-gray-400 overflow-hidden truncate ${
@@ -170,14 +157,14 @@ const SymbolCard = (props: SymbolCardProps) => {
             {!symbol.builtIn && (
               <IconButton
                 color="primary"
-                sx={{ mr: "auto", ml: { xs: 0, md: 2 } }}
+                className="mr-auto ml-0 md:ml-4"
                 onClick={() => setDeleteDialogVisibility(true)}
               >
                 <span className="lucidicon-trash"></span>
               </IconButton>
             )}
             {!isEdit && (
-              <IconButton color="primary" onClick={() => changeEdit(true)} sx={{ ml: 2 }}>
+              <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
                 <span className="lucidicon-pencil"></span>
               </IconButton>
             )}
@@ -192,9 +179,8 @@ const SymbolCard = (props: SymbolCardProps) => {
                     variant="contained"
                     type="submit"
                     form={"update-symbol_" + symbol.id}
-                    sx={{ ml: 2 }}
                     disabled={isUpdateSymbolLoading}
-                    className={`w-auto transition-all ease-in-out duration-300 ${
+                    className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                       isUpdateSymbolLoading ? "max-w-[113px]" : "max-w-[89px]"
                     }`}
                     endIcon={isUpdateSymbolLoading && <HourglassTopIcon className="opacity-50" />}

@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import Image from "next/image"
 import { useMutation } from "src/core/rpc-client"
 import { useRouter } from "next/router"
@@ -40,10 +41,10 @@ const SymbolsPage: BlitzPage = () => {
         <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} sm={6} md={4}>
           <Box
-            sx={{
-              width: { xs: "50%", sm: "100%" },
-              ...(user ? { margin: "auto" } : { margin: { xs: "0 auto -2rem", sm: "auto" } }),
-            }}
+            className={classnames(
+              "w-1/2 sm:w-full",
+              user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+            )}
           >
             <Image
               src={sheepSymbols}
@@ -121,9 +122,8 @@ const SymbolsPage: BlitzPage = () => {
                       variant="contained"
                       type="submit"
                       form="create-symbol"
-                      sx={{ ml: 2 }}
                       disabled={isCreateSymbolLoading}
-                      className={`w-auto transition-all ease-in-out duration-300 ${
+                      className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                         isCreateSymbolLoading ? "max-w-[87px]" : "max-w-[64px]"
                       }`}
                       endIcon={isCreateSymbolLoading && <HourglassTopIcon className="opacity-50" />}
