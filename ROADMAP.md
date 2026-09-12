@@ -18,7 +18,11 @@ comment there before starting work (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Phase 1: Foundation (current)
 
-- [ ] Migrate from MUI `sx={{}}` syntax to Tailwind CSS v4 ([#1](https://github.com/talpitoo/dreamingsheep/issues/1)) _(maintainer-led)_
+- [x] Migrate from MUI `sx={{}}` syntax to Tailwind CSS v4 ([#1](https://github.com/talpitoo/dreamingsheep/issues/1)) _(maintainer-led)_ —
+      landed on `main`, **release pending**: Tailwind 4.1.18, one explicit cascade order
+      (`@layer properties, theme, base, mui, components, utilities`), zero `sx` props, and a
+      Playwright snapshot suite that proved every page pixel-identical at nine breakpoint widths.
+      Browser floor moves to Tailwind v4's: Chrome 111+, Safari 16.4+, Firefox 128+.
 - [ ] Small in-code `TODO (future-feature)` notes, roughly in priority order:
       absolute `og:image` URLs ([`Layout.tsx`](src/core/layouts/Layout.tsx)),
       base64-ify the PDF-export images ([`ExportDreams/helper.ts`](src/settings/components/ExportDreams/helper.ts)),

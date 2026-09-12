@@ -67,7 +67,7 @@ export function DeletionConfirmationDialog({
             alt="symbols sheep"
             width={300}
             height={300}
-            className="temporary-img-fix w-full h-auto max-w-[300px]"
+            className="w-full h-auto max-w-[300px]"
           />
         </Box>
       </DialogContent>

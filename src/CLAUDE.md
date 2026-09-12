@@ -54,8 +54,18 @@ See root [CLAUDE.md](../CLAUDE.md) for the frozen-deps policy.
 - Key pages: `dreams/` (journal + calendar), `search/` (advanced search),
   `stats/` (charts), `settings/`, `symbols/`, `blog/` + `faq/` (hardcoded TSX
   content, playful lowercase-"i" copy).
-- MUI `sx`, MUI `className` and Tailwind utilities are mixed; match whatever the
-  surrounding file does (roadmap: gradual move toward Tailwind, maintainer-led).
+- **Styling**: Tailwind classes for layout, spacing and responsive behaviour;
+  `src/styles/Theme.ts` for how MUI components look; `style={}` only for values
+  computed at runtime (one place: the measured scale in `SymbolsRadioList`).
+  **`sx` is forbidden** — ESLint errors on it (issue #1). Breakpoints are MUI's own
+  (`sm` 600 / `md` 900 / `lg` 1200); `xsmax:` is ≤ 320 **inclusive** and `hover:`
+  applies on touch too, both via `@custom-variant`. The important modifier is a
+  suffix: `min-w-[48px]!`. Utilities reach inside MUI portals (dialogs, menus,
+  poppers) — they did not under the old `important: "#__next"` scoping.
+- When replacing an `sx`, do not assume it was doing anything: `sx` lands in
+  `@layer mui` where a more specific MUI rule can outrank it, and a utility never
+  loses that contest. Two `sx` props in this codebase were dead and would have come
+  alive as classes. Check the computed value before and after.
 
 ## Forms (src/core/components/)
 

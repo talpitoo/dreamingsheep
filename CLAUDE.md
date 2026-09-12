@@ -37,8 +37,8 @@ dependency that is truly required.** This is a peculiar, carefully balanced comb
   and replaced by a small **owned core**: `src/core/` (resolver, paginate, errors,
   rpc handler/client, Routes) + `src/auth/session/` (DB-backed sessions, CSRF) —
   ~900 lines, unit-tested; treat it as security-critical code
-- **MUI 5 + Tailwind 4.1.18** mixed together (yes, both; `sx` and utility classes coexist,
-  though `sx` is on its way out — issue #1). They share one explicit cascade order,
+- **MUI 5 + Tailwind 4.1.18** together (yes, both — but no `sx` anywhere: ESLint errors on it,
+  issue #1). They share one explicit cascade order,
   `@layer properties, theme, base, mui, components, utilities`, declared in
   [src/pages/\_document.tsx](src/pages/_document.tsx) and mirrored in
   [src/styles/index.css](src/styles/index.css): utilities beat MUI, MUI beats our base rules, and

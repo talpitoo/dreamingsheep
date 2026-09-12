@@ -235,12 +235,6 @@
      they beat MUI by layer order and still lose to utilities — same outcome, now by contract.
      (The toggle-button block that used to head this list now lives in src/styles/Theme.ts.) */
 
-  .MuiModal-root .temporary-img-fix {
-    width: 100%;
-    height: auto;
-    max-width: 300px;
-  }
-
   .chart-card .MuiContainer-maxWidthLg {
     min-height: 200px;
   }

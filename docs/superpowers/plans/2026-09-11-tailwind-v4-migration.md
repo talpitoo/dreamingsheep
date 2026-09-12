@@ -1825,6 +1825,27 @@ module.exports = {
   - `ROADMAP.md`: move `#1` to "Recently shipped" once released (leave a note "landed on main, release pending" until then).
 - [ ] **Step 4:** `npm run lint && npm run type:check && npm test`; `git commit -am "chore(lint): forbid sx; document the tailwind v4 conventions (#1)"`
 
+## M4 as built (2026-09-13)
+
+- **`sx` is an ESLint error** (`react/forbid-component-props`, from the plugin
+  `eslint-config-next` already pulls in). Proven to bite by adding one and watching lint fail.
+  The rule's message explains where styling goes instead; the comment above it explains _why_ it
+  is more than a style preference: `sx` lands in `@layer mui` where MUI's own rules can outrank it,
+  so an `sx` can silently do nothing, while a class in `@layer utilities` always applies.
+- **`.MuiModal-root .temporary-img-fix` deleted**, rule and class. It only ever existed because
+  utilities could not reach inside a portal under `important: "#__next"`; cascade layers made the
+  `w-full h-auto max-w-[300px]` next to it do the same job.
+- Docs updated: the root `CLAUDE.md` frozen-deps entry, `src/CLAUDE.md`'s styling conventions (with
+  the dead-`sx` warning), and `ROADMAP.md`, which now marks #1 landed with the release pending and
+  states the new browser floor.
+
+**Final tally of issue #1**: 279 `sx` props removed, one `style` prop left (a scale computed from a
+measured width), Tailwind 3.2.4 → 4.1.18, `tailwind.config.js` and `autoprefixer`/`postcss` gone,
+one explicit cascade order, and a 369-test visual suite that stayed at zero diffs through every
+milestone.
+
+---
+
 ### Task 21: Final verification, PR, release hand-off
 
 - [ ] **Step 1: Clean tree, fresh install** `git status` clean; `rm -rf node_modules && yarn install --frozen-lockfile && npx prisma generate && yarn build` — green.
