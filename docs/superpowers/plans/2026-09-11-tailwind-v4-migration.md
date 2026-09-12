@@ -922,7 +922,7 @@ test("stats range toggles shrink below sm (600px)", async ({ page }) => {
   await page.goto("/stats")
   await settle(page)
   const all = '.MuiToggleButtonGroup-root button[value="all"]'
-  expect(await css(page, all, "min-width")).toBe(width(page) >= 600 ? "86px" : "48px")
+  // NB: as built this asserts a constant "48px" and the 7px/11px padding switch instead — see "M0 as built" finding 1
 })
 
 test("no hover utility is gated behind @media (hover: hover)", async ({ page }) => {
@@ -1047,6 +1047,85 @@ npm run lint && npm run type:check && npm test
 git add package.json yarn.lock .gitignore test/visual src/CLAUDE.md .claude/skills/verify/SKILL.md
 git commit -m "test(visual): playwright snapshot suite across every breakpoint edge (#1)"
 ```
+
+## M0 as built (2026-09-12) — deviations and findings
+
+The harness landed as planned; these differences and discoveries came out of building it, and the
+later milestones depend on them.
+
+**Deviations (all maintainer-approved during implementation)**
+
+- **The captures strip the body background photos.** `freeze.css` adds
+  `body { background-image: none !important }`, leaving the `#0097a7` ground. A light page drops
+  from ~1.9 MiB to ~0.16 MiB, and diffs stop drowning in JPEG noise. The breakpoint switch between
+  the mobile and cover photo pairs is asserted in `contracts.visual.test.ts` instead.
+- **Every feature is opted in.** `global-setup.ts` switches `bedtime` and `advanced-charting` **on**
+  for the demo user, so nothing hides behind a setting. One serial block borrows
+  `advanced-charting` back for a shot of the static chart grid. The suite leaves both on.
+- **One blog article, not two** — every article shares the same layout.
+- **The shot set was trimmed to 31 states** (maintainer-picked, 23 removed). Visual testing guards
+  layout, not functionality, and the app repeats a handful of layouts: a bare landing/signup page is
+  covered by a richer shot of itself, a bare dream list/edit card/create form by its "More" variant,
+  every focused-field state by signup's glued password pair, the read-only settings page by any
+  `settings-edit-*` shot, and the stats chart grid by both remaining stats shots. Roughly halves the
+  runtime and the disk footprint.
+- **Added states**: `dreams-card-edit-more` (the "More" panel inside an edit card, where the
+  container is 2 rem narrower than in the create form), `settings-opted-out`, `stats-static-charts`.
+- **Added tooling**: `test/visual/make-index.mjs` + `npm run test:visual:index` builds a contact
+  sheet (`__snapshots__/index.html`, one row per state, one column per width) for eyeballing the
+  matrix.
+- **`meta.json` semantics**: a stored run parameter always beats "today", including on
+  `--update-snapshots` runs. Only an explicit `VISUAL_SEED_DATE` / `VISUAL_CAPTURE` re-records it,
+  so an update run can never silently re-date a baseline. This machine's database was seeded on
+  **2026-02-07** (dreams at −1, −2, −3, −7, −9 days).
+- `verify-user` is not snapshotted (it fires a mutation on mount).
+
+**Findings that the later milestones must respect**
+
+1. **The stats range buttons are 48 px wide at every width.**
+   `sx={{ minWidth: { xs: "48px !important", sm: "86px" } }}` marks the `xs` value important, which
+   outranks the `sm` media rule everywhere, so the `86px` is dead (the `px` switch at `sm` does
+   work: 7 px → 11 px). Pre-existing; **preserve it**. `min-w-[48px]! sm:min-w-[86px]` reproduces it
+   exactly, because an important declaration beats a plain one whatever the media query. Fixing it
+   is a separate, deliberate decision — `contracts.visual.test.ts` pins the current behaviour.
+2. **The dreams page races its own `?date=`.** An effect in `src/pages/dreams/index.tsx` pushes
+   `?date=<today>` before the router hydrates the query string, so a deep link can be overwritten.
+   The suite works around it with `gotoDreamsDay()` (freeze the clock on the wanted day, load a bare
+   `/dreams`). Not fixed here — out of scope for a styling migration, worth its own issue.
+3. **Animated GIFs never settle.** `animations: "disabled"` stops CSS animations, not GIF frames;
+   `public/assets/blog-dna.gif` made the blog index fail the two-consecutive-captures check.
+   `shot()` masks `img[src*=".gif"]` everywhere.
+4. **Background shorthands compute per layer** — two layers means `background-size: "cover, cover"`,
+   `background-attachment: "fixed, fixed"`. Contracts assert the pair.
+5. `npm run type:check` is at **0 errors** on this branch (the ~58 `noImplicitAny` errors in the
+   plan's constraints only appear if that flag is turned on, which it is not). Keep it at 0.
+6. **Two more sources of flake, both fixed in the harness** (found by running the full matrix
+   twice against unchanged code — the only honest way to prove a baseline is reproducible):
+   a click leaves the pointer on what it hit and MUI paints a hover overlay there
+   (`rgba(primary, 0.04)`), which appeared or not depending on how the layout moved afterwards —
+   `shot()` now parks the pointer at (-1, -1) first; and a dialog is `position: fixed`, so a
+   full-page capture paints it at whatever the scroll offset happens to be, while clicking an
+   opener auto-scrolls it into view — `openDialog()` settles the layout and scrolls to the top
+   first, making that offset a pure function of the layout. Three consecutive compare runs of the
+   affected specs then passed.
+7. **The footer tagline is random for logged-in users.** `src/core/layouts/Footer.tsx` picks one of
+   twelve quotes with `Math.random()` (anonymous visitors always get "Long time no sleep?™"), and
+   they differ in length and line count, so every authenticated page's height moved between runs.
+   `prepare()` pins `Math.random` to 0 in the page, which selects that same single-line tagline.
+   Safe: the only other `Math.random()` in the codebase generates OTP codes, server-side. This is
+   why the first full compare failed on the dreams specs — worth knowing before blaming a CSS
+   change for a diff that is really a moving footer.
+8. **First bug the harness caught** (fixed in the same milestone, commit `fix(blog): …`): the blog
+   index overflowed its 320/321 px viewport — every card rendered 335 px wide and was clipped by
+   the layout's `overflow-x: hidden`. Cause: the open-source post's excerpt contains the bare URL
+   `https://github.com/talpitoo/dreamingsheep`, and an unbreakable 41-character word sets the
+   min-content width of the MUI Grid item, which a flex item never shrinks below. Fix:
+   `className="[overflow-wrap:anywhere]"` on the excerpt `Typography` in `src/pages/blog/index.tsx`.
+   **`break-words` does not work here** — `overflow-wrap: break-word` breaks at layout time only and
+   does not reduce the intrinsic min-content size; only `anywhere` does (measured both). The
+   remaining content pages were swept at 320/321 and are clean.
+
+---
 
 ### Task 8: Tailwind 4.1.18 pipeline + CSS entry + cascade layers (single commit — M1)
 
@@ -1503,7 +1582,7 @@ No files. Read before every M3 task. MUI's spacing unit is 8px and Tailwind's is
 | `paddingTop: { xs: "8.5rem", md: 0 }, flexDirection: { xs: "column", md: "row" }, alignItems: { xs: "start", md: "center" }, width: { xs: "100%", md: "auto" }`                                                                                                      | `pt-34 md:pt-0 flex-col md:flex-row items-start md:items-center w-full md:w-auto` (`items-start` is `flex-start`; in a flex/grid container identical to `start`)                                                                                                                   |
 | `top: "3.75rem", right: "1.25rem"` / `right: "1rem", top: "22px"`                                                                                                                                                                                                    | `top-15 right-5` / `right-4 top-[22px]`                                                                                                                                                                                                                                            |
 | `order: { xs: -1, md: "unset" }`                                                                                                                                                                                                                                     | `-order-1 md:order-none`                                                                                                                                                                                                                                                           |
-| `minWidth: { xs: "48px !important", sm: "86px" }, px: { xs: "7px", sm: "11px" }`                                                                                                                                                                                     | `min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]`                                                                                                                                                                                                                              |
+| `minWidth: { xs: "48px !important", sm: "86px" }, px: { xs: "7px", sm: "11px" }`                                                                                                                                                                                     | `min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]` — keeps the quirk in "M0 as built" finding 1: the important base class wins at every width, exactly as the `xs` value does today                                                                                             |
 | `"& > span": { mr: 2, flexShrink: 0 }` (autocomplete option)                                                                                                                                                                                                         | `[&>span]:mr-4 [&>span]:shrink-0`                                                                                                                                                                                                                                                  |
 | `"& .MuiChip-deleteIcon": { color: "rgba(255,255,255,0.7)", "&:hover": { color: "white" } }`                                                                                                                                                                         | `[&_.MuiChip-deleteIcon]:text-white/70 [&_.MuiChip-deleteIcon:hover]:text-white`                                                                                                                                                                                                   |
 | `transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s"`                                                                                                                                                                                          | `classnames("[transition:transform_0.2s]", open && "[transform:rotate(180deg)]")` (NOT `rotate-180`/`transition-transform`: v4 animates the `rotate` property, which `transition: transform` would not cover)                                                                      |

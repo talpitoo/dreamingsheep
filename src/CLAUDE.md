@@ -140,6 +140,12 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   checkbox cards, pagination). Requires a running dev server + seeded DB;
   flows restore toggled settings and delete what they create. User-created
   symbols land on the LAST pagination page — use `gotoLastPaginationPage`.
+- **Visual** (`npm run test:visual`, Playwright, config
+  `test/visual/playwright.config.ts`): full-page `toHaveScreenshot` of ~45 page states at every
+  breakpoint edge (320/321, 375, 599/600, 899/900, 1199/1200) plus computed-style contracts for
+  what pixels miss. Baselines are local and gitignored; needs a running **production** build
+  (`yarn build && yarn start`) and a seeded DB. Run it before and after any styling change —
+  `test/visual/README.md` has the workflow, the determinism tricks and the triage rules.
 - CI runs lint + type-check + unit only (`.github/workflows/test.yml`).
 
 ## Gotchas

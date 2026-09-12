@@ -49,6 +49,10 @@
     "test": "vitest run --config vitest.config.mts",
     "test:watch": "vitest --config vitest.config.mts",
     "test:e2e": "vitest run --config vitest.config.e2e.mts",
+    "test:visual": "playwright test -c test/visual/playwright.config.ts",
+    "test:visual:update": "playwright test -c test/visual/playwright.config.ts --update-snapshots",
+    "test:visual:report": "playwright show-report test/visual/playwright-report",
+    "test:visual:index": "node test/visual/make-index.mjs",
     "migrate:dev": "node --env-file=.env.local node_modules/.bin/prisma migrate dev",
     "migrate:deploy": "node --env-file=.env.local node_modules/.bin/prisma migrate deploy",
     "db:seed": "node --env-file=.env.local node_modules/.bin/tsx db/run-seed.ts",
@@ -110,6 +114,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/formidable": "2.0.5",
     "@types/lodash": "4.14.184",
     "@types/luxon": "3.0.0",

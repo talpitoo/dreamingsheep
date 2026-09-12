@@ -39,6 +39,12 @@ pids
 .nyc_output
 lib-cov
 
+# visual regression (Playwright): baselines stay local (see test/visual/README.md)
+test/visual/__snapshots__/
+test/visual/.auth/
+test/visual/test-results/
+test/visual/playwright-report/
+
 # Caches
 *.tsbuildinfo
 .eslintcache

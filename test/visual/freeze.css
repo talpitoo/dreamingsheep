@@ -1,0 +1,34 @@
+/* toHaveScreenshot stylePath: injected while the screenshot is taken, removed afterwards.
+   Removes time-based noise — and the two background photos, which would otherwise dominate
+   the PNG size. */
+
+*,
+*::before,
+*::after {
+  animation-play-state: paused !important;
+  caret-color: transparent !important;
+}
+
+html,
+body {
+  scroll-behavior: auto !important;
+}
+
+.loading-spiral {
+  animation: none !important;
+}
+
+/* Google injects the reCAPTCHA badge iframe on the signup page */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
+/* The body carries two background photos — the mobile pair below sm and the cover pair from sm
+   up (src/styles/index.css). They are static assets no styling refactor touches, but they turn
+   every full-page PNG into a photograph: a flat colour compresses ~20x better and makes real
+   diffs obvious instead of drowning them in JPEG noise. `background-color: #0097a7 !important`
+   survives, so the ground stays the same teal.
+   The breakpoint switch between the two sets is asserted by contracts.visual.test.ts instead. */
+body {
+  background-image: none !important;
+}
