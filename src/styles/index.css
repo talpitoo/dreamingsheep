@@ -233,34 +233,7 @@
   /* The rules below were UNLAYERED under v3, where they beat MUI on source order (the stylesheet
      loads after emotion's tags) and lost to the #__next-scoped utilities. In the components layer
      they beat MUI by layer order and still lose to utilities — same outcome, now by contract.
-     The toggle-button block moves into Theme.ts in the next milestone. */
-
-  /* TODO @talpitoo This should be theme overrides and not done through pure css. Docs: https://mui.com/customization/theming/ */
-  .MuiToggleButtonGroup-root {
-    border-left: 1px solid #e0e0e0;
-    padding-top: 1px;
-    overflow: hidden;
-  }
-
-  .MuiToggleButtonGroup-grouped {
-    margin-top: -1px !important;
-    min-width: 86px;
-    min-height: 76px;
-    border-color: #e0e0e0 !important;
-    text-transform: lowercase !important;
-    font-size: 14px !important;
-    line-height: 2 !important;
-  }
-
-  .MuiToggleButtonGroup-grouped:first-child {
-    border-bottom-left-radius: 0;
-    border-top-left-radius: 0;
-    margin-left: -1px;
-  }
-
-  .MuiToggleButtonGroup-grouped:last-child {
-    border-top-right-radius: 0;
-  }
+     (The toggle-button block that used to head this list now lives in src/styles/Theme.ts.) */
 
   .MuiModal-root .temporary-img-fix {
     width: 100%;

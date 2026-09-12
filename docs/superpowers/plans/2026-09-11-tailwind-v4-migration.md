@@ -1614,6 +1614,27 @@ The `!important` flags are kept on purpose: MUI's own `grouped` rules (`:not(:fi
 - [ ] **Step 3: Verify** `yarn build && yarn start`; `yarn test:visual -- contracts settings dreams stats search-symbols` — 0 diffs, the toggle-button contract passes unchanged (its values are the same, only their source moved). If a diff appears in a toggle group, compare computed styles of the affected button in both reports and add the missing declaration with the same `!important` treatment.
 - [ ] **Step 4: Commit** `git commit -am "refactor(theme): toggle-button overrides move from index.css into Theme.ts (#1)"`
 
+## M2 as built (2026-09-12)
+
+The four `.MuiToggleButtonGroup-*` rules moved from `src/styles/index.css` into
+`src/styles/Theme.ts` as `MuiToggleButtonGroup.styleOverrides` (`root` + `grouped`), answering the
+`TODO @talpitoo` that had been sitting on them. Straightforward, with two things worth writing down:
+
+- **The `!important` flags came along unchanged.** As plain CSS the rules lived in
+  `@layer components` and beat MUI by layer order. In the theme they are IN the `mui` layer,
+  competing with MUI's own `grouped` styles on specificity — and MUI's are the more specific
+  (`&:not(:first-of-type)` and friends). Removing the flags is a separate cleanup that deserves its
+  own before/after run.
+- **`:first-child`/`:last-child`, not `:first-of-type`.** That is what the CSS said. The two agree
+  today because the groups only ever contain `ToggleButton`s, but the faithful selector is the one
+  that cannot change behaviour.
+
+Verified: the full suite at zero diffs, and `contracts.visual.test.ts` already pinned the computed
+values (min-width 86px, min-height 76px, lowercase, 14px, the -1px overlap, the group's left border
+and 1px top padding), so the move is checked twice over.
+
+---
+
 ### Task 12: `sx` translation rules (reference for Tasks 13–19)
 
 No files. Read before every M3 task. MUI's spacing unit is 8px and Tailwind's is 4px, so **multiply MUI numbers by 2**; rem strings map 1:1 (`1rem` = `4`). Breakpoint keys map 1:1 (`sm`/`md`/`lg` are 600/900/1200 in both systems): `{ xs: A, sm: B }` → `A sm:B`. Merge into an existing `className` with `classnames()` from `src/utils/classnames` when conditional.
