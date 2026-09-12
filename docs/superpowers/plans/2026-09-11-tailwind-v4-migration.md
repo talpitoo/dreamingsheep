@@ -1635,6 +1635,30 @@ and 1px top padding), so the move is checked twice over.
 
 ---
 
+## M3 as built — three ways an `sx` → `className` translation lies
+
+Found while converting the dreams group, all three caught by the visual suite rather than by
+reading the diff. Check for these before trusting any mechanical replacement:
+
+1. **The `sx` was dead.** `sx` lands in `@layer mui` alongside MUI's own component styles, so a
+   more specific MUI rule beats it — and a utility, sitting in a later layer, does not lose that
+   contest. Translating a dead `sx` therefore _revives_ it. Two cases:
+   `<Grid container rowSpacing={{ xs: 2 }} sx={{ mt: 2 }}>` (rowSpacing's −16px always won, so
+   `mt-4` pushed the whole dream list down 32px) and the submit button in both dialogs
+   (`DialogActions`' `> :not(style) ~ :not(style)` 8px gap always won, so `ml-4` widened it).
+   Both `sx` values are simply dropped, with a comment saying what actually renders.
+2. **A spread overwrites `className` where it could not overwrite `sx`.** The symbols autocomplete
+   renders its options as `<Box component="li" className=… {...props}>`, and `props` carries MUI's
+   own option className. The `sx` survived because props has no `sx`. Fix: spread first, then
+   `className={classnames(ours, props.className)}`.
+3. **A utility reaches where `sx` never did** — the M1 portal story: classes inside MUI portals
+   were inert under `important: "#__next"` and became live under layers.
+
+The cheap detector, when a page is not snapshotted: measure the computed value before and after
+(`git stash` the group, rebuild, compare). That is how both dead-`sx` cases were pinned down.
+
+---
+
 ### Task 12: `sx` translation rules (reference for Tasks 13–19)
 
 No files. Read before every M3 task. MUI's spacing unit is 8px and Tailwind's is 4px, so **multiply MUI numbers by 2**; rem strings map 1:1 (`1rem` = `4`). Breakpoint keys map 1:1 (`sm`/`md`/`lg` are 600/900/1200 in both systems): `{ xs: A, sm: B }` → `A sm:B`. Merge into an existing `className` with `classnames()` from `src/utils/classnames` when conditional.

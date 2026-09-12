@@ -61,7 +61,7 @@ export function DeletionConfirmationDialog({
       <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">{message}</DialogContentText>
-        <Box sx={{ textAlign: "center" }}>
+        <Box className="text-center">
           <Image
             src={sheepDelete}
             alt="symbols sheep"
@@ -71,7 +71,7 @@ export function DeletionConfirmationDialog({
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ mx: 2, mb: 2 }}>
+      <DialogActions className="mx-4 mb-4">
         <Button onClick={onCancel} disabled={isBusy}>
           Cancel
         </Button>
@@ -83,9 +83,10 @@ export function DeletionConfirmationDialog({
           variant="contained"
           onClick={handleDelete}
           disabled={isBusy}
+          // no ml-*: DialogActions' own `> :not(style) ~ :not(style)` rule is more specific than
+          // the sx that used to sit here, so its 8px gap is what has always rendered
           className="w-auto"
           endIcon={isBusy && <HourglassTopIcon className="opacity-50" />}
-          sx={{ ml: 2 }}
         >
           {deleteButton}
         </Button>

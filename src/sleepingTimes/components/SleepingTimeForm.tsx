@@ -106,7 +106,7 @@ const TimePickerField = forwardRef<Partial<TimePickerProps<Date, Date>>, TimePic
                                 size="small"
                                 color="primary"
                                 disabled={isSubmitting}
-                                sx={{ minWidth: 0, px: 1 }}
+                                className="min-w-0 px-2"
                                 // keep the tap from focusing/opening the picker (mobile
                                 // variant opens its dialog on any click into the field)
                                 onMouseDown={(event) => event.preventDefault()}

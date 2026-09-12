@@ -157,9 +157,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
               />
             </>
           )}
-          {!isEdit && false && (
-            <CardHeader title={dream.title} sx={{ paddingBottom: "0" }} component="h2" />
-          )}
+          {!isEdit && false && <CardHeader title={dream.title} className="pb-0" component="h2" />}
           {!isEdit && (
             <CardContent>
               <Typography
@@ -193,11 +191,8 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
               />
             </CardContent>
           )}
-          <CardActions className="p-4 flex-column" sx={{ display: { xs: "block", sm: "flex" } }}>
-            <Box
-              className="flex-row flex-wrap grow overflow-hidden"
-              sx={{ mb: { xs: "1rem", sm: "0" } }}
-            >
+          <CardActions className="p-4 flex-column block sm:flex">
+            <Box className="flex-row flex-wrap grow overflow-hidden mb-4 sm:mb-0">
               {!isEdit ? (
                 <DreamItemFooter
                   time={dream.time}
@@ -219,7 +214,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
             <Box className="flex flex-row ml-0">
               <IconButton
                 color="primary"
-                sx={{ mr: "auto", ml: { xs: 0, md: 2 } }}
+                className="mr-auto ml-0 md:ml-4"
                 onClick={() => setDeleteDialogVisibility(true)}
               >
                 <span className="lucidicon-trash"></span>
@@ -234,9 +229,8 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                     variant="contained"
                     type="submit"
                     form={"update-dream_" + dream.id}
-                    sx={{ ml: 2 }}
                     disabled={isUpdateDreamLoading}
-                    className={`w-auto transition-all ease-in-out duration-300 ${
+                    className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                       isUpdateDreamLoading ? "max-w-[113px]" : "max-w-[89px]"
                     }`}
                     endIcon={isUpdateDreamLoading && <HourglassTopIcon className="opacity-50" />}
@@ -246,7 +240,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                 </Fragment>
               )}
               {!isEdit && (
-                <IconButton color="primary" onClick={() => changeEdit(true)} sx={{ ml: 2 }}>
+                <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
                   <span className="lucidicon-pencil"></span>
                 </IconButton>
               )}
@@ -300,14 +294,14 @@ export const DreamList = ({
   return (
     <Fragment>
       {isLoading && (
-        <Box sx={{ height: "100%" }}>
+        <Box className="h-full">
           <LoadingSpiral />
         </Box>
       )}
       {count === 0 && !isLoading && (
         <Fragment>
           <Paper className="bg-mui-secondary-light">
-            <Box sx={{ p: 2 }}>
+            <Box className="p-4">
               <Typography variant="body1" gutterBottom className="mb-0">
                 {noDreamMessage}
               </Typography>
@@ -317,7 +311,10 @@ export const DreamList = ({
       )}
       {count > 0 && !isLoading && (
         <Fragment>
-          <Grid container spacing={{ xs: 4 }} rowSpacing={{ xs: 2 }} sx={{ mt: 2, mb: 2 }}>
+          {/* no mt-* here: the sx used to say `mt: 2`, but rowSpacing generates a more specific
+              rule in the same layer and the -16px it sets always won. Translating a dead sx into a
+              utility would revive it and push the whole list down (issue #1). */}
+          <Grid container spacing={{ xs: 4 }} rowSpacing={{ xs: 2 }} className="mb-4">
             {dreams.map((dream) => (
               <DreamItem
                 key={dream.id}

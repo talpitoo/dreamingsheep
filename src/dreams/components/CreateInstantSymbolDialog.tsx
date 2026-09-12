@@ -42,7 +42,7 @@ export const CreateInstantSymbolDialog = () => {
       <form onSubmit={handleDialogSubmit}>
         <DialogTitle>Create a new symbol?</DialogTitle>
         <DialogContent>
-          <Box sx={{ textAlign: "center" }}>
+          <Box className="text-center">
             <Image
               className="text-center"
               src={sheepSymbol}
@@ -51,7 +51,7 @@ export const CreateInstantSymbolDialog = () => {
               height={300}
             />
           </Box>
-          <DialogContentText sx={{ mb: 2 }}>
+          <DialogContentText className="mb-4">
             You can add more details about this symbol later.
           </DialogContentText>
 
@@ -69,7 +69,7 @@ export const CreateInstantSymbolDialog = () => {
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions sx={{ mx: 2, mb: 2 }}>
+        <DialogActions className="mx-4 mb-4">
           <Button onClick={closeDialog} disabled={isCreateSymbolLoading}>
             Cancel
           </Button>
@@ -77,8 +77,8 @@ export const CreateInstantSymbolDialog = () => {
           <Button
             type="submit"
             variant="contained"
-            sx={{ ml: 2 }}
             disabled={isCreateSymbolLoading}
+            // same as the deletion dialog: DialogActions' 8px gap wins, the sx never did
             className="w-auto"
             endIcon={isCreateSymbolLoading && <HourglassTopIcon className="opacity-50" />}
           >
