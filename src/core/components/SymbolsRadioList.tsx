@@ -78,7 +78,7 @@ export const SymbolsRadioList = (props: SymbolsRadioListProps) => {
         opt-out completely by deselecting all¹.
       </FormLabel>
       {isLoading && (
-        <Box sx={{ height: "100%" }}>
+        <Box className="h-full">
           <LoadingSpiral />
         </Box>
       )}
@@ -104,16 +104,20 @@ export const SymbolsRadioList = (props: SymbolsRadioListProps) => {
         />
       </Box>
       {/* NOTE: the calculation magic below is for offsetting the .-mx-4 while preserving the aspect ratio of the buttons */}
+      {/* the only `style` prop left in the app: the scale factor and the margin that
+          compensates for it are computed from the measured element width, so there is no class
+          that could express them (issue #1) */}
       <Box
-        sx={{
-          ...(!isDisabled && {
-            transformOrigin: "top center",
-            transform: `scale(${width / (width - 32)})`,
-            willChange: "transfrom",
-            mb: `${height * (width / (width - 32)) - height}px`,
-            // mx: 2,
-          }),
-        }}
+        style={
+          isDisabled
+            ? undefined
+            : {
+                transformOrigin: "top center",
+                transform: `scale(${width / (width - 32)})`,
+                willChange: "transfrom",
+                marginBottom: `${height * (width / (width - 32)) - height}px`,
+              }
+        }
         className="flex flex-wrap rounded-md shadow-sm bg-white overflow-hidden transition-transform"
       >
         <ToggleButtonGroup
@@ -140,7 +144,7 @@ export const SymbolsRadioList = (props: SymbolsRadioListProps) => {
         </ToggleButtonGroup>
       </Box>
       {error && (
-        <Typography variant="caption" sx={{ color: "red" }}>
+        <Typography variant="caption" className="text-[red]">
           {error}
         </Typography>
       )}

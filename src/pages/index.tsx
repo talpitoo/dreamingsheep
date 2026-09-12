@@ -118,7 +118,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
           <Grid item md={8}>
             <Card className="bg-mui-secondary-light">
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {lastMonthDreamsCount < 1 && (
                     <>
                       No dreams last month{" "}
@@ -154,12 +154,12 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 {/* <Box sx={{ textAlign: "center", mb: 2 }}>
                 <Image src={globalSymbolsExample} alt="chart" width="192" height="174" />
               </Box> */}
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Join us as we watch Replicants³ jump over the fence (and transform into Humans).
                   Let&apos;s dream a better⁴ world together!
                   {/* <span className="lucidicon lucidicon-shine-2"></span> */}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2, textAlign: "center" }}>
+                <Typography variant="body1" className="mb-4 text-center">
                   <em>
                     You may say that I&apos;m a dreamer
                     <br />
@@ -170,7 +170,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                     and the world will be as one.⁵
                   </em>
                 </Typography>
-                <Box sx={{ textAlign: "center" }}>
+                <Box className="text-center">
                   <Image
                     src={sheepDream}
                     alt="dream sheep"

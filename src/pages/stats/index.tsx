@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { AppPage as BlitzPage } from "src/core/types"
@@ -180,15 +181,10 @@ export const Stats = () => {
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
             <Box
-              sx={{
-                width: { xs: "50%", sm: "100%" },
-                ...(user && {
-                  margin: "auto",
-                }),
-                ...(!user && {
-                  margin: { xs: "0 auto -2rem", sm: "auto" },
-                }),
-              }}
+              className={classnames(
+                "w-1/2 sm:w-full",
+                user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+              )}
             >
               <Image
                 src={sheepStats}
@@ -201,29 +197,21 @@ export const Stats = () => {
           </Grid>
         </Grid>
 
-        <Grid container sx={{ mb: 2 }}>
+        <Grid container className="mb-4">
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
             <h1 className="heading">
               <Image src={titleStats} alt="Stats" width="77" height="55" />
               <span className="sr-only">Stats</span>
             </h1>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                flexWrap: "wrap",
-                gap: 2,
-              }}
-            >
+            <Box className="flex justify-between items-start flex-wrap gap-4">
               <Card className="bg-white inline-block">
                 <ToggleButtonGroup
                   value={range}
-                  // NOTE: using sx={...} instead of orientation={breakpointSm ? "vertical" : "horizontal"}
+                  // NOTE: wrapping via a class instead of orientation={breakpointSm ? "vertical" : "horizontal"}
                   color="primary"
                   exclusive
-                  sx={{ flexWrap: "wrap" }}
+                  className="flex-wrap"
                   onChange={(_, value) => {
                     if (value !== null) {
                       changeRange(value)
@@ -241,15 +229,15 @@ export const Stats = () => {
                     <ToggleButton
                       key={value}
                       value={value}
-                      sx={{
-                        minWidth: { xs: "48px !important", sm: "86px" },
-                        px: { xs: "7px", sm: "11px" },
-                      }}
+                      // the xs value is !important, so it outranks the sm media rule at EVERY
+                      // width and these buttons stay 48px wide even on desktop. Pre-existing and
+                      // preserved: min-w-[48px]! reproduces it exactly (the contracts pin it)
+                      className="min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]"
                     >
-                      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                      <Box component="span" className="hidden sm:inline">
                         {label}
                       </Box>
-                      <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
+                      <Box component="span" className="inline sm:hidden">
                         {shortLabel}
                       </Box>
                     </ToggleButton>
@@ -265,18 +253,20 @@ export const Stats = () => {
                     onClick={toggleAdvanced}
                     aria-expanded={advancedOpen}
                     aria-controls="advanced-stats-panel"
-                    sx={{ px: 2, py: "11px" }}
+                    className="px-4 py-[11px]"
                     endIcon={
+                      // arbitrary values, not rotate-180/transition-transform: v4's rotate-*
+                      // drives the `rotate` property while this transition names `transform`
                       <KeyboardArrowDown
-                        sx={{
-                          transform: advancedOpen ? "rotate(180deg)" : "none",
-                          transition: "transform 0.2s",
-                        }}
+                        className={classnames(
+                          "[transition:transform_0.2s]",
+                          advancedOpen && "[transform:rotate(180deg)]"
+                        )}
                       />
                     }
                   >
-                    <Settings sx={{ display: { xs: "inline", sm: "none" } }} />
-                    <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                    <Settings className="inline sm:hidden" />
+                    <Box component="span" className="hidden sm:inline">
                       Filters
                     </Box>
                   </Button>
@@ -287,7 +277,7 @@ export const Stats = () => {
             {/* the from–to window for the "custom" range — expands (same Collapse animation
                 as the Filters panel) with two dream-highlighted date pickers */}
             <Collapse in={range === "custom"}>
-              <Card className="bg-white" sx={{ mt: 2, p: 2 }}>
+              <Card className="bg-white mt-4 p-4">
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <DreamDatePicker
@@ -327,7 +317,7 @@ export const Stats = () => {
               <Suspense fallback={<LoadingSpiral />}>
                 <AdvancedStats range={range} custom={custom} filtersOpen={advancedOpen}>
                   {user?.trackSleepingTime && (
-                    <Box sx={{ mb: 3 }}>
+                    <Box className="mb-6">
                       <Suspense fallback={<LoadingSpiral />}>
                         <SleepChart range={range} custom={custom} />
                       </Suspense>
@@ -339,7 +329,7 @@ export const Stats = () => {
               <Fragment>
                 {/* 7th stat: full-width sleep pattern, only when bedtime/wake-up tracking is on */}
                 {user?.trackSleepingTime && (
-                  <Box sx={{ mb: 3 }}>
+                  <Box className="mb-6">
                     <Suspense fallback={<LoadingSpiral />}>
                       <SleepChart range={range} custom={custom} />
                     </Suspense>
