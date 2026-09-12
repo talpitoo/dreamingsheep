@@ -12,14 +12,7 @@ export const SheepGridContainer = ({ imageComponent }: SheepGridContainerProps) 
     <Grid container>
       <Grid item md={2} className="grid-spacer-md-2" />
       <Grid item xs={12} sm={6} md={4}>
-        <Box
-          sx={{
-            width: { xs: "50%", sm: "100%" },
-            margin: "auto",
-          }}
-        >
-          {imageComponent}
-        </Box>
+        <Box className="w-1/2 sm:w-full m-auto">{imageComponent}</Box>
       </Grid>
       <Grid item sm={6} md={4} className="text-center w-full">
         <Image

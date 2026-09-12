@@ -167,7 +167,7 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           <Head>
             <meta name="robots" content="noindex" />
           </Head>
-          <Grid container sx={{ mb: 2 }}>
+          <Grid container className="mb-4">
             <Grid container item sm={12} justifyContent="center">
               <Alert severity="warning">Your session expired. Please log in</Alert>
             </Grid>
@@ -175,12 +175,7 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           <Grid container>
             <Grid item md={2} className="grid-spacer-md-2" />
             <Grid item xs={12} sm={6} md={4}>
-              <Box
-                sx={{
-                  width: { xs: "50%", sm: "100%" },
-                  margin: { xs: "0 auto -2rem", sm: "auto" },
-                }}
-              >
+              <Box className="w-1/2 sm:w-full mt-0 mx-auto -mb-8 sm:m-auto">
                 <Image
                   src={sheepSignup}
                   alt="signup sheep"

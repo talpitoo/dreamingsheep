@@ -8,6 +8,7 @@ import { useRouter } from "next/router"
 import { Routes } from "src/routes"
 import Link from "next/link"
 import CookieNotice from "./CookieNotice"
+import classnames from "src/utils/classnames"
 
 interface AuthenticationContainerProps {
   imageComponent: ReactNode
@@ -31,15 +32,11 @@ export const AuthenticationContainer = ({
       <Grid item md={2} className="grid-spacer-md-2" />
       <Grid item xs={12} sm={6} md={4}>
         <Box
-          sx={{
-            width: { xs: "50%", sm: "100%" },
-            ...(session.userId && {
-              margin: "auto",
-            }),
-            ...(!session.userId && {
-              margin: { xs: "0 auto -2rem", sm: "auto" },
-            }),
-          }}
+          className={classnames(
+            "w-1/2 sm:w-full",
+            // logged out, the sheep is pulled up over the login card below it on small screens
+            session.userId ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+          )}
         >
           <Link href="/">{imageComponent}</Link>
         </Box>
@@ -54,7 +51,7 @@ export const AuthenticationContainer = ({
               height={75}
               className="w-full h-auto max-w-[325px]"
             />
-            <Box sx={{ marginBottom: { xs: "2rem", sm: "0" } }}>
+            <Box className="mb-8 sm:mb-0">
               <LoginForm
                 headerComponent={headerComponent}
                 footerComponent={footerComponent}
