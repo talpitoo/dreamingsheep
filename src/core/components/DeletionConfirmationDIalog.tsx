@@ -75,13 +75,15 @@ export function DeletionConfirmationDialog({
         <Button onClick={onCancel} disabled={isBusy}>
           Cancel
         </Button>
+        {/* No width animation in a dialog: MUI portals it out of #__next, so under Tailwind v3
+            these max-w-* classes never applied at all. Cascade layers made them live, and the first
+            thing they did was squeeze "Yes, Delete Account" onto three lines. The animation was
+            never seen here — drop it rather than invent a new look (issue #1). */}
         <Button
           variant="contained"
           onClick={handleDelete}
           disabled={isBusy}
-          className={`w-auto transition-all ease-in-out duration-300 ${
-            isBusy ? "max-w-[113px]" : "max-w-[89px]"
-          }`}
+          className="w-auto"
           endIcon={isBusy && <HourglassTopIcon className="opacity-50" />}
           sx={{ ml: 2 }}
         >

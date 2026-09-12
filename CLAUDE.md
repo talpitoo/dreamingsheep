@@ -37,7 +37,17 @@ dependency that is truly required.** This is a peculiar, carefully balanced comb
   and replaced by a small **owned core**: `src/core/` (resolver, paginate, errors,
   rpc handler/client, Routes) + `src/auth/session/` (DB-backed sessions, CSRF) —
   ~900 lines, unit-tested; treat it as security-critical code
-- **MUI 5 + Tailwind 3** mixed together (yes, both; `sx` and utility classes coexist)
+- **MUI 5 + Tailwind 4.1.18** mixed together (yes, both; `sx` and utility classes coexist,
+  though `sx` is on its way out — issue #1). They share one explicit cascade order,
+  `@layer properties, theme, base, mui, components, utilities`, declared in
+  [src/pages/\_document.tsx](src/pages/_document.tsx) and mirrored in
+  [src/styles/index.css](src/styles/index.css): utilities beat MUI, MUI beats our base rules, and
+  every stylesheet the app loads must be inside a layer (an unlayered one outranks the lot).
+  MUI's emotion output is wrapped by [src/createEmotionCache.ts](src/createEmotionCache.ts) **and**
+  by `<StyledEngineProvider enableCssLayer>` in `_app` — both, because Next gives the server two
+  instances of `@emotion/react`. Tailwind is configured in CSS only (no `tailwind.config.js`), and
+  `@tailwindcss/postcss` replaced `autoprefixer` + `postcss`. Preflight stays off: MUI's
+  `<CssBaseline />` is the reset.
 - **Prisma 3.13** + Postgres, React 18, react-google-charts 4 + d3 7,
   @tanstack/react-query 4 (what the rpc-client wraps), superjson on the RPC wire
 - Three date libs coexist: moment (stats), luxon (pickers), date-fns — don't

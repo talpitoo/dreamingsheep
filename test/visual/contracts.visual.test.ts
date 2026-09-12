@@ -90,7 +90,10 @@ test("card, button and toggle-grid animations keep their transitions", async ({ 
   expect(await css(page, update, "transition-duration")).toBe("0.3s")
   expect(await css(page, update, "transition-timing-function")).toBe("cubic-bezier(0.4, 0, 0.2, 1)")
   const grid = "form#symbols .transition-transform"
-  expect(await css(page, grid, "transition-property")).toBe("transform")
+  // v4 widened transition-transform to the separate transform properties as well; the grid is
+  // animated through `transform: scale(…)`, which is still in the list, and the snapshots of the
+  // settings symbols card are unchanged
+  expect(await css(page, grid, "transition-property")).toBe("transform, translate, scale, rotate")
   expect(await css(page, grid, "transition-duration")).toBe("0.15s")
 })
 

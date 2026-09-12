@@ -19,7 +19,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import React, { useState } from "react"
 import { Navigation, Controller } from "swiper"
 import { Swiper, SwiperSlide } from "swiper/react"
-import "swiper/css"
+// "swiper/css" is imported from src/styles/index.css so it lands in a cascade layer (issue #1)
 // import "swiper/css/navigation"
 
 // Rendered by the landing page inside the login card (AuthenticationContainer's

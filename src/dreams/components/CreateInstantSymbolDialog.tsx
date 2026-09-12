@@ -73,14 +73,13 @@ export const CreateInstantSymbolDialog = () => {
           <Button onClick={closeDialog} disabled={isCreateSymbolLoading}>
             Cancel
           </Button>
+          {/* same as the deletion dialog: a portal never saw these max-w-* classes under v3 */}
           <Button
             type="submit"
             variant="contained"
             sx={{ ml: 2 }}
             disabled={isCreateSymbolLoading}
-            className={`w-auto transition-all ease-in-out duration-300 ${
-              isCreateSymbolLoading ? "max-w-[87px]" : "max-w-[64px]"
-            }`}
+            className="w-auto"
             endIcon={isCreateSymbolLoading && <HourglassTopIcon className="opacity-50" />}
           >
             Add

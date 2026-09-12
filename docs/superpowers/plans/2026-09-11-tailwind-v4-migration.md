@@ -1496,6 +1496,78 @@ git add -A
 git commit -m "feat(styles): tailwind 4.1.18 + cascade layers, MUI in @layer mui (#1)"
 ```
 
+## M1 as built (2026-09-12) — what the plan did not foresee
+
+Tasks 8–10 landed, but four things had to be solved that the plan's spikes could not see, because
+each only shows up in the running app rather than in a standalone Tailwind compile.
+
+1. **Next gives the server two instances of `@emotion/react`.** Its `exports` map offers an ESM and
+   a CJS build, `_app.tsx`'s import resolves to one and `@mui/styled-engine`'s to the other, so the
+   `CacheProvider` in `_app` never reached MUI's components server-side: they fell back to their own
+   instance's default cache, whose styles are **unlayered** and therefore outrank every utility.
+   Proven by instrumenting the render — `_app` saw `cache.key === "mui-style"` while
+   `cache.inserted` stayed empty and the HTML came out full of `css-*` classes. Fix:
+   `<StyledEngineProvider enableCssLayer>` inside the existing `CacheProvider`. It is imported from
+   MUI, i.e. from the same instance its components read, so it is the provider that lands. Both
+   caches are wrapped either way, so whichever wins, the layering holds.
+   _Side finding, not fixed here:_ this also means the pages-router SSR style extraction in
+   `_document.tsx` has been dead since the Next 16 move — MUI's styles are emitted inline in the
+   body instead of the head. Worth its own issue.
+2. **Every stylesheet the app loads must be inside a layer.** `src/styles/fonts.css` and
+   `swiper/css` were plain imports, and an unlayered rule beats all layered ones, so the icon font's
+   `font-size: 16px` started winning over `text-2xl` and every toggle-button glyph shrank (a
+   uniform 16px height loss across the forms). Both are now `@import`ed from `index.css` with
+   `layer(components)`, which reproduces what they did under v3.
+3. **Tailwind's internal `properties` layer has to be named, first.** It holds the `@supports`
+   fallback that seeds the `--tw-*` custom properties for browsers without `@property`. A layer the
+   order statement leaves out is created on first use — i.e. appended after `utilities` — which
+   would let those initializers outrank the utilities that set them, on exactly the old browsers
+   they exist for. The order is therefore
+   `@layer properties, theme, base, mui, components, utilities`.
+4. **The 404 divider that never drew.** `ErrorStatus` asks for `border-r border-current`, but v3
+   sets only a border _width_ and, with Preflight disabled, the style stayed `none`. v4's border
+   utilities carry their own style, so the line appeared. Removed to keep the page identical;
+   restoring it is a design decision, not a migration side effect.
+
+5. **Cascade layers wedge Chrome 105, which is what the e2e suite drives.** After the flip, every
+   puppeteer navigation after the first timed out. Bisected to a minimal repro: a stylesheet
+   containing a layer _statement_ (`@layer a, b;`) followed by a layer _block_
+   (`@layer c { … }`) hangs that renderer on the NEXT navigation, but only once the file comes from
+   the HTTP cache (`setCacheEnabled(false)` makes it go away, and so does an empty stylesheet).
+   **This is a regression, not a pre-existing condition**: the live v3 site navigates fine in the
+   same Chrome 105 (measured), because it has no cascade layers. The root cause is a defect in that
+   browser build — the CSS is valid and modern Chromium is unaffected (the visual suite drives 153
+   over the same pages) — but adopting layers is what exposes it. Chrome 105 is from August 2022 and
+   sits below Tailwind v4's documented floor of Chrome 111+ / Safari 16.4+ / Firefox 128+.
+   **Fixed at the source, for real users too.** The trigger needs the statement and a block in the
+   SAME cached file, and the statement in `index.css` turned out to be redundant: `_document.tsx`
+   declares the authoritative order inline, ahead of everything, and every layer the stylesheet uses
+   gets a block of its own — so Lightning CSS was emitting a lone `@layer mui;` for the one layer
+   that had none. Dropping the statement from `index.css` leaves the file with blocks only, and
+   Chrome 105 navigates normally again with its cache on. The e2e suite therefore needs **no**
+   workaround (all 29 pass unchanged) and keeps working as a canary for this class of breakage —
+   it is the only thing in the project that drives an old browser.
+   Note the block order inside the built stylesheet is then whatever Lightning CSS likes
+   (properties, theme, utilities, components, base): harmless, because the inline statement has
+   already fixed every layer's position, and `layers.visual.test.ts` asserts exactly that.
+
+**Verification deviations**
+
+- The vendor-prefix diff of Task 10 Step 2 was not produced byte-for-byte: rebuilding the v3
+  toolchain needs a dependency reinstall, which would have disturbed the node_modules the visual
+  suite runs from (and a worktree build fails — Turbopack rejects a symlinked `node_modules`).
+  Instead the new build's prefix inventory was checked directly: every hand-written prefix survives
+  (`-webkit-box-decoration-break` ×2, `-webkit-line-clamp`, `-webkit-box-orient`,
+  `-webkit-font-smoothing` ×2, `-moz-osx-font-smoothing` ×2). What autoprefixer used to add beyond
+  those served browsers below the v4 floor, which this migration already accepted losing.
+- One contract expectation changed on purpose: v4 widens `transition-transform` to
+  `transform, translate, scale, rotate`. The settings symbols grid animates through
+  `transform: scale(…)`, still in the list, and its snapshots are unchanged at every width.
+- `test/visual/layers.visual.test.ts` was added: the layer order, every emotion rule being inside
+  `@layer mui`, a utility beating MUI without `!important`, and MUI still beating our base layer.
+
+---
+
 ### Task 11: Theme.ts takes over the toggle-button CSS (M2)
 
 **Files:**

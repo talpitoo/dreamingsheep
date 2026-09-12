@@ -125,7 +125,7 @@ export function Header() {
               </div>
 
               <Box
-                className="flex-grow mr-8"
+                className="grow mr-8"
                 sx={{
                   // on xs the box is empty (title hidden or absolutely positioned),
                   // so the logo offset only matters from md up
@@ -303,7 +303,7 @@ export function Header() {
                   <Link
                     href={Routes.SettingsPage()}
                     passHref={true}
-                    className="hover:!no-underline"
+                    className="hover:no-underline!"
                   >
                     <Button
                       sx={{

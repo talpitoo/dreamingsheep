@@ -114,7 +114,7 @@ export const SymbolsRadioList = (props: SymbolsRadioListProps) => {
             // mx: 2,
           }),
         }}
-        className="flex flex-wrap rounded-md shadow bg-white overflow-hidden transition-transform"
+        className="flex flex-wrap rounded-md shadow-sm bg-white overflow-hidden transition-transform"
       >
         <ToggleButtonGroup
           ref={ToggleButtonGroupRef}
