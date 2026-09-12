@@ -27,9 +27,9 @@ const FavoriteField = ({ name, ...props }: CheckboxFieldProps) => {
       {...favoriteFieldControllerProps}
       render={({ field: { onChange, value } }) => (
         <InputAdornment position="end">
-          <Checkbox sx={{ display: "none", displayPrint: "block" }} {...props} checked={value} />
+          <Checkbox className="hidden print:block" {...props} checked={value} />
           <IconButton
-            sx={{ mr: 0 }}
+            className="mr-0"
             aria-label="favorite"
             edge="end"
             onClick={() => onChange(!value)}
@@ -107,7 +107,7 @@ export const LabeledTextFieldFavorite = forwardRef<
             {...textFieldProps}
             InputLabelProps={{ shrink: true, disableAnimation: true }}
             InputProps={{
-              sx: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
+              className: "rounded-b-none",
               endAdornment: (
                 <InputAdornment position="end">
                   <FavoriteField name={favoriteFieldName} disabled={props.disabled} />

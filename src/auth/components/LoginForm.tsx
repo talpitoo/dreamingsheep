@@ -23,7 +23,7 @@ export const LoginForm = (props: LoginFormProps) => {
   const [loginMutation] = useMutation(login)
 
   return (
-    <Card sx={{ textAlign: "left" }}>
+    <Card className="text-left">
       <CardContent>
         {props.headerComponent}
         <Form
@@ -53,7 +53,7 @@ export const LoginForm = (props: LoginFormProps) => {
             fullWidth
             autoComplete="email"
             // className="rounded-top"
-            inputProps={{ sx: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } }}
+            inputProps={{ className: "rounded-b-none" }}
             inputLabelProps={{ shrink: true, disableAnimation: true }}
             className="translate-x-0 translate-y-0 transform-gpu"
           />
@@ -64,9 +64,7 @@ export const LoginForm = (props: LoginFormProps) => {
             type="password"
             fullWidth
             // className="rounded-bottom"
-            inputProps={{
-              sx: { borderTopLeftRadius: 0, borderTopRightRadius: 0, marginTop: "-1px" },
-            }}
+            inputProps={{ className: "rounded-t-none -mt-px" }}
             inputLabelProps={{ shrink: true, disableAnimation: true }}
             className="translate-x-0 translate-y-0 transform-gpu"
           />

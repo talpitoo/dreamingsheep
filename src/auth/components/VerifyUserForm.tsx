@@ -22,7 +22,7 @@ export const VerifyUserForm = ({ onSuccess }: VerifyUserFormProps) => {
 
   return (
     <Card className="text-left">
-      <CardHeader title="Check your email" sx={{ paddingBottom: "0" }} component="h2" />
+      <CardHeader title="Check your email" className="pb-0" component="h2" />
       <CardContent>
         <Form
           submitText="Let me in"
@@ -72,7 +72,7 @@ export const VerifyUserForm = ({ onSuccess }: VerifyUserFormProps) => {
           </Link>
         </p>
         {!!resendOtpError && (
-          <Typography variant="caption" sx={{ color: "red" }}>
+          <Typography variant="caption" className="text-[red]">
             {resendOtpError}
           </Typography>
         )}
