@@ -62,10 +62,10 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   height={736}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep,
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Way back in{" "}
                   <Link href={Routes.ArticlePageUseCaseTwoAddToHomeScreen()}>
                     Use case two: Add to home screen
@@ -74,14 +74,14 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   <em>&quot;keep an eye on the Stats page as those charts come to life&quot;</em>.
                   Consider this the awakening¹.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   There is a new <strong>Advanced charting</strong> switch waiting for you in{" "}
                   <Link href={Routes.SettingsPage()}>&#47;settings</Link>. Flip it, wander over to{" "}
                   <Link href={Routes.StatsPage()}>&#47;stats</Link>, and your dream garden turns
                   into a criss-cross laboratory: type a keyword, toggle a mood, handpick a symbol —
                   and every chart on the page redraws around your question.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   What kind of questions, you ask? The kind only you can ask about your own dreams:
                 </Typography>
                 <Typography variant="body1" component="div">
@@ -104,7 +104,7 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                     </li>
                   </ul>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Speaking of sleep: remember the <em>&quot;(future-feature)&quot;</em> note next to
                   the bedtime/wake-up opt-in on the Settings page? The future has officially
                   arrived. Track your bedtime and wake-up time on the{" "}
@@ -113,7 +113,7 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   night colored in between. Nights you don&apos;t track simply stay blank; the sheep
                   doesn&apos;t judge².
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   And in case you are wondering: no, we still won&apos;t tell you what any of it{" "}
                   <em>means</em>. As promised in{" "}
                   <Link href={Routes.ArticlePageBackstoryTheBeginnings()}>
@@ -122,11 +122,11 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                   , <em>dreamingsheep</em> remains a neu(t)ral tool: the charts do the showing, your
                   intuition does the interpreting.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Now go log a dream, flip the switch, and cross-examine your subconscious. Sweet
                   dreams!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Meh!
                 </Typography>
                 <hr />

@@ -65,10 +65,10 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
                   height={692}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   You can add <em>dreamingsheep</em>&#32;to your home screen and use it just like an
                   app, minus the tracking of your personal data, which is an inseparable part of the
                   app ecosystem. We&apos;re going to <em>“steal your soul”</em> anyway{" "}
@@ -85,7 +85,7 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
                   typos, or, who knows, maybe they were intentional? Attach symbols, arrange your
                   dream garden, and keep an eye on the Stats page as those charts come to life.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   To add the app to the home screen:
                 </Typography>
                 <ul>

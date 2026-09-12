@@ -104,11 +104,7 @@ const BlogPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
                           335px and got clipped on a 320px screen. `anywhere` is the fix and
                           `break-word` is not: only `anywhere` counts the break opportunities it
                           introduces towards the intrinsic min-content size. */}
-                      <Typography
-                        variant="body1"
-                        className="[overflow-wrap:anywhere]"
-                        sx={{ ml: { xs: 0, sm: 2 } }}
-                      >
+                      <Typography variant="body1" className="ml-0 sm:ml-4 [overflow-wrap:anywhere]">
                         {blog.content}
                         <Link href={`blog/${blog.href}`}>Read more</Link>
                       </Typography>

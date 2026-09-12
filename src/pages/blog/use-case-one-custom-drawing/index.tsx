@@ -64,12 +64,12 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                 <Typography variant="body1" align="right">
                   ¹
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Have you ever had a dream so vivid, so indescribable, that words alone fail to do
                   justice? With custom symbols, you have the ability to attach your own drawings or
                   images, capturing the dream&apos;s essence more precisely.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   But the possibilities don&apos;t end there. You can employ this feature to curate
                   your own unique categories. Missing the five (or six) senses in the predefined,
                   built-in symbols{" "}
@@ -80,12 +80,12 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                   <span className="lucidicon lucidicon-optical-illusion"></span>? No problem. Create
                   a custom symbol for each, and you&apos;re all set.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   This means that <em>dreamingsheep</em>&#32;isn&apos;t confined to dream journaling
                   alone. You can easily transform it into your very own travel journal, chronicling
                   your spacetime adventures.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <em>Right, let&apos;s go adventuring!</em>²
                 </Typography>
                 <hr />

@@ -70,7 +70,7 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
                     allowFullScreen
                   ></iframe>
                 </Box>
-                <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
+                <Typography variant="body1" className="mb-4 mt-4">
                   For years there was a footnote on the landing page saying{" "}
                   <em>obviously, the explainer video is in the works</em>, and for just as many
                   years an <code>&lt;iframe&gt;</code> sat right underneath it, commented out,
@@ -79,18 +79,18 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
                   deserves better than a <code>{"{/* */}"}</code>, so here it is, moved to a place
                   where it can finally play.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   It was never an explainer video. It was Faye Wong singing <em>Dreams</em>&#32;—
                   the Cranberries song¹, in Cantonese, the one she carries through Chungking
                   Express². Nothing about it explains what this website does, and everything about
                   it explains why this website exists.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   As for the explainer video: still in the works, in the way that things are in the
                   works. Until then the <Link href="/#demo">#demo</Link> on the landing page does
                   the explaining, and Faye does the rest.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep!
                 </Typography>
                 <hr />

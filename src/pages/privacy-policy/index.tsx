@@ -54,14 +54,14 @@ const PrivacyPolicyPage: BlitzPage = () => {
               <span className="sr-only">Privacy policy</span>
             </h1>
 
-            <Alert severity="info" sx={{ mb: 3 }}>
+            <Alert severity="info" className="mb-6">
               <strong>Last updated:</strong> 14 February 2026, <strong> Data Controller:</strong>{" "}
               Tóth Tamás, Serbia
             </Alert>
 
             {/* ==================== LEGAL SECTION ==================== */}
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Data We Collect" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Data We Collect" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="my-0">
@@ -91,7 +91,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Why We Collect It" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Why We Collect It" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="my-0">
@@ -111,7 +111,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Legal Basis (GDPR)" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Legal Basis (GDPR)" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   We process your data based on: (a) <strong>Contract</strong> — to provide the
@@ -122,7 +122,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Data Retention" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Data Retention" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="my-0">
@@ -138,7 +138,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Your Rights" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Your Rights" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   You have the right to:
@@ -168,7 +168,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Third-Party Services" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Third-Party Services" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="my-0">
@@ -190,11 +190,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="International Transfers"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="International Transfers" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   Some data may be processed in the United States through our service providers
@@ -205,7 +201,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Cookies" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Cookies" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="my-0">
@@ -227,7 +223,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Security" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Security" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   We use HTTPS encryption, secure password hashing, and regular backups. However, no
@@ -237,7 +233,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Contact" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Contact" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   For privacy questions or to exercise your rights:{" "}
@@ -248,23 +244,23 @@ const PrivacyPolicyPage: BlitzPage = () => {
 
             {/* ==================== FUN SECTION ==================== */}
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="The Fun Stuff" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="The Fun Stuff" className="pb-0" component="h2" />
               <CardContent>
-                <Typography variant="body1" sx={{ fontStyle: "italic", mb: 2 }}>
+                <Typography variant="body1" className="italic mb-4">
                   Now that the lawyers are satisfied, here&apos;s the human version...
                 </Typography>
 
                 <Typography variant="h6" component="h3">
                   Email and password
                 </Typography>
-                <Typography variant="body1" sx={{ marginBottom: "1.5rem" }}>
+                <Typography variant="body1" className="mb-6">
                   With great password comes <em>low</em> responsibility.
                 </Typography>
 
                 <Typography variant="h6" component="h3">
                   Google Analytics data
                 </Typography>
-                <Typography variant="body1" sx={{ marginBottom: "1.5rem" }}>
+                <Typography variant="body1" className="mb-6">
                   Technically it is possible to track your every move, the question is, is it worth
                   it? (Hint: it is not.) We are using it anonymously for improving the UI/UX.
                 </Typography>
@@ -272,7 +268,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
                 <Typography variant="h6" component="h3">
                   Cookies
                 </Typography>
-                <Typography variant="body1" sx={{ marginBottom: "1.5rem" }}>
+                <Typography variant="body1" className="mb-6">
                   We collect the cookies for the{" "}
                   <Link href="https://en.wikipedia.org/wiki/Cookie_Monster">Cookie Monster</Link>{" "}
                   from the Sesame Street only. In return he helps us in session management.
@@ -292,7 +288,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
                 <Typography variant="h6" component="h3">
                   Dreams
                 </Typography>
-                <Typography variant="body1" sx={{ marginBottom: "1.5rem" }}>
+                <Typography variant="body1" className="mb-6">
                   Not only we stalk your dreams, we are going to steal your soul{" "}
                   <span className="lucidicon lucidicon-scream"></span> bwahaha! Jokes aside, we are
                   too busy fulfilling our own dreams but if you are a Paranoid Android¹{" "}
@@ -303,7 +299,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
                 <Typography variant="h6" component="h3">
                   Terms of Service
                 </Typography>
-                <Typography variant="body1" sx={{ marginBottom: "1.5rem" }}>
+                <Typography variant="body1" className="mb-6">
                   By signing up, you have already sold your soul to <em>dreamingsheep</em>. The
                   Terms of Service just makes it official. Don&apos;t worry — we accept returns
                   within 90 dream-days, no receipt needed.
@@ -327,7 +323,7 @@ const PrivacyPolicyPage: BlitzPage = () => {
         <Grid container>
           <Grid item md={3} className="grid-spacer-md-3" />
           <Grid item md={6}>
-            <Alert severity="warning" sx={{ marginTop: "1rem" }}>
+            <Alert severity="warning" className="mt-4">
               If you are a serious person and still consider taking legal action against
               dreamingsheep, please <Link href="mailto:meh@dreamingsheep.net">contact us</Link>{" "}
               first and we will try to resolve the issues you are concerned about. Thank you!

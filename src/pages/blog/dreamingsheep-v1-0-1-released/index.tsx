@@ -62,13 +62,13 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
                   className="w-full h-auto object-cover aspect-square"
                 />
                 {/* NOTE: custom image classes */}
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep,
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   starting today, the DNS¹ (<em>Deoxyribonucleic</em> System) of our development
                   server points to the live IP address, which in translation means that{" "}
                   <em>dreamingsheep</em>&apos;s DNA¹ has officially come to life!
@@ -80,20 +80,20 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
                   <br />
                   git push origin v1.0.1
                 </code>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   In case you were under the false impression that we were running some kind of
                   woo-woo website, the above commands should make it clear that we are doing serious
                   business here! If you are still a bit suspicious, you can perform a forensic DNA
                   test (DNS lookup²) on the sweat and blood that went into our creation.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   If you haven&apos;t done so already, for context, please read the{" "}
                   <Link href={Routes.ArticlePageLifePurposeMilestoneOne()}>
                     Life purpose, milestone #1
                   </Link>
                   , then <Link href="/">sign up</Link> and follow your dreams!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Happy dream logging!
                 </Typography>
                 <hr />

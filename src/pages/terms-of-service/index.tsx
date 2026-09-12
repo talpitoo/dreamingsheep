@@ -53,22 +53,18 @@ const TermsOfServicePage: BlitzPage = () => {
               <span className="sr-only">Terms of Service</span>
             </h1>
 
-            <Alert severity="info" sx={{ mb: 3 }}>
+            <Alert severity="info" className="mb-6">
               <strong>Last updated:</strong> 14 February 2026
             </Alert>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="1. What is dreamingsheep?"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="1. What is dreamingsheep?" className="pb-0" component="h2" />
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <em>dreamingsheep</em> is a <strong>free, personal project</strong> created and
                   maintained by Tóth Tamás as a passion project for the lucid dreaming community.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   It is an online dream journal where you can log, analyze, and explore patterns in
                   your dreams. The service is provided free of charge, as-is, for personal,
                   non-commercial use.
@@ -77,11 +73,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="2. Acceptance of Terms"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="2. Acceptance of Terms" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   By accessing or using <em>dreamingsheep</em>, you agree to be bound by these{" "}
@@ -93,7 +85,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="3. User Accounts" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="3. User Accounts" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="mt-0">
@@ -107,13 +99,13 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="4. Your Content" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="4. Your Content" className="pb-0" component="h2" />
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <strong>You own your dreams.</strong> All dream entries, notes, and custom symbols
                   you create remain your intellectual property.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   By using <em>dreamingsheep</em>, you grant us a limited license to store and
                   display your content back to you. We do not claim ownership of your content, and
                   we do not sell, share, or analyze your dreams.
@@ -125,7 +117,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="5. Acceptable Use" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="5. Acceptable Use" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   You agree not to:
@@ -141,13 +133,9 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="6. Service Availability"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="6. Service Availability" className="pb-0" component="h2" />
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <em>dreamingsheep</em> is provided <strong>&quot;as is&quot;</strong> without any
                   guarantees. As a personal project:
                 </Typography>
@@ -159,20 +147,16 @@ const TermsOfServicePage: BlitzPage = () => {
                     <li>Backups are performed regularly, but data loss is possible</li>
                   </ul>
                 </Typography>
-                <Typography variant="body1" sx={{ mt: 2 }}>
+                <Typography variant="body1" className="mt-4">
                   <strong>Recommendation:</strong> Regularly export your dreams as a backup.
                 </Typography>
               </CardContent>
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="7. Limitation of Liability"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="7. Limitation of Liability" className="pb-0" component="h2" />
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   To the maximum extent permitted by law:
                 </Typography>
                 <Typography variant="body1" component="div">
@@ -192,11 +176,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="8. Account Termination"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="8. Account Termination" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1" component="div">
                   <ul className="mt-0">
@@ -211,7 +191,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="9. Changes to Terms" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="9. Changes to Terms" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   We may update these terms occasionally. Significant changes will be announced on
@@ -221,7 +201,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="10. Contact" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="10. Contact" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   Questions about these terms? Contact us at{" "}
@@ -235,7 +215,7 @@ const TermsOfServicePage: BlitzPage = () => {
         <Grid container>
           <Grid item md={3} className="grid-spacer-md-3" />
           <Grid item md={6}>
-            <Alert severity="warning" sx={{ marginTop: "1rem" }}>
+            <Alert severity="warning" className="mt-4">
               <strong>Remember:</strong> <em>dreamingsheep</em> is a labor of love, not a
               corporation. We do our best to keep your dreams safe, but please keep local backups of
               important entries. Sweet dreams!

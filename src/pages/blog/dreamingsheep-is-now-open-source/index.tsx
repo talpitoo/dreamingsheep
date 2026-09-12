@@ -65,13 +65,13 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   height={600}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep,
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   After much deliberation, <em>dreamingsheep</em> has officially taken the red pill¹
                   and gone open source! The code now lives at{" "}
                   <Link href="https://github.com/talpitoo/dreamingsheep">
@@ -79,7 +79,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   </Link>{" "}
                   for everyone to read, study, and contribute to.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <strong>Why?</strong> Because dreams are more fun when shared. Your actual dreams
                   remain yours alone (see the{" "}
                   <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link>). This is a
@@ -98,7 +98,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   &lsquo;astral&rsquo; cloud. Well, the cloud part is happening — minus the
                   sentience (for now).
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Here&apos;s what changes (and what doesn&apos;t):
                 </Typography>
                 <Typography variant="body1" component="div">
@@ -122,7 +122,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                     </li>
                   </ul>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   If you&apos;re a developer who likes dreams (or a dreamer who likes code), have a
                   look at the{" "}
                   <Link href="https://github.com/talpitoo/dreamingsheep/issues">open issues</Link>,{" "}
@@ -132,17 +132,17 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   </Link>{" "}
                   for what&apos;s coming and where help is wanted.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   A small disclaimer: the maintainer (
                   <Link href="https://github.com/talpitoo">@talpitoo</Link>) is primarily a frontend
                   developer, so backend PRs may take a little longer to review. Be patient, document
                   well, and we&apos;ll get there together.
                 </Typography>
 
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Now go log a dream. Or fix a bug. Or both. Sweet dreams!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Meh!
                 </Typography>
                 <hr />

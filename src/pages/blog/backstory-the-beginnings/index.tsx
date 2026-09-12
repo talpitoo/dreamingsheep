@@ -63,10 +63,10 @@ const ArticlePageBackstoryTheBeginnings: BlitzPage = () => {
                 <Typography variant="body1" align="right">
                   ¹
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   And Now for Something Completely Different²...
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   It&apos;s been more than 20 years since i³ have learnt that lucid dreams are a
                   thing. It all started with running away from monsters while simultaneously
                   becoming aware that i am dreaming, trying to wake up from those nightmares{" "}
@@ -78,12 +78,12 @@ const ArticlePageBackstoryTheBeginnings: BlitzPage = () => {
                   from which i&apos;ve learnt to take control, chase away and finally befriend the
                   monsters.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   While some people have lucid dreams quite often spontaneously, for others it
                   requires determination, focus, and practice. After some initial success, my lucid
                   dreams subsided, and it was time to do something about it.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   To strengthen my dream recall i started journaling in a ‘Word’ document and soon
                   realized that it would be much more convenient if i could use an app instead. With
                   due respect to other dreamjournaling software, for what i intended, they were
@@ -94,12 +94,12 @@ const ArticlePageBackstoryTheBeginnings: BlitzPage = () => {
                   neu(t)ral tool that would leave the leading role in dream interpretation to the
                   user&apos;s intuition.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   The challenge was to create a journaling software that could accommodate various
                   use case scenarios, but with “opinionated” defaults to make it more fun to use.
                   The brainstorming began.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   To be continued in part 2:{" "}
                   <Link href={Routes.ArticlePageLifePurposeMilestoneOne()}>
                     Life purpose, milestone #1

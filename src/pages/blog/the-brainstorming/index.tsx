@@ -59,29 +59,29 @@ const ArticlePageTheBrainstorming: BlitzPage = () => {
                   height={1701}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   The challenge was to create an app that would be the go-to dream journal for
                   dreamers of all colors: generic enough to cover a broad range of use cases, yet
                   with opinionated defaults to make it simple, fun, and intuitive for newcomers. In
                   the upcoming blog posts, some of these use cases will be expanded on.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   I had some initial ideas and sketches, but once i received the sheep mascot, it
                   was so good that i immediately discarded any ideas of fancy UI libraries and
                   decided to keep the rest of the layout minimalistic and low-key, resembling a
                   suprematist¹ painting.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   The hardest nut to crack was the dream types. Trying to categorize dream (and in
                   general, consciousness) states is a futile quest. If i had spent all my time
                   pondering it, dreamingsheep would still be in the works today. So don&apos;t take
                   the categories too seriously, but let your dreams roam free, unbounded by labels
                   and classifications.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Many hours were spent brainstorming whether to enable public dreams. Similar
                   websites have either a forum or you can interpret each other&apos;s dreams.
                   However, here the focus is on your personal journey. The intention wasn&apos;t to
@@ -89,7 +89,7 @@ const ArticlePageTheBrainstorming: BlitzPage = () => {
                   your sleeves and dream yourself up to the <em>‘next dimension’</em>. Then we can
                   meet and party all night in the <em>‘astral realm’</em>.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   TL;DR: no likes, no <em>seen</em>, no distractions!
                 </Typography>
                 <hr />

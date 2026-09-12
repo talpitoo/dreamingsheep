@@ -65,11 +65,11 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
                 <Typography variant="body1" align="right">
                   ¹
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   After more than 20+ years of hard procrastination and casual work²,{" "}
                   <strong>dreamingsheep</strong> is finally online!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   I am grateful to everyone who helped make this project a reality. Special thanks
                   to:
                   <ul>
@@ -111,7 +111,7 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
                     </li>
                   </ul>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   After falling in love with lucid dreaming (see part 1:{" "}
                   <Link href={Routes.ArticlePageBackstoryTheBeginnings()}>
                     Backstory - the beginnings
@@ -120,8 +120,8 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
                   flash of insight while washing dishes, it occurred to me that it was indeed my{" "}
                   <em>life purpose</em> (milestone #1 :-), however cliche that might sound.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}></Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4"></Typography>
+                <Typography variant="body1" className="mb-4">
                   My idea back then was that the world is hurtling toward a dystopian future with no
                   humans in it but <em>dreamingsheep</em> would survive ’in the cloud’. Some future
                   androids/replicants³ who stumble upon it in the information-ocean might start
@@ -130,19 +130,19 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
                   in their algorithm starting to doubt their own programming. The rest of the story
                   and its variations are familiar...
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Since then, many things have changed and the current status quo is that regardless
                   of utopia or dystopia, the show must go on⁴.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   I never would have imagined what doors (of perception⁵) would open by following my
                   dreams over the years. Now, after milestone #1 has been completed, the journey has
                   just begun!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <Link href="/">Sign up</Link> and follow your dreams!
                 </Typography>
-                {/* <Typography variant="body1" sx={{ mb: 2 }}>
+                {/* <Typography variant="body1" className="mb-4">
                   Sincerely,
                   <br />
                   <Link href="https://github.com/talpitoo">@talpitoo</Link>

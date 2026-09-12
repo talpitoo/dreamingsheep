@@ -68,13 +68,13 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
                 <Typography variant="body1" align="right">
                   ¹
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   We&apos;ve had to bump the version to <code>v2.0.0</code> as a major bug was
                   discovered on the database level. Hopefully, you might have noticed nothing more
                   than a glitch on the settings page and slight inconsistencies with the symbols.
                   All systems are now back online.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   In case you were about to fall asleep while waiting for the maintenance window to
                   end, you could count the good ol&apos;{" "}
                   <Link href="https://adrianotiger.github.io/desktopPet/">
@@ -83,7 +83,7 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
                   , recreated by <Link href="https://github.com/Adrianotiger">@Adrianotiger</Link>{" "}
                   for 64-bit.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Meh!
                 </Typography>
                 <hr />
