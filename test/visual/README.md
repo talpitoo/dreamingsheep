@@ -125,6 +125,13 @@ npx playwright test -c test/visual/playwright.config.ts -g "settings-edit-symbol
 Never blanket `--update-snapshots` after a change: that would overwrite the very evidence the suite
 exists to produce.
 
+**Do not pipe the run into `tail`/`head`** — the pipeline then exits with the _pager's_ status and a
+failing suite looks green. Redirect to a file and read `$?`:
+
+```sh
+npx playwright test -c test/visual/playwright.config.ts > /tmp/visual.log 2>&1; echo "exit=$?"
+```
+
 ## Determinism
 
 - **Session**: `global-setup.ts` logs in once as the seeded demo user and stores the state; specs
@@ -153,6 +160,15 @@ exists to produce.
   first — a `position: fixed` dialog is painted at the current scroll offset in a full-page shot.
 - **Settling**: network idle, fonts loaded, no loading spiral, 700 ms, two animation frames.
 - `maxDiffPixels: 0` — nothing is "close enough".
+
+**What is _not_ pinned: the order Postgres hands back a dream's symbols.** `getDreams` includes
+`symbols: true` with no `orderBy`, so the chips under a dream come back in heap order — and
+Postgres moves a row to the end of the heap when it is UPDATEd. Edit one symbol (attach a picture,
+rename it) through the UI or a probe and the symbol lists on `search-results`,
+`search-filters-open` and the dream footers reshuffle, failing those shots with a diff that is
+purely two words swapping places. That is the database talking, not the CSS: confirm the diff is
+only reordered names, then re-baseline those shots by name. Pinning the order would change what
+users see today, so it is a product decision, not a test fix — the suite just has to know about it.
 
 ## Backgrounds are stripped from the captures
 
