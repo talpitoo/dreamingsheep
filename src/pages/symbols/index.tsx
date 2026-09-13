@@ -26,9 +26,12 @@ const SymbolsPage: BlitzPage = () => {
   const [customOnly, setCustomOnly] = useState(false)
   const user = useCurrentUser()
 
-  // the sheep leads back to the first page of symbols; a bare /symbols also drops a stale ?id
-  // deep link, the same reset the "custom only" filter does below
-  const sheepHref = Number(router.query.page) > 1 ? Routes.SymbolsPage() : null
+  // the sheep leads back to the start of the section — the first page, with any ?id= dropped.
+  // `id` has to count too, not just the page: a deep link from a dream opens that symbol's card
+  // for editing, and when the symbol happens to sit on page 1 the URL ends up ?id=N&page=1, so a
+  // page-only test would leave the card open with no way back. Same reset the "custom only"
+  // filter does below
+  const sheepHref = router.query.id || Number(router.query.page) > 1 ? Routes.SymbolsPage() : null
 
   function goToLastPage() {
     router.push({ query: { refetch: "true" } })

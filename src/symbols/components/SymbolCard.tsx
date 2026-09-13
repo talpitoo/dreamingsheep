@@ -47,6 +47,9 @@ const SymbolCard = (props: SymbolCardProps) => {
   const [deleteSymbolMutation] = useMutation(deleteSymbol)
   const [deleteDialogVisibility, setDeleteDialogVisibility] = useState(false)
   const [pictureFile, setPictureFile] = useState<File | null | undefined>(null)
+  // set while ?id= is what opened this card, so that clearing ?id= can close it again — and only
+  // it, never a card the user opened by hand
+  const openedByDeepLink = useRef(false)
 
   function changeEdit(e: boolean) {
     onChangeEdit?.(e ? symbol.id : null)
@@ -56,8 +59,16 @@ const SymbolCard = (props: SymbolCardProps) => {
   useEffect(() => {
     const id = Number(router.query.id) || undefined
     if (id && id === symbol.id) {
+      openedByDeepLink.current = true
       changeEdit(true)
       symbolRef?.current?.scrollIntoView({ behavior: "smooth" })
+    } else if (openedByDeepLink.current) {
+      // the deep link is gone (the sheep, or the "custom only" filter, reset the section). On any
+      // other page the card would unmount and take its state with it, but a symbol that sits on
+      // page 1 stays mounted — and this effect only ever opened a card, so it stayed open with
+      // nothing left in the URL to explain why
+      openedByDeepLink.current = false
+      changeEdit(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol.id, router.query.id])
