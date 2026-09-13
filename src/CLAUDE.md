@@ -156,6 +156,10 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   what pixels miss. Baselines are local and gitignored; needs a running **production** build
   (`yarn build && yarn start`) and a seeded DB. Run it before and after any styling change —
   `test/visual/README.md` has the workflow, the determinism tricks and the triage rules.
+  Adding a feature: baseline on unchanged `main` FIRST, then build. A brand-new snapshot name
+  fails its first compare run ("A snapshot doesn't exist … writing actual"), writes the file and
+  passes on the next — so new states announce themselves. Re-baseline only the shots you approve,
+  by name, never in bulk.
 - CI runs lint + type-check + unit only (`.github/workflows/test.yml`).
 
 ## Gotchas

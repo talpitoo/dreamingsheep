@@ -78,6 +78,41 @@ MUI's defaults), plus 375 as a common-phone sample. Nothing in `src/` reacts abo
 Baselines live in `__snapshots__/` and are **gitignored** (a few hundred MiB). `meta.json` there
 records the run parameters so a later compare run lines up with them.
 
+## Adding a feature (the loop)
+
+The suite is a **drift detector**: it compares against a reference frame you took earlier, so the
+frame has to be of the code you are comparing _against_.
+
+1. On unchanged `main`, with a seeded DB and a production build running:
+   `VISUAL_SEED_DATE=<the day you seeded> npm run test:visual:update` (~15 min). That is the frame.
+2. Branch, build the feature, `yarn build && yarn start` again.
+3. Add a test for any genuinely new page state (a new panel, a new dialog, a new card layout).
+4. `npm run test:visual`, and read the failures in two buckets:
+
+| Failure says                                 | Means                                                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| a pixel diff on an existing shot             | **drift** — either a bug, or a change you meant to make and must approve                         |
+| `A snapshot doesn't exist …, writing actual` | your **new** state. Playwright writes the file and fails that one test; re-run and it goes green |
+
+5. For intended changes to existing shots, re-baseline **only those**:
+   `npx playwright test -c test/visual/playwright.config.ts -g "<name>" --update-snapshots=all`.
+   Never in bulk — that overwrites the evidence the suite exists to produce.
+6. `npm run test:visual:index` and look at the gallery before you believe any of it.
+
+**Four things that will bite**
+
+- **Baseline mid-feature and the suite tells you nothing** — you have baked the feature into the
+  reference frame.
+- **Baselines are tied to this machine's Chromium.** A colleague's will not match, and bumping
+  `@playwright/test` pins a different Chromium, invalidating all of them at once. Re-baseline after
+  such a bump, on `main`, before doing anything else.
+- **A feature that legitimately restyles shared components lights up shots you did not expect.**
+  The header and footer are on every page; a change there is a full-suite event. That is the suite
+  working, not failing.
+- **Nothing records which commit a baseline was taken at.** Baseline on `main`, pull a week of
+  other people's commits, and the diffs you are looking at are theirs, not yours. Re-baseline
+  whenever `main` moves under you.
+
 ## Triage
 
 A diff is real until proven otherwise. Fix the code, or — if the change is intended and the
