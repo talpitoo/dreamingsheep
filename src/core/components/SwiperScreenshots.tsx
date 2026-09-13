@@ -29,7 +29,26 @@ import { Swiper, SwiperSlide } from "swiper/react"
 // superscript by its own shape, so the button's uppercase/font styles can't flatten
 // it; it anchors footnote 2 (the Nexus note) to the label.
 export const SwiperDemoButton = () => (
-  <Button variant="outlined" fullWidth href="#demo">
+  <Button
+    variant="outlined"
+    fullWidth
+    href="#demo"
+    onClick={() => {
+      // The href does the work — this only tidies up after it. Without JS, or before
+      // hydration, the anchor still jumps and the URL keeps its #demo, which is the
+      // correct fallback. With JS, drop the hash so a URL copied from the address bar
+      // after pressing demo is the plain landing page rather than one that scrolls a
+      // stranger straight past the sign-up form.
+      //
+      // replaceState (not router.replace) keeps this out of Next's router entirely: no
+      // re-render, no scroll restoration, no history entry. Deferred a tick so the
+      // browser has committed the hash and started its smooth scroll first — removing
+      // the hash does not interrupt a scroll already under way.
+      window.setTimeout(() => {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search)
+      }, 0)
+    }}
+  >
     demo²
   </Button>
 )
