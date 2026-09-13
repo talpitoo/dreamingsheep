@@ -1,3 +1,4 @@
+import SymbolName from "src/symbols/components/SymbolName"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/router"
@@ -89,7 +90,7 @@ const SymbolCard = (props: SymbolCardProps) => {
               {Number(symbol.occurrences)}
             </Typography>
           }
-          title={symbol.name}
+          title={<SymbolName symbol={symbol} />}
           className="text-2xl pb-0"
         />
         {isEdit && (

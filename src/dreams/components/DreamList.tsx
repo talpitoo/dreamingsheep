@@ -1,3 +1,4 @@
+import SymbolName from "src/symbols/components/SymbolName"
 import Link from "next/link"
 import { useMutation } from "src/core/rpc-client"
 import { useRouter } from "next/router"
@@ -66,7 +67,9 @@ export const DreamItemFooter = ({
       {symbols.map((symbol, index) => (
         <Fragment key={symbol.id}>
           <Box className="inline-block">
-            <Link href={Routes.SymbolsPage({ id: symbol.id })}>{symbol.name}</Link>
+            <Link href={Routes.SymbolsPage({ id: symbol.id })}>
+              <SymbolName symbol={symbol} />
+            </Link>
             {index < symbols.length - 1 ? <Fragment>,&nbsp;</Fragment> : ""}
           </Box>
         </Fragment>
