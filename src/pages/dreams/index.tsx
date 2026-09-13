@@ -185,7 +185,11 @@ const DreamsPage: BlitzPage = () => {
 
   // set default date query
   useEffect(() => {
-    if (!router.query.date) {
+    // `router.isReady` matters: /dreams is statically optimized, so the first client render gets
+    // an EMPTY router.query and this effect used to fire before the URL's own ?date= hydrated —
+    // pushing today over it. Any link to a past day (a bookmark, a shared URL, the browser's
+    // back button) bounced straight back to today.
+    if (router.isReady && !router.query.date) {
       router.push(
         Routes.DreamsPage({
           date: DateTime.now()
