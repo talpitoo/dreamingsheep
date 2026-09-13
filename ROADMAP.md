@@ -16,20 +16,23 @@ comment there before starting work (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - [x] PWA web app manifest: "Add to home screen" installs with the proper sheep icon
 - [x] Local development in Docker (the only prerequisite is Docker) + MinIO S3 mock for symbol image uploads ([#13](https://github.com/talpitoo/dreamingsheep/issues/13))
 
-## Phase 1: Foundation (current)
+## Phase 1: Foundation
 
 - [x] Migrate from MUI `sx={{}}` syntax to Tailwind CSS v4 ([#1](https://github.com/talpitoo/dreamingsheep/issues/1)) _(maintainer-led)_ —
-      landed on `main`, **release pending**: Tailwind 4.1.18, one explicit cascade order
-      (`@layer properties, theme, base, mui, components, utilities`), zero `sx` props, and a
-      Playwright snapshot suite that proved every page pixel-identical at nine breakpoint widths.
-      Browser floor moves to Tailwind v4's: Chrome 111+, Safari 16.4+, Firefox 128+.
+      Tailwind 4.1.18, one explicit cascade order
+      (`@layer properties, theme, base, mui, components, utilities`) replacing the
+      `important: "#__next"` hack, **zero `sx` props** (279 removed), and the toggle-button CSS
+      moved into [`Theme.ts`](src/styles/Theme.ts). A Playwright snapshot suite
+      ([`test/visual/`](test/visual/README.md)) proved every page pixel-identical at nine
+      breakpoint widths through every milestone, and ESLint now errors on `sx`.
+      ⚠️ Browser floor is Tailwind v4's: **Chrome 111+, Safari 16.4+, Firefox 128+**.
 - [ ] Small in-code `TODO (future-feature)` notes, roughly in priority order:
       absolute `og:image` URLs ([`Layout.tsx`](src/core/layouts/Layout.tsx)),
       base64-ify the PDF-export images ([`ExportDreams/helper.ts`](src/settings/components/ExportDreams/helper.ts)),
       revisit the Settings refetch-vs-reload workaround ([`settings/index.tsx`](src/pages/settings/index.tsx)),
       the `suppressFirstRenderFlicker` experiment ([`pages/index.tsx`](src/pages/index.tsx))
 
-## Phase 2: Framework migration
+## Phase 2: Framework migration (current)
 
 - [x] **Remove BlitzJS** — one-take migration to plain Next.js 16 (pages router) + Node 22,
       landed 2026-08 (design: [docs/superpowers/specs/2026-08-02-blitz-removal-design.md](docs/superpowers/specs/2026-08-02-blitz-removal-design.md)).
