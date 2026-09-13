@@ -114,7 +114,6 @@ export const SymbolsRadioList = (props: SymbolsRadioListProps) => {
             : {
                 transformOrigin: "top center",
                 transform: `scale(${width / (width - 32)})`,
-                willChange: "transfrom",
                 marginBottom: `${height * (width / (width - 32)) - height}px`,
               }
         }
