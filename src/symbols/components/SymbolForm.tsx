@@ -20,7 +20,7 @@ export function SymbolForm<S extends z.ZodType<any, any>>({
   return (
     <Fragment>
       <Form<S> {...props}>
-        <Grid container sx={{ mb: 2 }}>
+        <Grid container className="mb-4">
           <Grid item xs={12}>
             {!builtInSymbol && (
               <LabeledTextField

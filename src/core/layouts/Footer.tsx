@@ -41,10 +41,7 @@ const FooterTag = () => {
             variant="body1"
             color="white"
             fontStyle="italic"
-            className="text-center"
-            sx={{
-              margin: { xs: "2rem auto", sm: "3rem auto" },
-            }}
+            className="text-center my-8 mx-auto sm:my-12"
           >
             {footerTag?.quote}
             <br />
@@ -56,10 +53,7 @@ const FooterTag = () => {
           variant="body1"
           color="white"
           fontStyle="italic"
-          className="text-center"
-          sx={{
-            margin: { xs: "2rem auto", sm: "3rem auto" },
-          }}
+          className="text-center my-8 mx-auto sm:my-12"
         >
           Long time no sleep?™
         </Typography>
@@ -70,7 +64,7 @@ const FooterTag = () => {
 
 export function Footer() {
   return (
-    <Container sx={{ textAlign: "center", position: "relative" }}>
+    <Container className="text-center relative">
       {/* <Box sx={{ position: "absolute", width: "5rem", margin: "1rem" }}>
         <Image src={arrowReadMore} alt="scroll to read more" />
       </Box> */}
@@ -81,10 +75,7 @@ export function Footer() {
             variant="body1"
             color="white"
             fontStyle="italic"
-            className="text-center"
-            sx={{
-              margin: { xs: "2rem auto", sm: "3rem auto" },
-            }}
+            className="text-center my-8 mx-auto sm:my-12"
           >
             Long time no sleep?™
           </Typography>

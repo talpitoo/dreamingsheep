@@ -2,6 +2,9 @@
 title: "Privacy Policy and Terms of Service update"
 date: "Sat Feb 14 2026."
 imageUrl: "/assets/sheep-privacy.png"
+related:
+  - "dreamingsheep-is-now-open-source"
+  - "backstory-the-beginnings"
 ---
 
 We've updated our Privacy Policy and added Terms of Service to be more

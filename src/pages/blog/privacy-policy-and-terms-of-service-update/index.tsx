@@ -8,17 +8,23 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import sheepPrivacy from "public/assets/sheep-privacy.png"
 import Link from "next/link"
 
-const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
+const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage<{ related: Blog[] }> = ({
+  related,
+}) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -32,6 +38,7 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -65,24 +72,24 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                   height={384}
                   className="w-full h-auto object-cover aspect-square"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep,
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   We&apos;ve updated our{" "}
                   <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link> and added{" "}
                   <Link href={Routes.TermsOfServicePage()}>Terms of Service</Link> to be more
                   transparent about how <em>dreamingsheep</em> handles your data.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <strong>Nothing has changed</strong>&#32;about what we collect or how we use it.
                   We&apos;ve just documented it properly. Think of it as finally writing down the
                   dream you&apos;ve been meaning to log for months.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Here&apos;s the TL;DR:
                 </Typography>
                 <Typography variant="body1" component="div">
@@ -100,13 +107,13 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                     </li>
                   </ul>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   If you signed up at any point in the past, you already agreed to let us guard your
                   dreams. Now it&apos;s just in writing. No new soul-stealing clause was added —
                   that was always the case <span className="lucidicon lucidicon-scream"></span>{" "}
                   bwahaha!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Read the full <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link> and{" "}
                   <Link href={Routes.TermsOfServicePage()}>Terms of Service</Link>, and as always —
                   sweet dreams!
@@ -114,6 +121,8 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                 <Typography variant="body1">Meh!</Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -132,5 +141,11 @@ ArticlePagePrivacyPolicyAndTermsOfServiceUpdate.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("privacy-policy-and-terms-of-service-update") },
+})
 
 export default ArticlePagePrivacyPolicyAndTermsOfServiceUpdate

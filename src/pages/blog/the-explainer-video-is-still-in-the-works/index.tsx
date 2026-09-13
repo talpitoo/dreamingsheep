@@ -7,17 +7,24 @@ import titleBlog from "public/assets/title-blog.png"
 import blogFayeWongDreams from "public/assets/FayeWong-Dreams-TheCranberriesCover.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
+import { Routes } from "src/routes"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import Link from "next/link"
 
-const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
+const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage<{ related: Blog[] }> = ({
+  related,
+}) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -31,6 +38,7 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -70,7 +78,7 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
                     allowFullScreen
                   ></iframe>
                 </Box>
-                <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
+                <Typography variant="body1" className="mb-4 mt-4">
                   For years there was a footnote on the landing page saying{" "}
                   <em>obviously, the explainer video is in the works</em>, and for just as many
                   years an <code>&lt;iframe&gt;</code> sat right underneath it, commented out,
@@ -79,18 +87,18 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
                   deserves better than a <code>{"{/* */}"}</code>, so here it is, moved to a place
                   where it can finally play.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   It was never an explainer video. It was Faye Wong singing <em>Dreams</em>&#32;—
                   the Cranberries song¹, in Cantonese, the one she carries through Chungking
                   Express². Nothing about it explains what this website does, and everything about
                   it explains why this website exists.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   As for the explainer video: still in the works, in the way that things are in the
                   works. Until then the <Link href="/#demo">#demo</Link> on the landing page does
                   the explaining, and Faye does the rest.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep!
                 </Typography>
                 <hr />
@@ -101,6 +109,8 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -119,5 +129,11 @@ ArticlePageTheExplainerVideoIsStillInTheWorks.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("the-explainer-video-is-still-in-the-works") },
+})
 
 export default ArticlePageTheExplainerVideoIsStillInTheWorks

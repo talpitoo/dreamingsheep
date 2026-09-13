@@ -8,17 +8,21 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogDna from "public/assets/blog-dna.gif"
 import Link from "next/link"
 
-const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
+const ArticlePageDreamingsheepV101Released: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -32,6 +36,7 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -62,13 +67,13 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
                   className="w-full h-auto object-cover aspect-square"
                 />
                 {/* NOTE: custom image classes */}
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep,
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   starting today, the DNS¹ (<em>Deoxyribonucleic</em> System) of our development
                   server points to the live IP address, which in translation means that{" "}
                   <em>dreamingsheep</em>&apos;s DNA¹ has officially come to life!
@@ -80,20 +85,20 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
                   <br />
                   git push origin v1.0.1
                 </code>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   In case you were under the false impression that we were running some kind of
                   woo-woo website, the above commands should make it clear that we are doing serious
                   business here! If you are still a bit suspicious, you can perform a forensic DNA
                   test (DNS lookup²) on the sweat and blood that went into our creation.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   If you haven&apos;t done so already, for context, please read the{" "}
                   <Link href={Routes.ArticlePageLifePurposeMilestoneOne()}>
                     Life purpose, milestone #1
                   </Link>
                   , then <Link href="/">sign up</Link> and follow your dreams!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Happy dream logging!
                 </Typography>
                 <hr />
@@ -118,6 +123,8 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -136,5 +143,11 @@ ArticlePageDreamingsheepV101Released.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("dreamingsheep-v1-0-1-released") },
+})
 
 export default ArticlePageDreamingsheepV101Released

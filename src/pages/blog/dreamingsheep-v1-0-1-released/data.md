@@ -2,6 +2,9 @@
 title: "dreamingsheep v1.0.1 released"
 date: "Mon Nov 6 2023."
 imageUrl: "/assets/blog-dna.gif"
+related:
+  - "a-glitch-in-the-dream-journal-matrix"
+  - "use-case-two-add-to-home-screen"
 ---
 
 Long time no sleep, starting today, the DNS¹ (Deoxyribonucleic System) of our

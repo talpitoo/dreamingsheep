@@ -13,6 +13,7 @@ import { DateTime } from "luxon"
 import titleDreams from "public/assets/title-dreams.png"
 import sheepDreams from "public/assets/sheep-dreamingsheep.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import SheepLink from "src/core/components/SheepLink"
 import {
   Button,
   Card,
@@ -32,6 +33,7 @@ import { SleepingTimeForm } from "src/sleepingTimes/components/SleepingTimeForm"
 import { DreamTime, DreamType, RecallTime } from "db"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
+import classnames from "src/utils/classnames"
 
 function getDateTime(date: string | string[] | undefined): DateTime {
   if (typeof date === "string") {
@@ -182,9 +184,21 @@ const DreamsPage: BlitzPage = () => {
   )
   const [showForm, setShowForm] = useState(false)
 
+  // the sheep leads back to today, the journal's home. Null while you are already there — which
+  // includes a bare /dreams, since the effect below is about to put today in the URL anyway
+  const todayParam = getDateTime(undefined).toFormat("yyyy-MM-dd")
+  const sheepHref =
+    !router.query.date || router.query.date === todayParam
+      ? null
+      : Routes.DreamsPage({ date: todayParam })
+
   // set default date query
   useEffect(() => {
-    if (!router.query.date) {
+    // `router.isReady` matters: /dreams is statically optimized, so the first client render gets
+    // an EMPTY router.query and this effect used to fire before the URL's own ?date= hydrated —
+    // pushing today over it. Any link to a past day (the sheep's, a bookmark, a shared URL)
+    // bounced straight back to today.
+    if (router.isReady && !router.query.date) {
       router.push(
         Routes.DreamsPage({
           date: DateTime.now()
@@ -202,23 +216,21 @@ const DreamsPage: BlitzPage = () => {
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={5} md={3} lg={4}>
             <Box
-              sx={{
-                width: { xs: "50%", sm: "100%" },
-                ...(user && {
-                  margin: "auto",
-                }),
-                ...(!user && {
-                  margin: { xs: "0 auto -2rem", sm: "auto" },
-                }),
-              }}
+              className={classnames(
+                "w-1/2 sm:w-full",
+                // logged out, the sheep is pulled up over the login card below it
+                user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+              )}
             >
-              <Image
-                src={sheepDreams}
-                alt="dreams sheep"
-                width={384}
-                height={384}
-                className="w-full h-auto"
-              />
+              <SheepLink href={sheepHref}>
+                <Image
+                  src={sheepDreams}
+                  alt="dreams sheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              </SheepLink>
             </Box>
           </Grid>
           <Grid
@@ -227,12 +239,12 @@ const DreamsPage: BlitzPage = () => {
             sm={7}
             md={5}
             lg={4}
-            sx={{ overflowX: "hidden", marginBottom: { xs: "2rem", sm: "0" }, borderRadius: "4px" }}
+            className="overflow-x-hidden mb-8 sm:mb-0 rounded-sm"
           >
             {!query && (
               <Suspense
                 fallback={
-                  <Box sx={{ height: "100%", display: "flex", minHeight: "21rem" }}>
+                  <Box className="h-full flex min-h-84">
                     <LoadingSpiral />
                   </Box>
                 }
@@ -255,7 +267,7 @@ const DreamsPage: BlitzPage = () => {
             </h1>
 
             {user?.trackSleepingTime && (
-              <Grid container sx={{ mt: { xs: -4, sm: -11 }, mb: 2 }} spacing={2}>
+              <Grid container className="-mt-8 sm:-mt-22 mb-4" spacing={2}>
                 <Grid item xs={12} sm={5} lg={6}></Grid>
                 <Grid item xs={12} sm={7} lg={6}>
                   <Suspense fallback={<LoadingSpiral />}>
@@ -354,9 +366,8 @@ const DreamsPage: BlitzPage = () => {
                         variant="contained"
                         type="submit"
                         form="create-dream"
-                        sx={{ ml: 2 }}
                         disabled={isCreateDreamLoading}
-                        className={`w-auto transition-all ease-in-out duration-300 ${
+                        className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                           isCreateDreamLoading ? "max-w-[87px]" : "max-w-[64px]"
                         }`}
                         endIcon={

@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -16,6 +17,7 @@ import { DreamList } from "src/dreams/components/DreamList"
 import { DreamSearchForm } from "src/dreams/components/DreamSearchForm"
 import { getSymbols } from "src/symbols/client"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import SheepLink from "src/core/components/SheepLink"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import {
   buildDreamSearchWhere,
@@ -37,7 +39,7 @@ export const SearchList = () => {
   }
   return (
     <Fragment>
-      <Typography variant="h4" sx={{ color: "white", mb: 1 }} component="p">
+      <Typography variant="h4" className="text-white mb-2" component="p">
         {count} results
       </Typography>
       <DreamList
@@ -64,6 +66,13 @@ const SearchPage: BlitzPage = () => {
       },
     },
   })
+  // the sheep leads back to the first page of THESE results: every filter kept, `page` dropped.
+  // Null on page 1, where it would only reload what you are looking at
+  const sheepHref = useMemo(() => {
+    const { page, ...firstPage } = router.query
+    return Number(page) > 1 ? { pathname: Routes.SearchPage().pathname, query: firstPage } : null
+  }, [router.query])
+
   const initialValues = useMemo(() => {
     const values = parseDreamSearchQuery(router.query)
     return {
@@ -109,23 +118,20 @@ const SearchPage: BlitzPage = () => {
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
             <Box
-              sx={{
-                width: { xs: "50%", sm: "100%" },
-                ...(user && {
-                  margin: "auto",
-                }),
-                ...(!user && {
-                  margin: { xs: "0 auto -2rem", sm: "auto" },
-                }),
-              }}
+              className={classnames(
+                "w-1/2 sm:w-full",
+                user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+              )}
             >
-              <Image
-                src={sheepSearch}
-                alt="dreams sheep"
-                width={384}
-                height={384}
-                className="w-full h-auto"
-              />
+              <SheepLink href={sheepHref}>
+                <Image
+                  src={sheepSearch}
+                  alt="dreams sheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              </SheepLink>
             </Box>
           </Grid>
         </Grid>
@@ -152,7 +158,7 @@ const SearchPage: BlitzPage = () => {
             {/* mirrors the stats page's "View as list": carries the current filters over.
                 the stats page defaults to the "all" range for these (search has no range) */}
             {user?.advancedCharting && (
-              <Box sx={{ mt: 2, textAlign: "right" }}>
+              <Box className="mt-4 text-right">
                 <Link href={Routes.StatsPage(statsQuery)} passHref={true}>
                   <Button variant="contained">View stats</Button>
                 </Link>

@@ -24,7 +24,7 @@ const SignupFormComponent = (props: SignupFormProps) => {
 
   return (
     <Card className="text-left">
-      <CardHeader title="New to dreamingsheep?" sx={{ paddingBottom: "0" }} component="h2" />
+      <CardHeader title="New to dreamingsheep?" className="pb-0" component="h2" />
       <CardContent>
         <Form
           submitText="Sign up"
@@ -66,7 +66,7 @@ const SignupFormComponent = (props: SignupFormProps) => {
             placeholder="Email"
             type="email"
             // className="rounded-top"
-            inputProps={{ sx: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } }}
+            inputProps={{ className: "rounded-b-none" }}
             inputLabelProps={{ shrink: true, disableAnimation: true }}
             fullWidth
             className="translate-x-0 translate-y-0 transform-gpu"
@@ -77,9 +77,7 @@ const SignupFormComponent = (props: SignupFormProps) => {
             placeholder="Password"
             type="password"
             // className="rounded-bottom"
-            inputProps={{
-              sx: { borderTopLeftRadius: 0, borderTopRightRadius: 0, marginTop: "-1px" },
-            }}
+            inputProps={{ className: "rounded-t-none -mt-px" }}
             inputLabelProps={{ shrink: true, disableAnimation: true }}
             fullWidth
             className="translate-x-0 translate-y-0 transform-gpu"

@@ -88,7 +88,7 @@ export function Form<S extends z.ZodType<any, any>>({
         {children}
 
         {formError && (
-          <Typography variant="caption" sx={{ color: "red" }}>
+          <Typography variant="caption" className="text-[red]">
             {formError}
           </Typography>
         )}

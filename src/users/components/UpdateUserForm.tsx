@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useMutation } from "src/core/rpc-client"
@@ -83,7 +84,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             editForm !== "user" ? "bg-mui-secondary-light" : "-mx-4"
           }`}
         >
-          <CardHeader title="Account" sx={{ paddingBottom: "0" }} component="h2" />
+          <CardHeader title="Account" className="pb-0" component="h2" />
           <CardContent>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -121,7 +122,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             </Box>
             {editForm === "user" && (
               <Box className="flex flex-row ml-0">
-                <Button type="reset" form="user" sx={{ ml: "auto" }} disabled={isUpdateUserLoading}>
+                <Button type="reset" form="user" className="ml-auto" disabled={isUpdateUserLoading}>
                   Cancel
                 </Button>
                 <Button
@@ -143,7 +144,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               <IconButton
                 color="primary"
                 onClick={() => onClickEdit("user", editForm)}
-                sx={{ ml: 2 }}
+                className="ml-4"
               >
                 <span className="lucidicon-pencil"></span>
               </IconButton>
@@ -176,7 +177,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             editForm !== "change-password" ? "bg-mui-secondary-light" : "-mx-4"
           }`}
         >
-          <CardHeader title="Change Password" sx={{ paddingBottom: "0" }} component="h2" />
+          <CardHeader title="Change Password" className="pb-0" component="h2" />
           <CardContent>
             {editForm === "change-password" && (
               <Grid container spacing={2}>
@@ -221,13 +222,13 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               </Grid>
             )}
           </CardContent>
-          <CardActions sx={{ p: 2 }}>
+          <CardActions className="p-4">
             {editForm === "change-password" && (
               <Fragment>
                 <Button
                   type="reset"
                   form="change-password"
-                  sx={{ ml: "auto" }}
+                  className="ml-auto"
                   disabled={isChangePasswordLoading}
                 >
                   Cancel
@@ -251,7 +252,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               <IconButton
                 color="primary"
                 onClick={() => onClickEdit("change-password", editForm)}
-                sx={{ ml: "auto" }}
+                className="ml-auto"
               >
                 <span className="lucidicon-pencil"></span>
               </IconButton>
@@ -273,9 +274,8 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
         >
           <CardHeader
             title="Predefined symbols"
-            sx={{ paddingBottom: "0" }}
             component="h2"
-            className={`${editForm !== "symbols" ? "" : "-mx-4"}`}
+            className={classnames("pb-0", editForm !== "symbols" ? "" : "-mx-4")}
           />
           <CardContent>
             <Grid container spacing={2}>
@@ -285,13 +285,17 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             </Grid>
           </CardContent>
           <CardActions
-            sx={{ display: { xs: "block", sm: "flex" } }}
-            className={`p-4 flex-column transition-all ${editForm !== "symbols" ? "" : "px-0"}`}
+            className={classnames(
+              "p-4 flex-column transition-all block sm:flex",
+              editForm !== "symbols" ? "" : "px-0"
+            )}
           >
             <Typography
               variant="body1"
-              sx={{ mb: { xs: "1rem", sm: "0" } }}
-              className={`text-black ${editForm !== "symbols" ? "opacity-40" : "opacity-60"}`}
+              className={classnames(
+                "text-black mb-4 sm:mb-0",
+                editForm !== "symbols" ? "opacity-40" : "opacity-60"
+              )}
             >
               <small>
                 1 - most icons used in dreamingsheep are from{" "}
@@ -303,7 +307,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
                 <Button
                   type="reset"
                   form="symbols"
-                  sx={{ ml: "auto" }}
+                  className="ml-auto"
                   disabled={isUpdateUserLoading}
                 >
                   Cancel
@@ -349,7 +353,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             editForm !== "bedtime" ? "bg-mui-secondary-light" : "-mx-4"
           }`}
         >
-          <CardHeader title="Bedtime/Wake-up time" sx={{ paddingBottom: "0" }} component="h2" />
+          <CardHeader title="Bedtime/Wake-up time" className="pb-0" component="h2" />
           <CardContent>
             <FormControlLabel
               disabled={editForm !== "bedtime"}
@@ -357,13 +361,13 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               label="Opt-in for bedtime/wake-up time for a sleep chart on the Stats page (the future-feature has arrived)."
             />
           </CardContent>
-          <CardActions sx={{ p: 2 }}>
+          <CardActions className="p-4">
             {editForm === "bedtime" && (
               <Fragment>
                 <Button
                   type="reset"
                   form="bedtime"
-                  sx={{ ml: "auto" }}
+                  className="ml-auto"
                   disabled={isUpdateUserLoading}
                 >
                   Cancel
@@ -387,7 +391,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               <IconButton
                 color="primary"
                 onClick={() => onClickEdit("bedtime", editForm)}
-                sx={{ ml: "auto" }}
+                className="ml-auto"
               >
                 <span className="lucidicon-pencil"></span>
               </IconButton>
@@ -407,7 +411,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
             editForm !== "advanced-charting" ? "bg-mui-secondary-light" : "-mx-4"
           }`}
         >
-          <CardHeader title="Advanced charting" sx={{ paddingBottom: "0" }} component="h2" />
+          <CardHeader title="Advanced charting" className="pb-0" component="h2" />
           <CardContent>
             <FormControlLabel
               disabled={editForm !== "advanced-charting"}
@@ -415,13 +419,13 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               label="Opt-in for advanced charting on the Stats page (interactive charts)."
             />
           </CardContent>
-          <CardActions sx={{ p: 2 }}>
+          <CardActions className="p-4">
             {editForm === "advanced-charting" && (
               <Fragment>
                 <Button
                   type="reset"
                   form="advanced-charting"
-                  sx={{ ml: "auto" }}
+                  className="ml-auto"
                   disabled={isUpdateUserLoading}
                 >
                   Cancel
@@ -445,7 +449,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
               <IconButton
                 color="primary"
                 onClick={() => onClickEdit("advanced-charting", editForm)}
-                sx={{ ml: "auto" }}
+                className="ml-auto"
               >
                 <span className="lucidicon-pencil"></span>
               </IconButton>
@@ -455,7 +459,7 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
       </Form>
 
       <Card className="bg-mui-secondary-light">
-        <CardHeader title="Your data" sx={{ paddingBottom: "0" }} component="h2" />
+        <CardHeader title="Your data" className="pb-0" component="h2" />
         <CardContent>
           <ExportDreams></ExportDreams>
         </CardContent>

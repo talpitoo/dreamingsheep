@@ -2,6 +2,9 @@
 title: "Backstory - the beginnings"
 date: "Tue Jan 3 2023."
 imageUrl: "https://images.pexels.com/photos/4506259/pexels-photo-4506259.jpeg?w=1472"
+related:
+  - "life-purpose-milestone-1"
+  - "the-brainstorming"
 ---
 
 And Now for Something Completely Different²... It's been more than 20 years

@@ -2,6 +2,9 @@
 title: "A glitch in the dream journal matrix"
 date: "Mon Nov 21 2023."
 imageUrl: "/assets/blog-sheep-bliss-by-lucifer-enterprises.jpg"
+related:
+  - "dreamingsheep-v1-0-1-released"
+  - "dreamingsheep-is-now-open-source"
 ---
 
 We've had to bump the version to v2.0.0 as a major bug was discovered on

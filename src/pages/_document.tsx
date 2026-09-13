@@ -21,6 +21,16 @@ export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
   return (
     <Html lang="en">
       <Head>
+        {/* The cascade-layer order has to be the first layer statement the browser parses: ahead of
+            the emotion tags below (MUI's output lives in `@layer mui`, see src/createEmotionCache.ts)
+            and ahead of the Tailwind stylesheet, which repeats the same statement. Next renders
+            <Head>'s children before its own CSS links, so this is that first position (issue #1).
+            `properties` is Tailwind's own internal layer (the @supports fallback that seeds the
+            --tw-* custom properties for browsers without @property). It must be named here, and
+            first: a layer this statement leaves out is created on first use — i.e. appended AFTER
+            utilities — which would let those fallback initializers outrank the utilities that set
+            them on exactly the old browsers they exist for. */}
+        <style>{"@layer properties, theme, base, mui, components, utilities;"}</style>
         {/* PWA primary color */}
         {/* <meta name="theme-color" content={Theme.palette.primary.main} /> */}
         <meta name="theme-color" content="#0097a7" />

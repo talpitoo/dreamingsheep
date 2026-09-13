@@ -8,17 +8,21 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogMaintenance from "public/assets/blog-sheep-bliss-by-lucifer-enterprises.jpg"
 import Link from "next/link"
 
-const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
+const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -32,6 +36,7 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -68,13 +73,13 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
                 <Typography variant="body1" align="right">
                   ¹
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   We&apos;ve had to bump the version to <code>v2.0.0</code> as a major bug was
                   discovered on the database level. Hopefully, you might have noticed nothing more
                   than a glitch on the settings page and slight inconsistencies with the symbols.
                   All systems are now back online.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   In case you were about to fall asleep while waiting for the maintenance window to
                   end, you could count the good ol&apos;{" "}
                   <Link href="https://adrianotiger.github.io/desktopPet/">
@@ -83,7 +88,7 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
                   , recreated by <Link href="https://github.com/Adrianotiger">@Adrianotiger</Link>{" "}
                   for 64-bit.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Meh!
                 </Typography>
                 <hr />
@@ -98,6 +103,8 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -116,5 +123,11 @@ ArticlePageAGlitchInTheDreamJournalMatrix.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("a-glitch-in-the-dream-journal-matrix") },
+})
 
 export default ArticlePageAGlitchInTheDreamJournalMatrix

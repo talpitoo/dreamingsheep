@@ -19,7 +19,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import React, { useState } from "react"
 import { Navigation, Controller } from "swiper"
 import { Swiper, SwiperSlide } from "swiper/react"
-import "swiper/css"
+// "swiper/css" is imported from src/styles/index.css so it lands in a cascade layer (issue #1)
 // import "swiper/css/navigation"
 
 // Rendered by the landing page inside the login card (AuthenticationContainer's
@@ -29,7 +29,36 @@ import "swiper/css"
 // superscript by its own shape, so the button's uppercase/font styles can't flatten
 // it; it anchors footnote 2 (the Nexus note) to the label.
 export const SwiperDemoButton = () => (
-  <Button variant="outlined" fullWidth href="#demo">
+  <Button
+    variant="outlined"
+    fullWidth
+    href="#demo"
+    onClick={(event) => {
+      // Without JS, or before hydration, the href does the work: the anchor jumps and the URL
+      // keeps its #demo, which is the correct fallback. With JS we scroll to the collage
+      // ourselves and never let the hash be written, so a URL copied from the address bar after
+      // pressing demo is the plain landing page rather than one that scrolls a stranger straight
+      // past the sign-up form.
+      //
+      // Scrolling instead of letting the anchor jump and then calling
+      // `history.replaceState` is what makes this work in every browser: Firefox commits the
+      // fragment AFTER a setTimeout(0) callback runs, so stripping the hash on a timer put it
+      // straight back (Chrome's ordering happened to be the other way round). Nothing to strip
+      // now, so nothing to race.
+      //
+      // Modified clicks are left to the browser — ctrl/cmd-click still opens #demo in a new tab.
+      if (event.defaultPrevented || event.button !== 0) return
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+      const demo = document.getElementById("demo")
+      if (!demo) return
+
+      event.preventDefault()
+      // no `behavior` option on purpose: that honours `html { scroll-behavior: smooth }` from
+      // index.css, and any reduced-motion guard the CSS may grow, instead of forcing smooth
+      demo.scrollIntoView()
+    }}
+  >
     demo²
   </Button>
 )

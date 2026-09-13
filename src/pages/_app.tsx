@@ -5,7 +5,8 @@ import { useRouter } from "next/router"
 import { ErrorBoundary, FallbackProps } from "react-error-boundary"
 import { QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query"
 
-import "src/styles/fonts.css"
+// fonts.css and swiper/css are imported FROM index.css so they land in a cascade layer —
+// see the comment there (issue #1)
 import "src/styles/index.css"
 
 import LoginForm from "src/auth/components/LoginForm"
@@ -14,7 +15,7 @@ import Theme from "src/styles/Theme"
 import React, { useEffect, useState } from "react"
 
 import CssBaseline from "@mui/material/CssBaseline"
-import { ThemeProvider } from "@mui/material/styles"
+import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles"
 import { LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon"
 import Layout from "src/core/layouts/Layout"
@@ -71,18 +72,28 @@ export default function App({
       <QueryClientProvider client={queryClient}>
         <LocalizationProvider dateAdapter={AdapterLuxon}>
           <CacheProvider value={emotionCache}>
-            <ThemeProvider theme={Theme}>
-              <CssBaseline />
-              <AppErrorBoundary>
-                <CreateInstantSymbolProvider>
-                  {getLayout(
-                    <AuthGuard Component={Component}>
-                      <Component {...pageProps} />
-                    </AuthGuard>
-                  )}
-                </CreateInstantSymbolProvider>
-              </AppErrorBoundary>
-            </ThemeProvider>
+            {/* Both providers hand MUI a cache whose every rule is wrapped in `@layer mui`
+                (issue #1) — and both are needed. On the server Next ends up with TWO instances of
+                @emotion/react (its exports map offers an ESM and a CJS build, and this file's
+                import resolves differently from @mui/styled-engine's), so the CacheProvider above
+                never reaches MUI's components there: they read their own instance's default cache.
+                StyledEngineProvider is imported from MUI, i.e. from that same instance, so it is
+                the one that lands. Keep the CacheProvider too: it is what _document.tsx extracts
+                server-side styles from, and it layers the client cache. */}
+            <StyledEngineProvider enableCssLayer>
+              <ThemeProvider theme={Theme}>
+                <CssBaseline />
+                <AppErrorBoundary>
+                  <CreateInstantSymbolProvider>
+                    {getLayout(
+                      <AuthGuard Component={Component}>
+                        <Component {...pageProps} />
+                      </AuthGuard>
+                    )}
+                  </CreateInstantSymbolProvider>
+                </AppErrorBoundary>
+              </ThemeProvider>
+            </StyledEngineProvider>
           </CacheProvider>
         </LocalizationProvider>
       </QueryClientProvider>
@@ -156,7 +167,7 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           <Head>
             <meta name="robots" content="noindex" />
           </Head>
-          <Grid container sx={{ mb: 2 }}>
+          <Grid container className="mb-4">
             <Grid container item sm={12} justifyContent="center">
               <Alert severity="warning">Your session expired. Please log in</Alert>
             </Grid>
@@ -164,12 +175,7 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           <Grid container>
             <Grid item md={2} className="grid-spacer-md-2" />
             <Grid item xs={12} sm={6} md={4}>
-              <Box
-                sx={{
-                  width: { xs: "50%", sm: "100%" },
-                  margin: { xs: "0 auto -2rem", sm: "auto" },
-                }}
-              >
+              <Box className="w-1/2 sm:w-full mt-0 mx-auto -mb-8 sm:m-auto">
                 <Image
                   src={sheepSignup}
                   alt="signup sheep"

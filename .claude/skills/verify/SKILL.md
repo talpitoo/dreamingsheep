@@ -43,6 +43,10 @@ Useful entry points when driving flows:
 
 ## Gotchas
 
+- **For layout/styling changes, reach for the visual suite first** (`npm run test:visual`,
+  `test/visual/README.md`): it already freezes the clock, logs in, opts into every feature, masks
+  the live counters and covers both sides of every breakpoint. Ad-hoc screenshots are for things it
+  does not cover.
 - **`page.screenshot()` lies about sticky headers.** The default
   `captureBeyondViewport: true` paints the sticky AppBar's contents at wrong
   offsets (title image floating mid-page, header appearing hundreds of px

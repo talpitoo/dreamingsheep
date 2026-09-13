@@ -58,7 +58,7 @@ const FileUpload = forwardRef<
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Box sx={{ border: 1, borderRadius: 1, borderColor: "#c4c4c4" }} p={1}>
+        <Box className="border border-[#c4c4c4] rounded-sm" p={1}>
           <Typography variant="caption" className="image-upload-label">
             image
           </Typography>

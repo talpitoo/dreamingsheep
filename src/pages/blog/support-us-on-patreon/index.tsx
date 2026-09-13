@@ -9,15 +9,20 @@ import blogPatreon from "public/assets/blog-patreon-new.jpg"
 import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
+import { Routes } from "src/routes"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 
-const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
+const ArticlePageSupportUsOnPatreon: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -31,6 +36,7 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -60,10 +66,10 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
                   height={1080}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   During the initial discussions, friends suggested various subscription plans, but
                   the more i thought about it, the less i liked the idea. How could i ask for money
                   for a service where people log their dreams? It felt contrary to the spirit of
@@ -71,37 +77,37 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
                   would remain forever free. Even if it helps just one person, my mission will be
                   fulfilled, and i will die in peace with a smile on my face.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   However, for practical reasons, the hosting costs should still be covered from my
                   own pocket money, and that&apos;s where you come in. This is an invitation to
                   support{" "}
                   <Link href="https://patreon.com/longtimenosleep">dreamingsheep on Patreon</Link>,
                   where you can contribute to keeping the dream alive.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   My secret plan is a “get-rich-quick” scheme where i could quit my job and focus
                   solely on enhancing <em>dreamingsheep</em>. Plus, i could attend Stephen
                   LaBerge&apos;s lucid dreaming workshops in Hawaii every year.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Another scenario is that <em>dreamingsheep</em> becomes lucid and grows into a
                   self-aware, self-sustaining AI in the ‘astral’ cloud. In that case, it could
                   automatically channel the funds towards the hosting company if i get possessed by
                   ‘mailer daemons’ in my dreams.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Now, let&apos;s address the elephant/ox in the room—I am aware of the tiers, perks
                   & co. in the Patreon ecosystem, but that&apos;s not our aim here. I have no desire
                   to artificially hold your attention, entertain you with videos or blog posts to
                   fulfill a ‘weekly quota’, or lure you into ‘subscribing to our channel’. It&apos;s
                   not about <em>dreamingsheep</em>; it&apos;s about <em>you</em>.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Your support is not required but if you find value in <em>dreamingsheep</em> and
                   wish to help, I offer an eternal thank you for your contribution, no matter the
                   size!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2, textAlign: "center" }}>
+                <Typography variant="body1" className="mb-4 text-center">
                   <em>
                     You may say that I&apos;m a dreamer
                     <br />
@@ -112,7 +118,7 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
                     and the world will be as one.¹
                   </em>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Continue to{" "}
                   <Link href="https://patreon.com/longtimenosleep">dreamingsheep on Patreon</Link>.
                 </Typography>
@@ -122,6 +128,8 @@ const ArticlePageSupportUsOnPatreon: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -140,5 +148,11 @@ ArticlePageSupportUsOnPatreon.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("support-us-on-patreon") },
+})
 
 export default ArticlePageSupportUsOnPatreon

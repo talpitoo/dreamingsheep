@@ -54,7 +54,7 @@ export const Preview = (props: PreviewProps) => {
             {humanFileSize(size || 0, true)} of 3 MB quota used
           </Typography>
 
-          <IconButton color="primary" sx={{ ml: 1 }} onClick={() => props.onRemove?.()}>
+          <IconButton color="primary" className="ml-2" onClick={() => props.onRemove?.()}>
             <span className="lucidicon-trash"></span>
           </IconButton>
         </>
@@ -63,12 +63,12 @@ export const Preview = (props: PreviewProps) => {
       {file && (
         <>
           {size === undefined && !uploading && (
-            <Typography variant="caption" sx={{ color: "red", display: "block" }}>
+            <Typography variant="caption" className="text-[red] block">
               Failed get total size, please re-upload
             </Typography>
           )}
           {(size || 0) > MAX_FILE_SIZE && (
-            <Typography variant="caption" sx={{ color: "red", display: "block" }}>
+            <Typography variant="caption" className="text-[red] block">
               Image size is too big, please try resizing and re-upload
             </Typography>
           )}

@@ -103,23 +103,14 @@ const AdvancedStatsQueryAndCharts = ({
       {/* the only feedback that the filters are narrowing things down while the panel is
           collapsed; same style as the search page's result count. The keyword chip is the
           searched words carried over from the search page — deletable here, editable there */}
-      <Typography variant="h4" sx={{ color: "white", mb: 1 }} component="p">
+      <Typography variant="h4" className="text-white mb-2" component="p">
         {count} matching dream{count === 1 ? "" : "s"}
         {keyword && (
           <Chip
             variant="outlined"
             label={`"${keyword}"`}
             onDelete={onClearKeyword}
-            sx={{
-              ml: 1.5,
-              verticalAlign: "middle",
-              color: "white",
-              borderColor: "white",
-              "& .MuiChip-deleteIcon": {
-                color: "rgba(255, 255, 255, 0.7)",
-                "&:hover": { color: "white" },
-              },
-            }}
+            className="ml-3 align-middle text-white border-white [&_.MuiChip-deleteIcon]:text-white/70 [&_.MuiChip-deleteIcon:hover]:text-white"
           />
         )}
       </Typography>
@@ -146,7 +137,7 @@ const AdvancedStatsQueryAndCharts = ({
           <StatGoogleChart data={facetsData.recall} type="recall" />
         </Grid>
       </Grid>
-      <Box sx={{ mt: 2, textAlign: "right" }}>
+      <Box className="mt-4 text-right">
         <Link
           href={Routes.SearchPage({
             ...(values.q && { q: encodeURI(values.q) }),
@@ -277,7 +268,7 @@ export const AdvancedStats = ({
         {/* Collapse (not conditional render) keeps the form mounted, so the active
             filter values survive toggling the panel */}
         <Collapse in={filtersOpen} id="advanced-stats-panel">
-          <Paper sx={{ mb: 2, p: 2 }}>
+          <Paper className="mb-4 p-4">
             {/* NOTE: no keyword field on purpose — searching for words happens on the
                 Search page, which carries them over via its "View stats" button */}
             <ToggleButtonField

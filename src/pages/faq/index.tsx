@@ -61,7 +61,7 @@ const FaqPage: BlitzPage = () => {
             </h1>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Who?" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Who?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   Dreamingsheep is your virtual assistant keeping track of your (
@@ -76,7 +76,7 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="What?" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="What?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   It is an{" "}
@@ -91,14 +91,14 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Where?" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Where?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">In your web browser on any of your devices.</Typography>
               </CardContent>
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="When?" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="When?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   Right after you awaken while your memories are fresh.
@@ -107,7 +107,7 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="Why?" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="Why?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   That is up to you. Dreamingsheep&apos;s favorite activity is to practice{" "}
@@ -117,7 +117,7 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader title="How?" sx={{ paddingBottom: "0" }} component="h2" />
+              <CardHeader title="How?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   <Link href={Routes.SignupPage()}>Sign up</Link> and have a good sleep. Sweet
@@ -127,13 +127,9 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="Who can read my dreams?"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="Who can read my dreams?" className="pb-0" component="h2" />
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Unlike other dream journaling websites that either have a forum or allow users to
                   interpret each other&apos;s public dreams (learn more in{" "}
                   <Link href={Routes.ArticlePageTheBrainstorming()}>The brainstorming</Link>), here,
@@ -151,7 +147,7 @@ const FaqPage: BlitzPage = () => {
                   ></iframe>
                 </Box>
                 {/* NOTE: A/B video https://www.youtube-nocookie.com/embed/UwJvuo37dMw */}
-                <Typography variant="body1" sx={{ mt: 2 }}>
+                <Typography variant="body1" className="mt-4">
                   Still don&apos;t believe us? Read more in the{" "}
                   <Link href={Routes.ArticlePagePrivacyPolicyAndTermsOfServiceUpdate()}>
                     Privacy Policy and Terms of Service update
@@ -165,7 +161,7 @@ const FaqPage: BlitzPage = () => {
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader
                 title="Can someone see the symbols I created?"
-                sx={{ paddingBottom: "0" }}
+                className="pb-0"
                 component="h2"
               />
               <CardContent>
@@ -176,7 +172,7 @@ const FaqPage: BlitzPage = () => {
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader
                 title="What about the stats about unicorns on the landing page. Aren't those public?"
-                sx={{ paddingBottom: "0" }}
+                className="pb-0"
                 component="h2"
               />
               <CardContent>
@@ -191,7 +187,7 @@ const FaqPage: BlitzPage = () => {
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader
                 title="Where can i learn more about various use cases?"
-                sx={{ paddingBottom: "0" }}
+                className="pb-0"
                 component="h2"
               />
               <CardContent>
@@ -206,11 +202,7 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="Can i attach images to dreams?"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="Can i attach images to dreams?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
                   Yes. Create a custom symbol <span className="lucidicon-tag"></span> and attach
@@ -226,7 +218,7 @@ const FaqPage: BlitzPage = () => {
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader
                 title="What if a symbol or dream type is missing?"
-                sx={{ paddingBottom: "0" }}
+                className="pb-0"
                 component="h2"
               />
               <CardContent>
@@ -242,7 +234,7 @@ const FaqPage: BlitzPage = () => {
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader
                 title="How can i use dreamingsheep on my phone?"
-                sx={{ paddingBottom: "0" }}
+                className="pb-0"
                 component="h2"
               />
               <CardContent>
@@ -263,7 +255,7 @@ const FaqPage: BlitzPage = () => {
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader
                 title="How do i analyze my dream patterns?"
-                sx={{ paddingBottom: "0" }}
+                className="pb-0"
                 component="h2"
               />
               <CardContent>
@@ -280,16 +272,11 @@ const FaqPage: BlitzPage = () => {
             </Card>
 
             <Card className="bg-mui-secondary-light mb-4">
-              <CardHeader
-                title="Can i export my dream journal?"
-                sx={{ paddingBottom: "0" }}
-                component="h2"
-              />
+              <CardHeader title="Can i export my dream journal?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
-                  Of course, your dreams are yours. Head to the{" "}
-                  <Link href={Routes.SettingsPage()}>Settings</Link> page and download your dreams,
-                  symbols and stats as a PDF, ready to print.
+                  Of course, your dreams are yours. Head to the Settings page and download your
+                  dreams, symbols and stats as a PDF, ready to print.
                 </Typography>
               </CardContent>
             </Card>

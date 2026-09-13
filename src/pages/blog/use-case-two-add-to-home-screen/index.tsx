@@ -8,17 +8,21 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogUseCaseTwoAddToHomeScreen from "public/assets/blog-add-to-home-screen.jpg"
 import Link from "next/link"
 
-const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
+const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -32,6 +36,7 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -65,10 +70,10 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
                   height={692}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   You can add <em>dreamingsheep</em>&#32;to your home screen and use it just like an
                   app, minus the tracking of your personal data, which is an inseparable part of the
                   app ecosystem. We&apos;re going to <em>“steal your soul”</em> anyway{" "}
@@ -85,7 +90,7 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
                   typos, or, who knows, maybe they were intentional? Attach symbols, arrange your
                   dream garden, and keep an eye on the Stats page as those charts come to life.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   To add the app to the home screen:
                 </Typography>
                 <ul>
@@ -103,6 +108,8 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -121,5 +128,11 @@ ArticlePageUseCaseTwoAddToHomeScreen.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("use-case-two-add-to-home-screen") },
+})
 
 export default ArticlePageUseCaseTwoAddToHomeScreen

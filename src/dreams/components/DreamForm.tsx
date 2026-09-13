@@ -52,7 +52,7 @@ export function DreamForm<S extends z.ZodType<any, any>>(props: FormProps<S>) {
           className="translate-x-0 translate-y-0 transform-gpu"
         />
 
-        <Button variant="outlined" endIcon={buttonIcon} fullWidth sx={{ my: 2 }} onClick={toggle}>
+        <Button variant="outlined" endIcon={buttonIcon} fullWidth className="my-4" onClick={toggle}>
           {buttonText}
         </Button>
 

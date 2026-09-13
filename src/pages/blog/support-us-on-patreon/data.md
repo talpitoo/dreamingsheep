@@ -2,6 +2,9 @@
 title: "Support us on Patreon"
 date: "Sun Jul 9 2023."
 imageUrl: "/assets/blog-patreon-new.jpg"
+related:
+  - "life-purpose-milestone-1"
+  - "dreamingsheep-is-now-open-source"
 ---
 
 During the initial discussions, friends suggested various subscription plans, but

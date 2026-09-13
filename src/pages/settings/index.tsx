@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { AppPage as BlitzPage } from "src/core/types"
@@ -39,15 +40,10 @@ export const Settings = () => {
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
             <Box
-              sx={{
-                width: { xs: "50%", sm: "100%" },
-                ...(user && {
-                  margin: "auto",
-                }),
-                ...(!user && {
-                  margin: { xs: "0 auto -2rem", sm: "auto" },
-                }),
-              }}
+              className={classnames(
+                "w-1/2 sm:w-full",
+                user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+              )}
             >
               <Image
                 src={sheepSettings}

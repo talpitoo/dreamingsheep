@@ -109,7 +109,7 @@ export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
   return (
     <Card className="translate-x-0 translate-y-0 transform-gpu">
       <CardContent className="bg-white">
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box className="flex justify-between items-center">
           <Typography variant="subtitle1">symbols</Typography>
           <FormControlLabel
             control={
@@ -122,7 +122,7 @@ export function StatSymbolChart({ data, isPdf = false }: StatSymbolChartProps) {
             label={<Typography variant="body2">custom only</Typography>}
           />
         </Box>
-        <Container ref={chartRef} sx={{ display: "flex", justifyContent: "center" }}></Container>
+        <Container ref={chartRef} className="flex justify-center"></Container>
       </CardContent>
     </Card>
   )

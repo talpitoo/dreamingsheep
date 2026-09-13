@@ -23,6 +23,7 @@ import title from "public/assets/title-dreamingsheep.png"
 import { Routes } from "src/routes"
 import { Logout, Search, Settings, ExpandMore } from "@mui/icons-material"
 import { useTheme } from "@mui/material/styles"
+import classnames from "src/utils/classnames"
 
 const SQUARE_LOGO_SIZE = 150
 
@@ -101,16 +102,10 @@ export function Header() {
             color="secondary"
             className="translate-x-0 translate-y-0 transform-gpu"
           >
-            <Toolbar
-              className="py-3 translate-x-0 translate-y-0 transform-gpu"
-              sx={{
-                minHeight: { xs: "80px" },
-                // below md the mobile menu is a full-width Collapse that wraps to its own
-                // line; md+ must stay nowrap like before, otherwise the nav wraps under
-                // the logo at borderline widths instead of squeezing onto one row
-                flexWrap: { xs: "wrap", md: "nowrap" },
-              }}
-            >
+            {/* below md the mobile menu is a full-width Collapse that wraps to its own line;
+                md+ must stay nowrap like before, otherwise the nav wraps under the logo at
+                borderline widths instead of squeezing onto one row */}
+            <Toolbar className="py-3 translate-x-0 translate-y-0 transform-gpu min-h-20 flex-wrap md:flex-nowrap">
               <div className="absolute top-0 left-0">
                 <Link href={Routes.Home()} passHref={true}>
                   <Box>
@@ -124,28 +119,16 @@ export function Header() {
                 </Link>
               </div>
 
-              <Box
-                className="flex-grow mr-8"
-                sx={{
-                  // on xs the box is empty (title hidden or absolutely positioned),
-                  // so the logo offset only matters from md up
-                  marginLeft: { xs: "0", md: `${SQUARE_LOGO_SIZE - 30}px` },
-                }}
-              >
+              {/* on xs the box is empty (title hidden or absolutely positioned), so the logo
+                  offset only matters from md up. md:ml-30 = 120px = SQUARE_LOGO_SIZE - 30 */}
+              <Box className="grow mr-8 ml-0 md:ml-30">
                 <Link href={Routes.Home()} passHref={true}>
                   <Box
-                    sx={{
-                      ...(expanded && {
-                        display: { xs: "block", sm: "flex" },
-                        position: { xs: "absolute", md: "static" },
-                        top: "3.75rem",
-                        right: "1.25rem",
-                      }),
-                      ...(!expanded && {
-                        display: { xs: "none", lg: "flex" },
-                        position: "static",
-                      }),
-                    }}
+                    className={classnames(
+                      expanded
+                        ? "block sm:flex absolute md:static top-15 right-5"
+                        : "hidden lg:flex static"
+                    )}
                   >
                     <Image
                       className="cursor-pointer xsmax:w-[160px] xsmax:h-[37px]"
@@ -160,13 +143,7 @@ export function Header() {
 
               <Fragment>
                 <Button
-                  sx={{
-                    position: "absolute",
-                    right: "1rem",
-                    top: "22px",
-                    borderColor: "lightgray",
-                    display: { xs: "block", md: "none" },
-                  }}
+                  className="absolute right-4 top-[22px] border-[lightgray] block md:hidden"
                   aria-expanded={expanded}
                   onClick={handleExpandClick}
                   variant="outlined"
@@ -179,114 +156,82 @@ export function Header() {
               {/* Collapse (same animation as the search/stats filter panels) slides the
                   mobile menu open/closed; on md+ it's permanently open, so the desktop
                   nav renders exactly as before */}
-              <Collapse in={expanded || isDesktop} sx={{ width: { xs: "100%", md: "auto" } }}>
-                <Box
-                  sx={{
-                    // padding (not margin — margins don't count into Collapse's measured
-                    // height) clears the absolutely positioned title image on mobile
-                    paddingTop: { xs: "8.5rem", md: 0 },
-                    display: { xs: "grid", md: "flex" },
-                    flexDirection: { xs: "column", md: "row" },
-                    alignItems: { xs: "start", md: "center" },
-                    width: { xs: "100%", md: "auto" },
-                  }}
-                >
+              <Collapse in={expanded || isDesktop} className="w-full md:w-auto">
+                {/* padding (not margin — margins don't count into Collapse's measured height)
+                    clears the absolutely positioned title image on mobile; pt-34 = 8.5rem */}
+                <Box className="pt-34 md:pt-0 grid md:flex flex-col md:flex-row items-start md:items-center w-full md:w-auto">
                   <Link href={Routes.DreamsPage()} passHref={true}>
                     <Button
-                      sx={{
-                        flexShrink: 0,
-                        mr: { xs: 0, md: 2 },
-                        "&:hover": { textDecoration: "none !important" },
-                        backgroundColor:
-                          Routes.DreamsPage().pathname === router.pathname
-                            ? "lightgray !important"
-                            : "transparent",
-                      }}
                       color="inherit"
                       onClick={collapseMobileMenu}
-                      className="w-full md:w-auto text-[#202020]"
+                      className={classnames(
+                        "w-full md:w-auto text-[#202020] shrink-0 mr-0 md:mr-4 hover:no-underline!",
+                        Routes.DreamsPage().pathname === router.pathname
+                          ? "bg-[lightgray]!"
+                          : "bg-transparent"
+                      )}
                     >
                       Dreams
                     </Button>
                   </Link>
                   <Link href={Routes.SymbolsPage()} passHref={true}>
                     <Button
-                      sx={{
-                        flexShrink: 0,
-                        mr: { xs: 0, md: 2 },
-                        "&:hover": { textDecoration: "none !important" },
-                        backgroundColor:
-                          Routes.SymbolsPage().pathname === router.pathname
-                            ? "lightgray !important"
-                            : "transparent",
-                      }}
                       color="inherit"
                       onClick={collapseMobileMenu}
-                      className="w-full md:w-auto text-[#202020]"
+                      className={classnames(
+                        "w-full md:w-auto text-[#202020] shrink-0 mr-0 md:mr-4 hover:no-underline!",
+                        Routes.SymbolsPage().pathname === router.pathname
+                          ? "bg-[lightgray]!"
+                          : "bg-transparent"
+                      )}
                     >
                       Symbols
                     </Button>
                   </Link>
                   <Link href={Routes.StatsPage()} passHref={true}>
                     <Button
-                      sx={{
-                        flexShrink: 0,
-                        mr: { xs: 0, md: 2 },
-                        "&:hover": { textDecoration: "none !important" },
-                        backgroundColor:
-                          Routes.StatsPage().pathname === router.pathname
-                            ? "lightgray !important"
-                            : "transparent",
-                      }}
                       color="inherit"
                       onClick={collapseMobileMenu}
-                      className="w-full md:w-auto text-[#202020]"
+                      className={classnames(
+                        "w-full md:w-auto text-[#202020] shrink-0 mr-0 md:mr-4 hover:no-underline!",
+                        Routes.StatsPage().pathname === router.pathname
+                          ? "bg-[lightgray]!"
+                          : "bg-transparent"
+                      )}
                     >
                       Stats
                     </Button>
                   </Link>
                   <Link href={Routes.FaqPage()} passHref={true}>
                     <Button
-                      sx={{
-                        flexShrink: 0,
-                        mr: { xs: 0, md: 2 },
-                        "&:hover": { textDecoration: "none !important" },
-                        backgroundColor:
-                          Routes.FaqPage().pathname === router.pathname
-                            ? "lightgray !important"
-                            : "transparent",
-                      }}
                       color="inherit"
                       onClick={collapseMobileMenu}
-                      className="w-full md:w-auto text-[#202020]"
+                      className={classnames(
+                        "w-full md:w-auto text-[#202020] shrink-0 mr-0 md:mr-4 hover:no-underline!",
+                        Routes.FaqPage().pathname === router.pathname
+                          ? "bg-[lightgray]!"
+                          : "bg-transparent"
+                      )}
                     >
                       FAQ
                     </Button>
                   </Link>
                   <Link href={Routes.BlogPage()} passHref={true}>
                     <Button
-                      sx={{
-                        flexShrink: 0,
-                        mr: { xs: 0, md: 2 },
-                        "&:hover": { textDecoration: "none !important" },
-                        backgroundColor: router.pathname.startsWith(Routes.BlogPage().pathname)
-                          ? "lightgray !important"
-                          : "transparent",
-                      }}
                       color="inherit"
                       onClick={collapseMobileMenu}
-                      className="w-full md:w-auto text-[#202020]"
+                      className={classnames(
+                        "w-full md:w-auto text-[#202020] shrink-0 mr-0 md:mr-4 hover:no-underline!",
+                        router.pathname.startsWith(Routes.BlogPage().pathname)
+                          ? "bg-[lightgray]!"
+                          : "bg-transparent"
+                      )}
                     >
                       Blog
                     </Button>
                   </Link>
                   <TextField
-                    sx={{
-                      mr: { xs: 0, md: 2 },
-                      mb: { xs: 2, md: 0 },
-                      order: { xs: -1, md: "unset" },
-                    }}
-                    className="translate-x-0 translate-y-0 transform-gpu"
+                    className="translate-x-0 translate-y-0 transform-gpu mr-0 md:mr-4 mb-4 md:mb-0 -order-1 md:order-none"
                     // InputLabelProps={{ shrink: true, disableAnimation: true }}
                     // variant="outlined"
                     placeholder="Search..."
@@ -303,38 +248,30 @@ export function Header() {
                   <Link
                     href={Routes.SettingsPage()}
                     passHref={true}
-                    className="hover:!no-underline"
+                    className="hover:no-underline!"
                   >
                     <Button
-                      sx={{
-                        mr: { xs: 0, md: 2 },
-                        // mobile-menu-only entry; the desktop nav has the account dropdown instead
-                        display: { xs: "flex", md: "none" },
-                        "&:hover": { textDecoration: "none !important" },
-                        backgroundColor:
-                          Routes.SettingsPage().pathname === router.pathname
-                            ? "lightgray !important"
-                            : "transparent",
-                      }}
                       color="inherit"
                       onClick={collapseMobileMenu}
-                      className="w-full md:w-auto text-[#202020]"
+                      // mobile-menu-only entry; the desktop nav has the account dropdown instead
+                      className={classnames(
+                        "w-full md:w-auto text-[#202020] mr-0 md:mr-4 flex md:hidden hover:no-underline!",
+                        Routes.SettingsPage().pathname === router.pathname
+                          ? "bg-[lightgray]!"
+                          : "bg-transparent"
+                      )}
                     >
                       Settings
                     </Button>
                   </Link>
                   <Button
-                    sx={{
-                      mr: { xs: 0, md: 2 },
-                      mb: { xs: 1, sm: 2, md: 0 },
-                      // mobile-menu-only entry; the desktop nav has the account dropdown instead
-                      display: { xs: "flex", md: "none" },
-                    }}
+                    // mobile-menu-only entry; the desktop nav has the account dropdown instead
+                    className="mr-0 md:mr-4 mb-2 sm:mb-4 md:mb-0 flex md:hidden"
                     color="inherit"
                     onClick={handleLogout}
                   >
                     <Logout />
-                    <Box sx={{ ml: ".5rem" }}>Sign out</Box>
+                    <Box className="ml-2">Sign out</Box>
                   </Button>
 
                   <Button
@@ -344,13 +281,12 @@ export function Header() {
                     onClick={handleMenu}
                     color="inherit"
                     endIcon={<ExpandMore />}
-                    sx={{
-                      backgroundColor:
-                        Routes.SettingsPage().pathname === router.pathname
-                          ? "lightgray !important"
-                          : "transparent",
-                      display: { xs: "none", md: "flex" },
-                    }}
+                    className={classnames(
+                      "hidden md:flex",
+                      Routes.SettingsPage().pathname === router.pathname
+                        ? "bg-[lightgray]!"
+                        : "bg-transparent"
+                    )}
                   >
                     <Box className="account-dropdown">{session.username}</Box>
                   </Button>
@@ -370,7 +306,7 @@ export function Header() {
                       }}
                     >
                       <Settings />
-                      <Box sx={{ ml: ".5rem" }}>Settings</Box>
+                      <Box className="ml-2">Settings</Box>
                     </MenuItem>
                     <MenuItem
                       onClick={async () => {
@@ -379,7 +315,7 @@ export function Header() {
                       }}
                     >
                       <Logout />
-                      <Box sx={{ ml: ".5rem" }}>Sign out</Box>
+                      <Box className="ml-2">Sign out</Box>
                     </MenuItem>
                   </Menu>
                 </Box>

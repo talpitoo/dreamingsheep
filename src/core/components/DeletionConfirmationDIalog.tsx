@@ -61,29 +61,32 @@ export function DeletionConfirmationDialog({
       <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">{message}</DialogContentText>
-        <Box sx={{ textAlign: "center" }}>
+        <Box className="text-center">
           <Image
             src={sheepDelete}
             alt="symbols sheep"
             width={300}
             height={300}
-            className="temporary-img-fix w-full h-auto max-w-[300px]"
+            className="w-full h-auto max-w-[300px]"
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ mx: 2, mb: 2 }}>
+      <DialogActions className="mx-4 mb-4">
         <Button onClick={onCancel} disabled={isBusy}>
           Cancel
         </Button>
+        {/* No width animation in a dialog: MUI portals it out of #__next, so under Tailwind v3
+            these max-w-* classes never applied at all. Cascade layers made them live, and the first
+            thing they did was squeeze "Yes, Delete Account" onto three lines. The animation was
+            never seen here — drop it rather than invent a new look (issue #1). */}
         <Button
           variant="contained"
           onClick={handleDelete}
           disabled={isBusy}
-          className={`w-auto transition-all ease-in-out duration-300 ${
-            isBusy ? "max-w-[113px]" : "max-w-[89px]"
-          }`}
+          // no ml-*: DialogActions' own `> :not(style) ~ :not(style)` rule is more specific than
+          // the sx that used to sit here, so its 8px gap is what has always rendered
+          className="w-auto"
           endIcon={isBusy && <HourglassTopIcon className="opacity-50" />}
-          sx={{ ml: 2 }}
         >
           {deleteButton}
         </Button>

@@ -54,8 +54,18 @@ See root [CLAUDE.md](../CLAUDE.md) for the frozen-deps policy.
 - Key pages: `dreams/` (journal + calendar), `search/` (advanced search),
   `stats/` (charts), `settings/`, `symbols/`, `blog/` + `faq/` (hardcoded TSX
   content, playful lowercase-"i" copy).
-- MUI `sx`, MUI `className` and Tailwind utilities are mixed; match whatever the
-  surrounding file does (roadmap: gradual move toward Tailwind, maintainer-led).
+- **Styling**: Tailwind classes for layout, spacing and responsive behaviour;
+  `src/styles/Theme.ts` for how MUI components look; `style={}` only for values
+  computed at runtime (one place: the measured scale in `SymbolsRadioList`).
+  **`sx` is forbidden** — ESLint errors on it (issue #1). Breakpoints are MUI's own
+  (`sm` 600 / `md` 900 / `lg` 1200); `xsmax:` is ≤ 320 **inclusive** and `hover:`
+  applies on touch too, both via `@custom-variant`. The important modifier is a
+  suffix: `min-w-[48px]!`. Utilities reach inside MUI portals (dialogs, menus,
+  poppers) — they did not under the old `important: "#__next"` scoping.
+- When replacing an `sx`, do not assume it was doing anything: `sx` lands in
+  `@layer mui` where a more specific MUI rule can outrank it, and a utility never
+  loses that contest. Two `sx` props in this codebase were dead and would have come
+  alive as classes. Check the computed value before and after.
 
 ## Forms (src/core/components/)
 
@@ -140,6 +150,16 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   checkbox cards, pagination). Requires a running dev server + seeded DB;
   flows restore toggled settings and delete what they create. User-created
   symbols land on the LAST pagination page — use `gotoLastPaginationPage`.
+- **Visual** (`npm run test:visual`, Playwright, config
+  `test/visual/playwright.config.ts`): full-page `toHaveScreenshot` of 29 page states at every
+  breakpoint edge (320/321, 375, 599/600, 899/900, 1199/1200) plus computed-style contracts for
+  what pixels miss. Baselines are local and gitignored; needs a running **production** build
+  (`yarn build && yarn start`) and a seeded DB. Run it before and after any styling change —
+  `test/visual/README.md` has the workflow, the determinism tricks and the triage rules.
+  Adding a feature: baseline on unchanged `main` FIRST, then build. A brand-new snapshot name
+  fails its first compare run ("A snapshot doesn't exist … writing actual"), writes the file and
+  passes on the next — so new states announce themselves. Re-baseline only the shots you approve,
+  by name, never in bulk.
 - CI runs lint + type-check + unit only (`.github/workflows/test.yml`).
 
 ## Gotchas

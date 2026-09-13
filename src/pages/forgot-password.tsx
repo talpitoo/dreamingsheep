@@ -23,12 +23,7 @@ const ForgotPasswordPage: BlitzPage = () => {
       <Grid container>
         <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} sm={6} md={4}>
-          <Box
-            sx={{
-              width: { xs: "50%", sm: "100%" },
-              margin: { xs: "0 auto -2rem", sm: "auto" },
-            }}
-          >
+          <Box className="w-1/2 sm:w-full mt-0 mx-auto -mb-8 sm:m-auto">
             {isSuccess ? (
               <Image
                 src={sheepMail}
@@ -57,7 +52,7 @@ const ForgotPasswordPage: BlitzPage = () => {
             className="w-full h-auto max-w-[325px]"
           />
           <Card className="text-left">
-            <CardHeader title="Forgot your password?" sx={{ paddingBottom: "0" }} component="h1" />
+            <CardHeader title="Forgot your password?" className="pb-0" component="h1" />
             <CardContent>
               {isSuccess ? (
                 <div>

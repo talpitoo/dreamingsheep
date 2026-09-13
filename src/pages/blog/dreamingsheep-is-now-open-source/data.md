@@ -2,6 +2,9 @@
 title: "dreamingsheep is now open source"
 date: "Sun May 3 2026."
 imageUrl: "/assets/sheep-matrix.jpg"
+related:
+  - "privacy-policy-and-terms-of-service-update"
+  - "support-us-on-patreon"
 ---
 
 After much deliberation, dreamingsheep has officially taken the red pill¹ and

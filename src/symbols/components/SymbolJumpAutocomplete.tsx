@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import { useQuery } from "src/core/rpc-client"
 import { useRouter } from "next/router"
 import { Routes } from "src/routes"
@@ -46,11 +47,9 @@ export const SymbolJumpAutocomplete = ({
   )
 
   return (
-    <Paper
-      sx={{ mb: 7, p: 1, px: "14px", display: "flex", flexWrap: "wrap", alignItems: "center" }}
-    >
+    <Paper className="mb-14 p-2 px-[14px] flex flex-wrap items-center">
       <Autocomplete
-        sx={{ flexGrow: 1, minWidth: "12rem" }}
+        className="grow min-w-48"
         options={symbols as Symbol[]}
         autoHighlight
         handleHomeEndKeys
@@ -63,7 +62,12 @@ export const SymbolJumpAutocomplete = ({
         getOptionLabel={(option: Symbol) => option.name}
         isOptionEqualToValue={(option: Symbol, value: Symbol) => option.id === value.id}
         renderOption={(props, option) => (
-          <Box component="li" sx={{ "& > span": { mr: 2, flexShrink: 0 } }} {...props}>
+          // props carries MUI's own option className — spread first, then merge
+          <Box
+            component="li"
+            {...props}
+            className={classnames("[&>span]:mr-4 [&>span]:shrink-0", props.className)}
+          >
             {option.icon ? (
               <span className={option.icon} />
             ) : (
@@ -89,7 +93,7 @@ export const SymbolJumpAutocomplete = ({
         )}
       />
       <FormControlLabel
-        sx={{ ml: -14, mr: 0, whiteSpace: "nowrap" }}
+        className="-ml-28 mr-0 whitespace-nowrap"
         control={
           <Checkbox
             size="small"

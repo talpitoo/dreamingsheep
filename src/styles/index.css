@@ -1,6 +1,50 @@
-@tailwind base; /* Preflight will be injected here */
-@tailwind components;
-@tailwind utilities;
+/* Tailwind CSS v4 entry — docs/superpowers/plans/2026-09-11-tailwind-v4-migration.md (issue #1).
+   The layer order below is the FIRST layer statement the browser parses (src/pages/_document.tsx
+   repeats it inline ahead of the emotion tags), so `mui` — MUI's emotion output, wrapped in
+   src/createEmotionCache.ts — sits between base and components: utilities beat MUI, MUI beats our
+   base rules. That is the precedence `important: "#__next"` bought us under v3, minus the #__next
+   scoping, so utilities now also reach MUI's portals (dialogs, menus, poppers).
+   `properties` is Tailwind's own internal layer and has to be named, first — see _document.tsx. */
+/* The order statement itself is NOT repeated here on purpose. Every layer this file uses gets a
+   block below, so the only layer a statement would add is `mui` — and a bare `@layer …;` next to
+   `@layer …{ … }` in one CACHED stylesheet wedges Chrome 105's renderer on the next navigation
+   (issue #1). _document.tsx declares the authoritative order inline, before anything else, which
+   is where `mui` gets its position; layers.visual.test.ts fails loudly if that ever stops working. */
+@import "tailwindcss/theme.css" layer(theme);
+/* no "tailwindcss/preflight.css": MUI's <CssBaseline /> stays the reset (was corePlugins.preflight: false) */
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Everything else the app loads has to be layered too. An UNLAYERED rule outranks every layered
+   one, so a plain stylesheet would silently beat all the utilities: the icon font's `font-size:
+   16px` was winning over `text-2xl`, shrinking every toggle-button glyph. `components` reproduces
+   what these sheets did under v3 — they beat MUI (source order put them after emotion's tags) and
+   lost to the #__next-scoped utilities. */
+@import "./fonts.css" layer(components);
+@import "swiper/css" layer(components);
+
+@theme {
+  /* Tailwind screens = MUI's default breakpoints (createTheme().breakpoints.values), so `sm:` and
+     an sx `{ sm: … }` switch at the same width. xl/2xl keep Tailwind's defaults (unused). */
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 900px;
+  --breakpoint-lg: 1200px;
+
+  /* palette mirrored from src/styles/Theme.ts — MUI 5 cannot emit CSS variables, so the hexes live
+     in both places; keep them in sync */
+  --color-mui-primary: #e84122;
+  --color-mui-secondary: #e6e5e5;
+  --color-mui-secondary-light: #f5f5f5;
+  --color-bg-canvas-blue: #0097a7;
+
+  /* v4 moved the default palette to oklch; pin the v3 hex so text-gray-400 stays byte-identical */
+  --color-gray-400: #9ca3af;
+}
+
+/* v3's `xsmax: { max: "320px" }` was INCLUSIVE (≤ 320, the 320px-wide phones); v4's built-in max-*
+   variants are exclusive, so the variant is spelled out by hand */
+@custom-variant xsmax (@media (width <= 320px));
+/* v3 applied hover on touch devices too; v4 gates it behind @media (hover: hover). Keep v3. */
+@custom-variant hover (&:hover);
 
 @layer base {
   * {
@@ -54,7 +98,8 @@
     background-size: 600px 1920px;
   }
 
-  @screen sm {
+  /* was `@screen sm` */
+  @variant sm {
     body {
       background-image: url("/assets/background-canvas-progressive.jpg"),
         url("/assets/background-canvas-blur.jpg");
@@ -66,8 +111,8 @@
 
   a {
     @apply text-mui-primary;
-    @apply no-underline !important;
-    @apply hover:underline !important;
+    @apply no-underline!;
+    @apply hover:underline!;
     /* TODO @talpitoo find a better way for global text links */
   }
 
@@ -184,131 +229,87 @@
     margin-right: -0.5rem;
     white-space: nowrap;
   }
+
+  /* The rules below were UNLAYERED under v3, where they beat MUI on source order (the stylesheet
+     loads after emotion's tags) and lost to the #__next-scoped utilities. In the components layer
+     they beat MUI by layer order and still lose to utilities — same outcome, now by contract.
+     (The toggle-button block that used to head this list now lives in src/styles/Theme.ts.) */
+
+  .chart-card .MuiContainer-maxWidthLg {
+    min-height: 200px;
+  }
+
+  .text-outline label {
+    display: block !important;
+    background-color: white;
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .text-outline label.Mui-focused {
+    border-top: 1px solid #00bcd4;
+  }
+
+  .text-outline label.MuiFormLabel-filled {
+    border-top: 1px solid rgba(0, 0, 0, 0.23);
+  }
+
+  .image-upload-label {
+    position: absolute;
+    display: inline-block;
+    background-color: white;
+    padding: 1px 5px;
+    margin-top: -19px !important;
+  }
+
+  .image-upload-fullwidth > div {
+    position: static !important;
+  }
+
+  .image-upload-fullwidth img {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .MuiPickerStaticWrapper-content {
+    border-radius: 4px;
+  }
+
+  header .MuiOutlinedInput-notchedOutline {
+    top: 0;
+  }
 }
 
-/* TODO @talpitoo This should be theme overrides and not done through pure css. Docs: https://mui.com/customization/theming/ */
-.MuiToggleButtonGroup-root {
-  border-left: 1px solid #e0e0e0;
-  padding-top: 1px;
+/* were `@layer utilities` classes under v3 */
+@utility transition-margin {
+  transition-property: margin;
+}
+
+@utility line-clamp {
   overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
 }
 
-.MuiToggleButtonGroup-grouped {
-  margin-top: -1px !important;
-  min-width: 86px;
-  min-height: 76px;
-  border-color: #e0e0e0 !important;
-  text-transform: lowercase !important;
-  font-size: 14px !important;
-  line-height: 2 !important;
+@utility pre-wrap {
+  white-space: pre-wrap;
 }
 
-.MuiToggleButtonGroup-grouped:first-child {
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  margin-left: -1px;
+/* for the empty offset columns (<Grid item md={2} className="grid-spacer-md-2" />): MUI sizes grid
+   items with flex-basis alone, and ancient WebKits (the Kindle browser & co) size an EMPTY flex
+   item from its content — 0px — so the spacer vanishes and the row shifts left. An explicit
+   percentage width is understood by every engine as the fallback basis, and modern flexbox ignores
+   it in favor of the identical flex-basis, so nothing changes on current browsers. */
+@utility grid-spacer-md-2 {
+  @apply md:w-2/12;
 }
 
-.MuiToggleButtonGroup-grouped:last-child {
-  border-top-right-radius: 0;
+@utility grid-spacer-md-3 {
+  @apply md:w-3/12;
 }
 
-.MuiModal-root .temporary-img-fix {
-  width: 100%;
-  height: auto;
-  max-width: 300px;
-}
-
-.chart-card .MuiContainer-maxWidthLg {
-  min-height: 200px;
-}
-
-.text-outline label {
-  display: block !important;
-  background-color: white;
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-
-.text-outline label.Mui-focused {
-  border-top: 1px solid #00bcd4;
-}
-
-.text-outline label.MuiFormLabel-filled {
-  border-top: 1px solid rgba(0, 0, 0, 0.23);
-}
-
-.image-upload-label {
-  position: absolute;
-  display: inline-block;
-  background-color: white;
-  padding: 1px 5px;
-  margin-top: -19px !important;
-}
-
-.image-upload-fullwidth > div {
-  position: static !important;
-}
-
-.image-upload-fullwidth img {
-  position: static !important;
-  width: 100% !important;
-  height: auto !important;
-}
-
-.MuiPickerStaticWrapper-content {
-  border-radius: 4px;
-}
-
-header .MuiOutlinedInput-notchedOutline {
-  top: 0;
-}
-
-/*
-  NOTE: not required anymore, as we are using the default recaptcha badge
-
-  #recaptcha-wrapper .grecaptcha-badge {
-  width: 100% !important;
-  box-shadow: none !important;
-  margin-top: 1rem;
-}
-
-#recaptcha-wrapper .grecaptcha-badge iframe {
-  width: 100% !important;
-  height: 76px !important;
-} */
-
-@layer utilities {
-  .transition-margin {
-    transition-property: margin;
-  }
-
-  .line-clamp {
-    @apply overflow-hidden;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    display: -webkit-box;
-  }
-
-  .pre-wrap {
-    white-space: pre-wrap;
-  }
-
-  /* for the empty offset columns (<Grid item md={2} className="grid-spacer-md-2" />):
-     MUI sizes grid items with flex-basis alone, and ancient WebKits (the Kindle
-     browser & co) size an EMPTY flex item from its content — 0px — so the spacer
-     vanishes and the row shifts left. An explicit percentage width is understood
-     by every engine as the fallback basis, and modern flexbox ignores it in favor
-     of the identical flex-basis, so nothing changes on current browsers. */
-  .grid-spacer-md-2 {
-    @apply md:w-2/12;
-  }
-
-  .grid-spacer-md-3 {
-    @apply md:w-3/12;
-  }
-
-  .min-h-screen-minus-header {
-    min-height: calc(100vh - 80px);
-  }
+@utility min-h-screen-minus-header {
+  min-height: calc(100vh - 80px);
 }

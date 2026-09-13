@@ -2,6 +2,9 @@
 title: "Use case one: Custom drawing"
 date: "Tue Sep 12 2023."
 imageUrl: "/assets/blog-the-floating-island-by-araiko-o.jpg"
+related:
+  - "use-case-two-add-to-home-screen"
+  - "use-case-three-off-the-charts"
 ---
 
 Have you ever had a dream so vivid, so indescribable, that words alone fail

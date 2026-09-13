@@ -8,17 +8,21 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogUseCaseOneCustomDrawing from "public/assets/blog-the-floating-island-by-araiko-o.jpg"
 import Link from "next/link"
 
-const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
+const ArticlePageUseCaseOneCustomDrawing: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -32,6 +36,7 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -64,12 +69,12 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                 <Typography variant="body1" align="right">
                   ¹
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Have you ever had a dream so vivid, so indescribable, that words alone fail to do
                   justice? With custom symbols, you have the ability to attach your own drawings or
                   images, capturing the dream&apos;s essence more precisely.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   But the possibilities don&apos;t end there. You can employ this feature to curate
                   your own unique categories. Missing the five (or six) senses in the predefined,
                   built-in symbols{" "}
@@ -80,12 +85,12 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                   <span className="lucidicon lucidicon-optical-illusion"></span>? No problem. Create
                   a custom symbol for each, and you&apos;re all set.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   This means that <em>dreamingsheep</em>&#32;isn&apos;t confined to dream journaling
                   alone. You can easily transform it into your very own travel journal, chronicling
                   your spacetime adventures.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <em>Right, let&apos;s go adventuring!</em>²
                 </Typography>
                 <hr />
@@ -102,6 +107,8 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -120,5 +127,11 @@ ArticlePageUseCaseOneCustomDrawing.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("use-case-one-custom-drawing") },
+})
 
 export default ArticlePageUseCaseOneCustomDrawing

@@ -97,7 +97,14 @@ const BlogPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
                       </Link>
                     </Grid>
                     <Grid item sm={9}>
-                      <Typography variant="body1" sx={{ ml: { xs: 0, sm: 2 } }}>
+                      {/* excerpts come from the articles' markdown and may contain a bare URL —
+                          "https://github.com/talpitoo/dreamingsheep" in the open-source post. An
+                          unbreakable 41-character word sets this flex item's min-content width, and
+                          a flex item never shrinks below that, so every card on the page grew to
+                          335px and got clipped on a 320px screen. `anywhere` is the fix and
+                          `break-word` is not: only `anywhere` counts the break opportunities it
+                          introduces towards the intrinsic min-content size. */}
+                      <Typography variant="body1" className="ml-0 sm:ml-4 [overflow-wrap:anywhere]">
                         {blog.content}
                         <Link href={`blog/${blog.href}`}>Read more</Link>
                       </Typography>

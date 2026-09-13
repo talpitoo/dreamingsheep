@@ -115,7 +115,7 @@ export const SleepChart = ({ range, custom }: SleepChartProps) => {
   return (
     <Card className="bg-white translate-x-0 translate-y-0 transform-gpu">
       <CardContent>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box className="flex justify-between items-center">
           <Typography variant="subtitle1">sleep</Typography>
           <FormControlLabel
             control={

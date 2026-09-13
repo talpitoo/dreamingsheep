@@ -6,6 +6,7 @@ import { Symbol } from "db"
 import React, { Fragment } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { Autocomplete, Box, Chip, createFilterOptions, TextField, FormLabel } from "@mui/material"
+import classnames from "src/utils/classnames"
 
 type PartialSymbol = Pick<Symbol, "name" | "code" | "id" | "icon" | "builtIn"> & {
   inputValue?: string
@@ -57,7 +58,14 @@ export const SymbolsAutocomplete = ({ allowCreate = false }: { allowCreate?: boo
             return option.id === value.id
           }}
           renderOption={(props, option) => (
-            <Box component="li" sx={{ "& > span": { mr: 2, flexShrink: 0 } }} {...props}>
+            // props carries MUI's own className for the option, so spread it FIRST and merge —
+            // otherwise the spread silently overwrites ours (sx survived here only because props
+            // has no sx to clobber it with)
+            <Box
+              component="li"
+              {...props}
+              className={classnames("[&>span]:mr-4 [&>span]:shrink-0", props.className)}
+            >
               {option.icon ? (
                 <span className={option.icon} />
               ) : (

@@ -1,3 +1,4 @@
+import classnames from "src/utils/classnames"
 import Image from "next/image"
 import { useMutation } from "src/core/rpc-client"
 import { useRouter } from "next/router"
@@ -13,6 +14,7 @@ import { FORM_ERROR, FORM_RESET, SymbolForm } from "src/symbols/components/Symbo
 import { CreateSymbol } from "src/symbols/validations"
 import { createSymbol } from "src/symbols/client"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import SheepLink from "src/core/components/SheepLink"
 import { SymbolsList } from "src/symbols/components/SymbolsList"
 import { SymbolJumpAutocomplete } from "src/symbols/components/SymbolJumpAutocomplete"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
@@ -23,6 +25,13 @@ const SymbolsPage: BlitzPage = () => {
   const [showForm, setShowForm] = useState(false)
   const [customOnly, setCustomOnly] = useState(false)
   const user = useCurrentUser()
+
+  // the sheep leads back to the start of the section — the first page, with any ?id= dropped.
+  // `id` has to count too, not just the page: a deep link from a dream opens that symbol's card
+  // for editing, and when the symbol happens to sit on page 1 the URL ends up ?id=N&page=1, so a
+  // page-only test would leave the card open with no way back. Same reset the "custom only"
+  // filter does below
+  const sheepHref = router.query.id || Number(router.query.page) > 1 ? Routes.SymbolsPage() : null
 
   function goToLastPage() {
     router.push({ query: { refetch: "true" } })
@@ -40,18 +49,20 @@ const SymbolsPage: BlitzPage = () => {
         <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} sm={6} md={4}>
           <Box
-            sx={{
-              width: { xs: "50%", sm: "100%" },
-              ...(user ? { margin: "auto" } : { margin: { xs: "0 auto -2rem", sm: "auto" } }),
-            }}
+            className={classnames(
+              "w-1/2 sm:w-full",
+              user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
+            )}
           >
-            <Image
-              src={sheepSymbols}
-              alt="symbols sheep"
-              width={384}
-              height={384}
-              className="w-full h-auto"
-            />
+            <SheepLink href={sheepHref}>
+              <Image
+                src={sheepSymbols}
+                alt="symbols sheep"
+                width={384}
+                height={384}
+                className="w-full h-auto"
+              />
+            </SheepLink>
           </Box>
         </Grid>
       </Grid>
@@ -121,9 +132,8 @@ const SymbolsPage: BlitzPage = () => {
                       variant="contained"
                       type="submit"
                       form="create-symbol"
-                      sx={{ ml: 2 }}
                       disabled={isCreateSymbolLoading}
-                      className={`w-auto transition-all ease-in-out duration-300 ${
+                      className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                         isCreateSymbolLoading ? "max-w-[87px]" : "max-w-[64px]"
                       }`}
                       endIcon={isCreateSymbolLoading && <HourglassTopIcon className="opacity-50" />}

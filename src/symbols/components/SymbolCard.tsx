@@ -1,3 +1,4 @@
+import SymbolName from "src/symbols/components/SymbolName"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/router"
@@ -46,6 +47,9 @@ const SymbolCard = (props: SymbolCardProps) => {
   const [deleteSymbolMutation] = useMutation(deleteSymbol)
   const [deleteDialogVisibility, setDeleteDialogVisibility] = useState(false)
   const [pictureFile, setPictureFile] = useState<File | null | undefined>(null)
+  // set while ?id= is what opened this card, so that clearing ?id= can close it again — and only
+  // it, never a card the user opened by hand
+  const openedByDeepLink = useRef(false)
 
   function changeEdit(e: boolean) {
     onChangeEdit?.(e ? symbol.id : null)
@@ -55,8 +59,16 @@ const SymbolCard = (props: SymbolCardProps) => {
   useEffect(() => {
     const id = Number(router.query.id) || undefined
     if (id && id === symbol.id) {
+      openedByDeepLink.current = true
       changeEdit(true)
       symbolRef?.current?.scrollIntoView({ behavior: "smooth" })
+    } else if (openedByDeepLink.current) {
+      // the deep link is gone (the sheep, or the "custom only" filter, reset the section). On any
+      // other page the card would unmount and take its state with it, but a symbol that sits on
+      // page 1 stays mounted — and this effect only ever opened a card, so it stayed open with
+      // nothing left in the URL to explain why
+      openedByDeepLink.current = false
+      changeEdit(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol.id, router.query.id])
@@ -85,17 +97,12 @@ const SymbolCard = (props: SymbolCardProps) => {
             )
           }
           action={
-            <Typography
-              variant="body1"
-              sx={{ fontSize: "1.875rem", marginRight: "0.5rem" }}
-              className="text-gray-400"
-            >
+            <Typography variant="body1" className="text-gray-400 text-[1.875rem] mr-2">
               {Number(symbol.occurrences)}
             </Typography>
           }
-          title={symbol.name}
-          sx={{ paddingBottom: "0" }}
-          className="text-2xl"
+          title={<SymbolName symbol={symbol} />}
+          className="text-2xl pb-0"
         />
         {isEdit && (
           <CardContent>
@@ -119,7 +126,7 @@ const SymbolCard = (props: SymbolCardProps) => {
                 onAfterUpdate={onAfterUpdate}
               />
 
-              <Typography variant="body1" sx={{ mt: 2 }}>
+              <Typography variant="body1" className="mt-4">
                 {Number(symbol.occurrences)}{" "}
                 {symbol.occurrences === 1 ? "occurrence" : "occurrences"}
               </Typography>
@@ -145,15 +152,7 @@ const SymbolCard = (props: SymbolCardProps) => {
           </CardContent>
         )}
         <CardActions
-          className={`p-4 flex-column ${isEdit ? "pt-0" : ""}`}
-          sx={{
-            ...(isEdit && {
-              display: { xs: "block", sm: "flex" },
-            }),
-            ...(!isEdit && {
-              display: "flex",
-            }),
-          }}
+          className={classnames("p-4 flex-column", isEdit ? "pt-0 block sm:flex" : "flex")}
         >
           <Box
             className={`flex-row flex-wrap grow text-gray-400 overflow-hidden truncate ${
@@ -170,14 +169,14 @@ const SymbolCard = (props: SymbolCardProps) => {
             {!symbol.builtIn && (
               <IconButton
                 color="primary"
-                sx={{ mr: "auto", ml: { xs: 0, md: 2 } }}
+                className="mr-auto ml-0 md:ml-4"
                 onClick={() => setDeleteDialogVisibility(true)}
               >
                 <span className="lucidicon-trash"></span>
               </IconButton>
             )}
             {!isEdit && (
-              <IconButton color="primary" onClick={() => changeEdit(true)} sx={{ ml: 2 }}>
+              <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
                 <span className="lucidicon-pencil"></span>
               </IconButton>
             )}
@@ -192,9 +191,8 @@ const SymbolCard = (props: SymbolCardProps) => {
                     variant="contained"
                     type="submit"
                     form={"update-symbol_" + symbol.id}
-                    sx={{ ml: 2 }}
                     disabled={isUpdateSymbolLoading}
-                    className={`w-auto transition-all ease-in-out duration-300 ${
+                    className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                       isUpdateSymbolLoading ? "max-w-[113px]" : "max-w-[89px]"
                     }`}
                     endIcon={isUpdateSymbolLoading && <HourglassTopIcon className="opacity-50" />}

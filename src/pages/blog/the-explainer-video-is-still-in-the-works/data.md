@@ -2,6 +2,9 @@
 title: "The explainer video is still in the works"
 date: "Sun Aug 16 2026."
 imageUrl: "/assets/FayeWong-Dreams-TheCranberriesCover.png"
+related:
+  - "use-case-three-off-the-charts"
+  - "dreamingsheep-is-now-open-source"
 ---
 
 For years a footnote on the landing page promised an explainer video, and for just

@@ -240,9 +240,11 @@ export const ExportDreams = () => {
             )}
           </div>
         </DialogContent>
-        <DialogActions sx={{ mx: 2, mb: 2 }}>
+        <DialogActions className="mx-4 mb-4">
           <Button onClick={() => setDownloadModalVisibility(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => download()} sx={{ ml: 2 }}>
+          {/* no ml-*: DialogActions' sibling rule is more specific than the sx that sat here,
+              so its 8px gap is what has always rendered */}
+          <Button variant="contained" onClick={() => download()}>
             Download
           </Button>
         </DialogActions>

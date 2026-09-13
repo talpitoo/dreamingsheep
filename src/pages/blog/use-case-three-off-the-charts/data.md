@@ -2,6 +2,9 @@
 title: "Use case three: Off the charts"
 date: "Thu Jul 2 2026."
 imageUrl: "/assets/screenshot-use-case-three-off-the-charts.png"
+related:
+  - "use-case-one-custom-drawing"
+  - "use-case-two-add-to-home-screen"
 ---
 
 Remember when we told you to keep an eye on the Stats page as those charts

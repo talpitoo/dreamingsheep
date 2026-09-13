@@ -24,12 +24,7 @@ const ResetPasswordPage: BlitzPage = () => {
       <Grid container>
         <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} sm={6} md={4}>
-          <Box
-            sx={{
-              width: { xs: "50%", sm: "100%" },
-              margin: { xs: "0 auto -2rem", sm: "auto" },
-            }}
-          >
+          <Box className="w-1/2 sm:w-full mt-0 mx-auto -mb-8 sm:m-auto">
             <Image
               src={sheepNewPassword}
               alt="new password sheep"
@@ -48,7 +43,7 @@ const ResetPasswordPage: BlitzPage = () => {
             className="w-full h-auto max-w-[325px]"
           />
           <Card className="text-left">
-            <CardHeader title="Set a new password" sx={{ paddingBottom: "0" }} component="h1" />
+            <CardHeader title="Set a new password" className="pb-0" component="h1" />
             <CardContent>
               {isSuccess && (
                 <div>
@@ -89,7 +84,7 @@ const ResetPasswordPage: BlitzPage = () => {
                     placeholder="New password"
                     type="password"
                     // className="rounded-top"
-                    inputProps={{ sx: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } }}
+                    inputProps={{ className: "rounded-b-none" }}
                     inputLabelProps={{ shrink: true, disableAnimation: true }}
                     fullWidth
                     className="translate-x-0 translate-y-0 transform-gpu"
@@ -100,9 +95,7 @@ const ResetPasswordPage: BlitzPage = () => {
                     placeholder="Confirm new password"
                     type="password"
                     // className="rounded-bottom"
-                    inputProps={{
-                      sx: { borderTopLeftRadius: 0, borderTopRightRadius: 0, marginTop: "-1px" },
-                    }}
+                    inputProps={{ className: "rounded-t-none -mt-px" }}
                     inputLabelProps={{ shrink: true, disableAnimation: true }}
                     fullWidth
                     className="translate-x-0 translate-y-0 transform-gpu"

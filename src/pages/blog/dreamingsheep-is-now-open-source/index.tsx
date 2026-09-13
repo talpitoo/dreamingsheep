@@ -8,17 +8,21 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogMatrixSheep from "public/assets/sheep-matrix.jpg"
 import Link from "next/link"
 
-const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
+const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -32,6 +36,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}
@@ -65,13 +70,13 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   height={600}
                   className="w-full h-auto"
                 />
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {" "}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Long time no sleep,
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   After much deliberation, <em>dreamingsheep</em> has officially taken the red pill¹
                   and gone open source! The code now lives at{" "}
                   <Link href="https://github.com/talpitoo/dreamingsheep">
@@ -79,7 +84,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   </Link>{" "}
                   for everyone to read, study, and contribute to.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   <strong>Why?</strong> Because dreams are more fun when shared. Your actual dreams
                   remain yours alone (see the{" "}
                   <Link href={Routes.PrivacyPolicyPage()}>Privacy Policy</Link>). This is a
@@ -98,7 +103,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   &lsquo;astral&rsquo; cloud. Well, the cloud part is happening — minus the
                   sentience (for now).
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Here&apos;s what changes (and what doesn&apos;t):
                 </Typography>
                 <Typography variant="body1" component="div">
@@ -122,7 +127,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                     </li>
                   </ul>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   If you&apos;re a developer who likes dreams (or a dreamer who likes code), have a
                   look at the{" "}
                   <Link href="https://github.com/talpitoo/dreamingsheep/issues">open issues</Link>,{" "}
@@ -132,17 +137,17 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                   </Link>{" "}
                   for what&apos;s coming and where help is wanted.
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   A small disclaimer: the maintainer (
                   <Link href="https://github.com/talpitoo">@talpitoo</Link>) is primarily a frontend
                   developer, so backend PRs may take a little longer to review. Be patient, document
                   well, and we&apos;ll get there together.
                 </Typography>
 
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Now go log a dream. Or fix a bug. Or both. Sweet dreams!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   Meh!
                 </Typography>
                 <hr />
@@ -154,6 +159,8 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -172,5 +179,11 @@ ArticlePageDreamingsheepIsNowOpenSource.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("dreamingsheep-is-now-open-source") },
+})
 
 export default ArticlePageDreamingsheepIsNowOpenSource

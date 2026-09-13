@@ -19,6 +19,8 @@ import AuthenticationContainer from "src/core/components/AuthenticationContainer
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { Fragment, Suspense } from "react"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs } from "src/pages/api/blog/get-blogs"
 
 // structured data for search engines — kept to plain facts, no review/rating fluff
 const JSON_LD = {
@@ -41,6 +43,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
   lastMonthLucidCount,
   topSymbols,
   unicornDreamsCount,
+  relatedBlogs,
 }) => {
   const router = useRouter()
 
@@ -118,7 +121,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
           <Grid item md={8}>
             <Card className="bg-mui-secondary-light">
               <CardContent>
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" className="mb-4">
                   {lastMonthDreamsCount < 1 && (
                     <>
                       No dreams last month{" "}
@@ -154,12 +157,15 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 {/* <Box sx={{ textAlign: "center", mb: 2 }}>
                 <Image src={globalSymbolsExample} alt="chart" width="192" height="174" />
               </Box> */}
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  Join us as we watch Replicants³ jump over the fence (and transform into Humans).
+                <Typography variant="body1" className="mb-4">
+                  <Link href={Routes.SignupPage()} passHref={true}>
+                    Join us
+                  </Link>
+                  &#32;as we watch Replicants³ jump over the fence (and transform into Humans).
                   Let&apos;s dream a better⁴ world together!
                   {/* <span className="lucidicon lucidicon-shine-2"></span> */}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2, textAlign: "center" }}>
+                <Typography variant="body1" className="mb-4 text-center">
                   <em>
                     You may say that I&apos;m a dreamer
                     <br />
@@ -170,7 +176,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                     and the world will be as one.⁵
                   </em>
                 </Typography>
-                <Box sx={{ textAlign: "center" }}>
+                <Box className="text-center">
                   <Image
                     src={sheepDream}
                     alt="dream sheep"
@@ -196,6 +202,8 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={relatedBlogs} />
           </Grid>
         </Grid>
       </Container>
@@ -260,6 +268,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       lastMonthLucidCount,
       topSymbols,
       unicornDreamsCount,
+      // no article to be "related" to out here, so this is simply the two freshest posts
+      relatedBlogs: getRelatedBlogs(),
     },
   }
 }
