@@ -161,6 +161,16 @@ npx playwright test -c test/visual/playwright.config.ts > /tmp/visual.log 2>&1; 
 - **Settling**: network idle, fonts loaded, no loading spiral, 700 ms, two animation frames.
 - `maxDiffPixels: 0` — nothing is "close enough".
 
+**What is _not_ pinned: the seeded data itself.** The baseline is a photograph of _your_
+database. Add a symbol or a dream through the UI while smoke-testing and the shots that render a
+symbol list move — `symbols-new-form`, `symbols-card-edit`, `settings-edit-symbols`,
+`search-filters-open`, `stats-filters-panel-open` — because a new card pushes the grid down. The
+landing page is worse than that: its counters come from `getServerSideProps` on the **real server
+clock**, not the frozen page clock, so a dream logged today flips the whole paragraph from "No
+dreams last month" to "Last month we've collected N dreams…", and it flips back 31 days later on
+its own. Masking the `<strong>` counters hides the numbers, not the branch. Both are diffs of
+content, not of CSS: confirm that is all they are, then re-baseline those shots by name.
+
 **What is _not_ pinned: the order Postgres hands back a dream's symbols.** `getDreams` includes
 `symbols: true` with no `orderBy`, so the chips under a dream come back in heap order — and
 Postgres moves a row to the end of the heap when it is UPDATEd. Edit one symbol (attach a picture,
