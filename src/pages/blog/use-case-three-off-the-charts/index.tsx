@@ -76,10 +76,9 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   There is a new <strong>Advanced charting</strong> switch waiting for you in{" "}
-                  <Link href={Routes.SettingsPage()}>&#47;settings</Link>. Flip it, wander over to{" "}
-                  <Link href={Routes.StatsPage()}>&#47;stats</Link>, and your dream garden turns
-                  into a criss-cross laboratory: type a keyword, toggle a mood, handpick a symbol —
-                  and every chart on the page redraws around your question.
+                  <em>&#47;settings</em>. Flip it, wander over to <em>&#47;stats</em>, and your
+                  dream garden turns into a criss-cross laboratory: type a keyword, toggle a mood,
+                  handpick a symbol — and every chart on the page redraws around your question.
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   What kind of questions, you ask? The kind only you can ask about your own dreams:
@@ -107,11 +106,10 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                 <Typography variant="body1" className="mb-4">
                   Speaking of sleep: remember the <em>&quot;(future-feature)&quot;</em> note next to
                   the bedtime/wake-up opt-in on the Settings page? The future has officially
-                  arrived. Track your bedtime and wake-up time on the{" "}
-                  <Link href={Routes.DreamsPage()}>&#47;dreams</Link>&#32;page and Stats greets you
-                  with a full-width sleep chart — bedtime at the bottom, wake-up at the top, your
-                  night colored in between. Nights you don&apos;t track simply stay blank; the sheep
-                  doesn&apos;t judge².
+                  arrived. Track your bedtime and wake-up time on the <em>&#47;dreams</em>&#32;page
+                  and Stats greets you with a full-width sleep chart — bedtime at the bottom,
+                  wake-up at the top, your night colored in between. Nights you don&apos;t track
+                  simply stay blank; the sheep doesn&apos;t judge².
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   And in case you are wondering: no, we still won&apos;t tell you what any of it{" "}

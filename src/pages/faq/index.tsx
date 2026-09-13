@@ -275,9 +275,8 @@ const FaqPage: BlitzPage = () => {
               <CardHeader title="Can i export my dream journal?" className="pb-0" component="h2" />
               <CardContent>
                 <Typography variant="body1">
-                  Of course, your dreams are yours. Head to the{" "}
-                  <Link href={Routes.SettingsPage()}>Settings</Link> page and download your dreams,
-                  symbols and stats as a PDF, ready to print.
+                  Of course, your dreams are yours. Head to the Settings page and download your
+                  dreams, symbols and stats as a PDF, ready to print.
                 </Typography>
               </CardContent>
             </Card>
