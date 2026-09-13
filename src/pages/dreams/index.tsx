@@ -13,6 +13,7 @@ import { DateTime } from "luxon"
 import titleDreams from "public/assets/title-dreams.png"
 import sheepDreams from "public/assets/sheep-dreamingsheep.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import SheepLink from "src/core/components/SheepLink"
 import {
   Button,
   Card,
@@ -183,12 +184,20 @@ const DreamsPage: BlitzPage = () => {
   )
   const [showForm, setShowForm] = useState(false)
 
+  // the sheep leads back to today, the journal's home. Null while you are already there — which
+  // includes a bare /dreams, since the effect below is about to put today in the URL anyway
+  const todayParam = getDateTime(undefined).toFormat("yyyy-MM-dd")
+  const sheepHref =
+    !router.query.date || router.query.date === todayParam
+      ? null
+      : Routes.DreamsPage({ date: todayParam })
+
   // set default date query
   useEffect(() => {
     // `router.isReady` matters: /dreams is statically optimized, so the first client render gets
     // an EMPTY router.query and this effect used to fire before the URL's own ?date= hydrated —
-    // pushing today over it. Any link to a past day (a bookmark, a shared URL, the browser's
-    // back button) bounced straight back to today.
+    // pushing today over it. Any link to a past day (the sheep's, a bookmark, a shared URL)
+    // bounced straight back to today.
     if (router.isReady && !router.query.date) {
       router.push(
         Routes.DreamsPage({
@@ -213,13 +222,15 @@ const DreamsPage: BlitzPage = () => {
                 user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
               )}
             >
-              <Image
-                src={sheepDreams}
-                alt="dreams sheep"
-                width={384}
-                height={384}
-                className="w-full h-auto"
-              />
+              <SheepLink href={sheepHref}>
+                <Image
+                  src={sheepDreams}
+                  alt="dreams sheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              </SheepLink>
             </Box>
           </Grid>
           <Grid

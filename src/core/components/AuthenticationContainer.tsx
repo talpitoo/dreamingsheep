@@ -6,7 +6,7 @@ import { Fragment, ReactNode } from "react"
 import { useSession } from "src/auth/client"
 import { useRouter } from "next/router"
 import { Routes } from "src/routes"
-import Link from "next/link"
+import SheepLink, { SheepLinkProps } from "./SheepLink"
 import CookieNotice from "./CookieNotice"
 import classnames from "src/utils/classnames"
 
@@ -17,12 +17,17 @@ interface AuthenticationContainerProps {
   headerComponent?: ReactNode
   // same idea, below the submit button — the landing page puts the swiper's demo button there
   footerComponent?: ReactNode
+  // where the sheep leads: the landing page everywhere except a blog article, which sends you
+  // to the blog index instead — a reader who wants the next article should not have to scroll
+  // to the footer for it
+  sheepHref?: SheepLinkProps["href"]
 }
 
 export const AuthenticationContainer = ({
   imageComponent,
   headerComponent,
   footerComponent,
+  sheepHref = "/",
 }: AuthenticationContainerProps) => {
   const session = useSession()
   const router = useRouter()
@@ -38,7 +43,7 @@ export const AuthenticationContainer = ({
             session.userId ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
           )}
         >
-          <Link href="/">{imageComponent}</Link>
+          <SheepLink href={sheepHref}>{imageComponent}</SheepLink>
         </Box>
       </Grid>
       <Grid item sm={6} md={4} className="text-center w-full">

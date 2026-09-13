@@ -8,6 +8,7 @@ import blogBrainstorming from "public/assets/blog-brainstorming.png"
 import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
+import { Routes } from "src/routes"
 import { AppPage as BlitzPage } from "src/core/types"
 import RelatedPosts from "src/core/components/RelatedPosts"
 import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
@@ -20,6 +21,7 @@ const ArticlePageTheBrainstorming: BlitzPage<{ related: Blog[] }> = ({ related }
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -33,6 +35,7 @@ const ArticlePageTheBrainstorming: BlitzPage<{ related: Blog[] }> = ({ related }
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}

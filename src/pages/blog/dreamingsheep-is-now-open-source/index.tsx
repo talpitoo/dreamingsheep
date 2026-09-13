@@ -22,6 +22,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage<{ related: Blog[] }> = 
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -35,6 +36,7 @@ const ArticlePageDreamingsheepIsNowOpenSource: BlitzPage<{ related: Blog[] }> = 
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}

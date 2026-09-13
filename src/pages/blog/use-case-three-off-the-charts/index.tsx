@@ -23,6 +23,7 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage<{ related: Blog[] }> = ({ r
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -36,6 +37,7 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage<{ related: Blog[] }> = ({ r
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}

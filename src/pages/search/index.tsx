@@ -17,6 +17,7 @@ import { DreamList } from "src/dreams/components/DreamList"
 import { DreamSearchForm } from "src/dreams/components/DreamSearchForm"
 import { getSymbols } from "src/symbols/client"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import SheepLink from "src/core/components/SheepLink"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import {
   buildDreamSearchWhere,
@@ -65,6 +66,13 @@ const SearchPage: BlitzPage = () => {
       },
     },
   })
+  // the sheep leads back to the first page of THESE results: every filter kept, `page` dropped.
+  // Null on page 1, where it would only reload what you are looking at
+  const sheepHref = useMemo(() => {
+    const { page, ...firstPage } = router.query
+    return Number(page) > 1 ? { pathname: Routes.SearchPage().pathname, query: firstPage } : null
+  }, [router.query])
+
   const initialValues = useMemo(() => {
     const values = parseDreamSearchQuery(router.query)
     return {
@@ -115,13 +123,15 @@ const SearchPage: BlitzPage = () => {
                 user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
               )}
             >
-              <Image
-                src={sheepSearch}
-                alt="dreams sheep"
-                width={384}
-                height={384}
-                className="w-full h-auto"
-              />
+              <SheepLink href={sheepHref}>
+                <Image
+                  src={sheepSearch}
+                  alt="dreams sheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              </SheepLink>
             </Box>
           </Grid>
         </Grid>

@@ -7,6 +7,7 @@ import titleBlog from "public/assets/title-blog.png"
 import blogFayeWongDreams from "public/assets/FayeWong-Dreams-TheCranberriesCover.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
+import { Routes } from "src/routes"
 import { AppPage as BlitzPage } from "src/core/types"
 import RelatedPosts from "src/core/components/RelatedPosts"
 import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
@@ -23,6 +24,7 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage<{ related: Blog[]
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -36,6 +38,7 @@ const ArticlePageTheExplainerVideoIsStillInTheWorks: BlitzPage<{ related: Blog[]
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}

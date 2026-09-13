@@ -24,6 +24,7 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage<{ related: Blog
         <Suspense
           fallback={
             <SheepGridContainer
+              sheepHref={Routes.BlogPage()}
               imageComponent={
                 <Image
                   src={sheepRecall}
@@ -37,6 +38,7 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage<{ related: Blog
           }
         >
           <AuthenticationContainer
+            sheepHref={Routes.BlogPage()}
             imageComponent={
               <Image
                 src={sheepRecall}

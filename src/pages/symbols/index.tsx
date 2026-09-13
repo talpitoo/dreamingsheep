@@ -14,6 +14,7 @@ import { FORM_ERROR, FORM_RESET, SymbolForm } from "src/symbols/components/Symbo
 import { CreateSymbol } from "src/symbols/validations"
 import { createSymbol } from "src/symbols/client"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import SheepLink from "src/core/components/SheepLink"
 import { SymbolsList } from "src/symbols/components/SymbolsList"
 import { SymbolJumpAutocomplete } from "src/symbols/components/SymbolJumpAutocomplete"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
@@ -24,6 +25,10 @@ const SymbolsPage: BlitzPage = () => {
   const [showForm, setShowForm] = useState(false)
   const [customOnly, setCustomOnly] = useState(false)
   const user = useCurrentUser()
+
+  // the sheep leads back to the first page of symbols; a bare /symbols also drops a stale ?id
+  // deep link, the same reset the "custom only" filter does below
+  const sheepHref = Number(router.query.page) > 1 ? Routes.SymbolsPage() : null
 
   function goToLastPage() {
     router.push({ query: { refetch: "true" } })
@@ -46,13 +51,15 @@ const SymbolsPage: BlitzPage = () => {
               user ? "m-auto" : "mt-0 mx-auto -mb-8 sm:m-auto"
             )}
           >
-            <Image
-              src={sheepSymbols}
-              alt="symbols sheep"
-              width={384}
-              height={384}
-              className="w-full h-auto"
-            />
+            <SheepLink href={sheepHref}>
+              <Image
+                src={sheepSymbols}
+                alt="symbols sheep"
+                width={384}
+                height={384}
+                className="w-full h-auto"
+              />
+            </SheepLink>
           </Box>
         </Grid>
       </Grid>
