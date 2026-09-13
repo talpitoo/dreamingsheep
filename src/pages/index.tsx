@@ -155,7 +155,10 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 <Image src={globalSymbolsExample} alt="chart" width="192" height="174" />
               </Box> */}
                 <Typography variant="body1" className="mb-4">
-                  Join us as we watch Replicants³ jump over the fence (and transform into Humans).
+                  <Link href={Routes.SignupPage()} passHref={true}>
+                    Join us
+                  </Link>
+                  &#32;as we watch Replicants³ jump over the fence (and transform into Humans).
                   Let&apos;s dream a better⁴ world together!
                   {/* <span className="lucidicon lucidicon-shine-2"></span> */}
                 </Typography>
