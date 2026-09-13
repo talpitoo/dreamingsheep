@@ -8,11 +8,14 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogDna from "public/assets/blog-dna.gif"
 import Link from "next/link"
 
-const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
+const ArticlePageDreamingsheepV101Released: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
@@ -118,6 +121,8 @@ const ArticlePageDreamingsheepV101Released: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -136,5 +141,11 @@ ArticlePageDreamingsheepV101Released.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("dreamingsheep-v1-0-1-released") },
+})
 
 export default ArticlePageDreamingsheepV101Released

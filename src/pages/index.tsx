@@ -19,6 +19,8 @@ import AuthenticationContainer from "src/core/components/AuthenticationContainer
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { Fragment, Suspense } from "react"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs } from "src/pages/api/blog/get-blogs"
 
 // structured data for search engines — kept to plain facts, no review/rating fluff
 const JSON_LD = {
@@ -41,6 +43,7 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
   lastMonthLucidCount,
   topSymbols,
   unicornDreamsCount,
+  relatedBlogs,
 }) => {
   const router = useRouter()
 
@@ -199,6 +202,8 @@ const Home: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={relatedBlogs} />
           </Grid>
         </Grid>
       </Container>
@@ -263,6 +268,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       lastMonthLucidCount,
       topSymbols,
       unicornDreamsCount,
+      // no article to be "related" to out here, so this is simply the two freshest posts
+      relatedBlogs: getRelatedBlogs(),
     },
   }
 }

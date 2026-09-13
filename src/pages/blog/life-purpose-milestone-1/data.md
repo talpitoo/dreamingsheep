@@ -2,6 +2,9 @@
 title: "Life purpose, milestone #1"
 date: "Wed Jan 4 2023."
 imageUrl: "https://images.tothtamas.tt/weblog/iceland/toth-tamas-iceland-11.jpg"
+related:
+  - "backstory-the-beginnings"
+  - "the-brainstorming"
 ---
 
 After more than 20+ years of hard procrastination and casual work (not your typical

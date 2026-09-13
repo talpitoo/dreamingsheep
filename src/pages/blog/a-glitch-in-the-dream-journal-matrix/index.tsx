@@ -8,11 +8,14 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogMaintenance from "public/assets/blog-sheep-bliss-by-lucifer-enterprises.jpg"
 import Link from "next/link"
 
-const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
+const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
@@ -98,6 +101,8 @@ const ArticlePageAGlitchInTheDreamJournalMatrix: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -116,5 +121,11 @@ ArticlePageAGlitchInTheDreamJournalMatrix.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("a-glitch-in-the-dream-journal-matrix") },
+})
 
 export default ArticlePageAGlitchInTheDreamJournalMatrix

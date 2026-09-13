@@ -8,11 +8,14 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogUseCaseOneCustomDrawing from "public/assets/blog-the-floating-island-by-araiko-o.jpg"
 import Link from "next/link"
 
-const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
+const ArticlePageUseCaseOneCustomDrawing: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
@@ -102,6 +105,8 @@ const ArticlePageUseCaseOneCustomDrawing: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -120,5 +125,11 @@ ArticlePageUseCaseOneCustomDrawing.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("use-case-one-custom-drawing") },
+})
 
 export default ArticlePageUseCaseOneCustomDrawing

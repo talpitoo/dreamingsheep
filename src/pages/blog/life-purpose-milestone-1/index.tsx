@@ -11,8 +11,11 @@ import AuthenticationContainer from "src/core/components/AuthenticationContainer
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 
-const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
+const ArticlePageLifePurposeMilestoneOne: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
@@ -166,6 +169,8 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -184,5 +189,11 @@ ArticlePageLifePurposeMilestoneOne.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("life-purpose-milestone-1") },
+})
 
 export default ArticlePageLifePurposeMilestoneOne

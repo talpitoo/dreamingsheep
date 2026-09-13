@@ -2,6 +2,9 @@
 title: "Use case two: Add to home screen"
 date: "Sun Oct 22 2023."
 imageUrl: "/assets/blog-add-to-home-screen.jpg"
+related:
+  - "use-case-one-custom-drawing"
+  - "use-case-three-off-the-charts"
 ---
 
 You can add dreamingsheep to your home screen and use it just like an app,

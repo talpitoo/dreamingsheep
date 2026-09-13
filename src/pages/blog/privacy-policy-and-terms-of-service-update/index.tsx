@@ -8,11 +8,16 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import sheepPrivacy from "public/assets/sheep-privacy.png"
 import Link from "next/link"
 
-const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
+const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage<{ related: Blog[] }> = ({
+  related,
+}) => {
   return (
     <Fragment>
       <Container>
@@ -114,6 +119,8 @@ const ArticlePagePrivacyPolicyAndTermsOfServiceUpdate: BlitzPage = () => {
                 <Typography variant="body1">Meh!</Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -132,5 +139,11 @@ ArticlePagePrivacyPolicyAndTermsOfServiceUpdate.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("privacy-policy-and-terms-of-service-update") },
+})
 
 export default ArticlePagePrivacyPolicyAndTermsOfServiceUpdate

@@ -67,7 +67,10 @@ until explicitly started.
   `contact`, `core` (shared components/layouts/helpers).
 - DB: `db/schema.prisma`, migrations in `db/migrations/`, seeds via `npm run db:seed`.
 - Blog articles and FAQ are **hardcoded TSX pages** (no CMS/markdown), e.g.
-  `src/pages/blog/<slug>/index.tsx`.
+  `src/pages/blog/<slug>/index.tsx`; each article folder also carries a `data.md`
+  whose frontmatter feeds the blog index card (title/date/image/excerpt) and the
+  `related:` slug list behind "More from the blog" — that list is the whole
+  editing interface for cross-linking posts (`getRelatedBlogs`, guard-tested).
 - Icon font: "lucidicon" CSS classes (`lucidicon-eye`, `lucidicon-unicorn`, …);
   most icons originally from thenounproject.com.
 - Prettier: no semicolons, printWidth 100. Husky + lint-staged on commit.

@@ -8,12 +8,15 @@ import titleBlog from "public/assets/title-blog.png"
 import AuthenticationContainer from "src/core/components/AuthenticationContainer"
 import SheepGridContainer from "src/core/components/SheepGridContainer"
 import { AppPage as BlitzPage } from "src/core/types"
+import RelatedPosts from "src/core/components/RelatedPosts"
+import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
+import type { GetStaticProps } from "next"
 import Image from "next/image"
 import sheepStats from "public/assets/sheep-stats.png"
 import screenshotUseCaseThree from "public/assets/screenshot-use-case-three-off-the-charts.png"
 import Link from "next/link"
 
-const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
+const ArticlePageUseCaseThreeOffTheCharts: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
     <Fragment>
       <Container>
@@ -138,6 +141,8 @@ const ArticlePageUseCaseThreeOffTheCharts: BlitzPage = () => {
                 </Typography>
               </CardContent>
             </Card>
+
+            <RelatedPosts blogs={related} />
           </Grid>
         </Grid>
       </Container>
@@ -156,5 +161,11 @@ ArticlePageUseCaseThreeOffTheCharts.getLayout = (page) => (
     {page}
   </Layout>
 )
+
+// the related posts are read from the articles' data.md at BUILD time, so these pages
+// stay the prerendered .html they have always been (see getRelatedBlogs)
+export const getStaticProps: GetStaticProps = async () => ({
+  props: { related: getRelatedBlogs("use-case-three-off-the-charts") },
+})
 
 export default ArticlePageUseCaseThreeOffTheCharts
