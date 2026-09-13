@@ -33,20 +33,30 @@ export const SwiperDemoButton = () => (
     variant="outlined"
     fullWidth
     href="#demo"
-    onClick={() => {
-      // The href does the work — this only tidies up after it. Without JS, or before
-      // hydration, the anchor still jumps and the URL keeps its #demo, which is the
-      // correct fallback. With JS, drop the hash so a URL copied from the address bar
-      // after pressing demo is the plain landing page rather than one that scrolls a
-      // stranger straight past the sign-up form.
+    onClick={(event) => {
+      // Without JS, or before hydration, the href does the work: the anchor jumps and the URL
+      // keeps its #demo, which is the correct fallback. With JS we scroll to the collage
+      // ourselves and never let the hash be written, so a URL copied from the address bar after
+      // pressing demo is the plain landing page rather than one that scrolls a stranger straight
+      // past the sign-up form.
       //
-      // replaceState (not router.replace) keeps this out of Next's router entirely: no
-      // re-render, no scroll restoration, no history entry. Deferred a tick so the
-      // browser has committed the hash and started its smooth scroll first — removing
-      // the hash does not interrupt a scroll already under way.
-      window.setTimeout(() => {
-        window.history.replaceState(null, "", window.location.pathname + window.location.search)
-      }, 0)
+      // Scrolling instead of letting the anchor jump and then calling
+      // `history.replaceState` is what makes this work in every browser: Firefox commits the
+      // fragment AFTER a setTimeout(0) callback runs, so stripping the hash on a timer put it
+      // straight back (Chrome's ordering happened to be the other way round). Nothing to strip
+      // now, so nothing to race.
+      //
+      // Modified clicks are left to the browser — ctrl/cmd-click still opens #demo in a new tab.
+      if (event.defaultPrevented || event.button !== 0) return
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+      const demo = document.getElementById("demo")
+      if (!demo) return
+
+      event.preventDefault()
+      // no `behavior` option on purpose: that honours `html { scroll-behavior: smooth }` from
+      // index.css, and any reduced-motion guard the CSS may grow, instead of forcing smooth
+      demo.scrollIntoView()
     }}
   >
     demo²
