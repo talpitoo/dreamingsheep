@@ -40,8 +40,16 @@ keeps working during rollout.
 Production context (details in the maintainer's private devops cheatsheet):
 Postgres runs **locally on the EC2 box** (db name `dreamingsheep`, user
 `postgres`, local trust auth), app config lives in **`.env.local`**, and a weekly
-`~/backup.sh` cron (Mondays) already dumps the DB into `~/backup/` with 7-day
-rotation.
+`~/backup.sh` cron (Mondays) dumps the DB into `~/backup/`. The box runs its own
+standalone copy of that script; [backup.sh](backup.sh) here is the **reference
+copy** — so the logic is reviewable and survives the box, not so it deploys.
+Nothing syncs the two: change one and `cp` it across by hand.
+
+It keeps 90 days of dumps (`find -mtime +89 -delete`) to match what the privacy
+policy promises, and only rotates once the new dump is verified complete — a
+truncated dump plus blind rotation would wipe every healthy backup. Rotation was
+commented out until 2026-09, so `~/backup/` had accumulated every dump since
+2023; `-mtime` expires by AGE, never by count.
 
 On the EC2 box, before deploying a release that contains a new migration:
 

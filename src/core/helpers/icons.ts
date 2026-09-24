@@ -58,7 +58,7 @@ export const TYPE_ICONS = [
   },
   {
     value: DreamType.MEDITATION,
-    label: "mediation",
+    label: "meditation",
     icon: "lucidicon-meditation",
   },
 ]
