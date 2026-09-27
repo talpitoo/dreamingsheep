@@ -5,6 +5,7 @@ import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import { useSession } from "src/auth/client"
 import { getDreams } from "src/dreams/client"
 import { CreateDream } from "src/dreams/validations"
 import { createDream } from "src/dreams/client"
@@ -23,6 +24,7 @@ import {
   Grid,
   TextField,
   Box,
+  Snackbar,
 } from "@mui/material"
 import { PickersDayProps, StaticDatePicker } from "@mui/x-date-pickers"
 import { getDreamsByMonth } from "src/dreams/client"
@@ -34,6 +36,9 @@ import { DreamTime, DreamType, RecallTime } from "db"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 import classnames from "src/utils/classnames"
+import { isBrowserOnline } from "src/core/offline/onlineStatus"
+import { enqueueDream, OutboxWriteError } from "src/dreams/offline/outbox"
+import { clearPersistedQueries } from "src/core/offline/persistedQueries"
 
 function getDateTime(date: string | string[] | undefined): DateTime {
   if (typeof date === "string") {
@@ -183,6 +188,8 @@ const DreamsPage: BlitzPage = () => {
     createDreamFormInitialValues
   )
   const [showForm, setShowForm] = useState(false)
+  const session = useSession()
+  const [offlineSnackbar, setOfflineSnackbar] = useState(false)
 
   // the sheep leads back to today, the journal's home. Null while you are already there — which
   // includes a bare /dreams, since the effect below is about to put today in the URL anyway
@@ -208,6 +215,27 @@ const DreamsPage: BlitzPage = () => {
       )
     }
   }, [router])
+
+  const queueOffline = (values: any) => {
+    if (!session.userId) return { [FORM_ERROR]: "please log in to save dreams" }
+    try {
+      try {
+        enqueueDream(window.localStorage, session.userId, values)
+      } catch (error) {
+        if (!(error instanceof OutboxWriteError)) throw error
+        // the dream outranks the offline read cache: free its space and try once more
+        clearPersistedQueries(window.localStorage, session.userId)
+        enqueueDream(window.localStorage, session.userId, values)
+      }
+    } catch (error) {
+      if (error instanceof OutboxWriteError)
+        return { [FORM_ERROR]: "couldn't save on this device — storage seems unavailable" }
+      throw error
+    }
+    setShowForm(false)
+    setOfflineSnackbar(true)
+    return { [FORM_RESET]: true }
+  }
 
   return (
     <Fragment>
@@ -296,46 +324,47 @@ const DreamsPage: BlitzPage = () => {
                       schema={CreateDream}
                       initialValues={createDreamFormInitialValues}
                       onSubmit={async (values) => {
+                        const nowDate = DateTime.now()
+                          .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+                          .toISO()
+
+                        // add the current hours/minutes/seconds... to currentDate so that the difference is exactly 24 hours
+                        const currentDateTimestampUtc = DateTime.fromISO(currentDate)
+                          .set({
+                            hour: DateTime.now().hour,
+                            minute: DateTime.now().minute,
+                            second: DateTime.now().second,
+                          })
+                          .toUTC()
+                          .toISO()
+
+                        if (debugParam === "true") {
+                          console.debug(
+                            `currentDate/currentDateTimestampUtc ${currentDate}/${currentDateTimestampUtc}`
+                          )
+                          console.debug(
+                            `currentDate/nowDate/equal? ${currentDate}/${nowDate}/${
+                              currentDate === nowDate
+                            }`
+                          )
+                        }
+
+                        values.dreamAt =
+                          currentDate === nowDate
+                            ? DateTime.now().toUTC().toISO()
+                            : currentDateTimestampUtc // NOTE: possible UTC/local timezone conflict, double-check
+
+                        if (!isBrowserOnline()) return queueOffline(values)
                         try {
-                          const nowDate = DateTime.now()
-                            .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-                            .toISO()
-
-                          // add the current hours/minutes/seconds... to currentDate so that the difference is exactly 24 hours
-                          const currentDateTimestampUtc = DateTime.fromISO(currentDate)
-                            .set({
-                              hour: DateTime.now().hour,
-                              minute: DateTime.now().minute,
-                              second: DateTime.now().second,
-                            })
-                            .toUTC()
-                            .toISO()
-
-                          if (debugParam === "true") {
-                            console.debug(
-                              `currentDate/currentDateTimestampUtc ${currentDate}/${currentDateTimestampUtc}`
-                            )
-                            console.debug(
-                              `currentDate/nowDate/equal? ${currentDate}/${nowDate}/${
-                                currentDate === nowDate
-                              }`
-                            )
-                          }
-
-                          values.dreamAt =
-                            currentDate === nowDate
-                              ? DateTime.now().toUTC().toISO()
-                              : currentDateTimestampUtc // NOTE: possible UTC/local timezone conflict, double-check
-
                           await createDreamMutation(values)
                           invalidateQuery(getDreams)
                           invalidateQuery(getDreamsByMonth)
                           setShowForm(false)
                           return { [FORM_RESET]: true }
                         } catch (error: any) {
-                          return {
-                            [FORM_ERROR]: error.toString(),
-                          }
+                          // navigator.onLine lied (flaky network): fetch itself failed — fall back to the outbox
+                          if (error instanceof TypeError) return queueOffline(values)
+                          return { [FORM_ERROR]: error.toString() }
                         }
                       }}
                       onValuesChange={(values) => setCreateDreamFormValues(values)}
@@ -381,6 +410,13 @@ const DreamsPage: BlitzPage = () => {
                 </Card>
               </Grid>
             )}
+
+            <Snackbar
+              open={offlineSnackbar}
+              autoHideDuration={6000}
+              onClose={() => setOfflineSnackbar(false)}
+              message="dream tucked away on this device — it syncs when you're back online 🌙"
+            />
           </Grid>
         </Grid>
       </Container>
