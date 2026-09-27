@@ -6,6 +6,8 @@ import {
   clearPersistedQueries,
   hydratePersistedQueries,
   MAX_PERSISTED_QUERIES,
+  PERSIST_BUDGET_CHARS,
+  PERSIST_ENTRY_MAX_CHARS,
   persistedQueriesKey,
   persistQueries,
   subscribeQueryPersistence,
@@ -24,6 +26,28 @@ function fakeStorage(): KeyValueStorage {
       map.delete(key)
     },
   }
+}
+
+// Mirrors persistedQueries.ts's own wire format: a plain JSON array of
+// superjson's per-value envelopes, one per entry (see that file's comment on
+// SerializedEntry for why). Kept in one place so a future format change only
+// needs updating here, not at every seeding/reading call site below.
+function encodeEntries(entries: unknown[]): string {
+  return JSON.stringify(entries.map((entry) => superjson.serialize(entry as never)))
+}
+
+function decodeEntries(raw: string): { queryKey: unknown[] }[] {
+  return (JSON.parse(raw) as unknown[]).map((envelope) => superjson.deserialize(envelope as never))
+}
+
+// A fixed, non-random permutation: distinct small indices hash to well-spread,
+// non-monotonic keys, so seeding fixtures in "shuffled" order never depends on
+// Math.random (no flakiness) and never coincides with insertion order.
+function deterministicShuffle<T>(items: T[]): T[] {
+  return items
+    .map((item, index) => ({ item, sortKey: (index * 2654435761) % 2147483647 }))
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ item }) => item)
 }
 
 beforeEach(() => {
@@ -59,6 +83,21 @@ describe("persistedQueries", () => {
     expect(target.getQueryData(["notAllowlisted", "x"])).toBeUndefined()
   })
 
+  it("preserves Date values inside persisted data through the envelope-per-entry storage format", () => {
+    const storage = fakeStorage()
+    const qc = new QueryClient()
+    const dreamAt = new Date("2020-01-01T00:00:00.000Z")
+    qc.setQueryData(["getDreams", "params"], { dreams: [{ dreamAt }] })
+
+    persistQueries(storage, USER_ID, qc)
+
+    const target = new QueryClient()
+    hydratePersistedQueries(storage, USER_ID, target)
+    const restored = target.getQueryData(["getDreams", "params"]) as { dreams: { dreamAt: Date }[] }
+    expect(restored.dreams[0]!.dreamAt).toBeInstanceOf(Date)
+    expect(restored.dreams[0]!.dreamAt.getTime()).toBe(dreamAt.getTime())
+  })
+
   it("hydratePersistedQueries is a no-op when the stored payload is corrupt", () => {
     const storage = fakeStorage()
     storage.setItem(persistedQueriesKey(USER_ID), "{oops")
@@ -75,7 +114,13 @@ describe("persistedQueries", () => {
       data: { dreams: [] },
       dataUpdatedAt: Date.now(),
     }
-    storage.setItem(persistedQueriesKey(USER_ID), superjson.stringify([validEntry, null]))
+    // The malformed envelope goes FIRST: an implementation that walks entries in
+    // order and aborts (rather than isolates) at the first bad one would stop
+    // before ever reaching the valid entry that follows.
+    storage.setItem(
+      persistedQueriesKey(USER_ID),
+      JSON.stringify([null, superjson.serialize(validEntry as never)])
+    )
     const qc = new QueryClient()
 
     expect(() => hydratePersistedQueries(storage, USER_ID, qc)).not.toThrow()
@@ -147,29 +192,68 @@ describe("persistedQueries", () => {
     expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: [] }) // newly captured
   })
 
-  it("persistQueries keeps an error-status query that still holds data from an earlier successful fetch", async () => {
+  it("persistQueries keeps the newer of a live entry and a previously stored one for the same key", () => {
+    const storage = fakeStorage()
+    const freshQc = new QueryClient()
+    freshQc.setQueryData(["getDreams", "p"], { dreams: ["fresh"] }) // dataUpdatedAt = 10:00:00
+    persistQueries(storage, USER_ID, freshQc)
+
+    // A different (e.g. background) tab whose own live copy is older than what's
+    // already stored must not be allowed to clobber the fresher stored copy.
+    vi.setSystemTime(new Date("2026-09-27T09:00:00.000Z"))
+    const staleQc = new QueryClient()
+    staleQc.setQueryData(["getDreams", "p"], { dreams: ["stale"] })
+    persistQueries(storage, USER_ID, staleQc)
+
+    const target = new QueryClient()
+    hydratePersistedQueries(storage, USER_ID, target)
+    expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["fresh"] })
+  })
+
+  it("persistQueries neither persists an invalidated cache entry nor keeps its old snapshot copy", () => {
     const storage = fakeStorage()
     const qc = new QueryClient()
-    await qc.fetchQuery({
-      queryKey: ["getDreams", "p"],
-      queryFn: () => Promise.resolve({ dreams: ["ok"] }),
-      retry: false,
-    })
-    await expect(
-      qc.fetchQuery({
-        queryKey: ["getDreams", "p"],
-        queryFn: () => Promise.reject(new Error("502 maintenance")),
-        retry: false,
-      })
-    ).rejects.toThrow("502 maintenance")
-    expect(qc.getQueryState(["getDreams", "p"])?.status).toBe("error")
-    expect(qc.getQueryState(["getDreams", "p"])?.data).toEqual({ dreams: ["ok"] })
+    qc.setQueryData(["getDreams", "p"], { dreams: ["v1"] })
+    persistQueries(storage, USER_ID, qc) // the old snapshot now holds this entry
 
+    qc.getQueryCache().find(["getDreams", "p"])!.invalidate() // still has data, now isInvalidated
     persistQueries(storage, USER_ID, qc)
 
     const target = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["ok"] })
+    expect(target.getQueryData(["getDreams", "p"])).toBeUndefined()
+  })
+
+  it("persistQueries keeps an error-status query that still holds data from an earlier successful fetch", async () => {
+    // react-query logs a failed fetch through console.error outside production;
+    // this deliberately-failing fetch is the point of the test, not a real bug.
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
+    try {
+      const storage = fakeStorage()
+      const qc = new QueryClient()
+      await qc.fetchQuery({
+        queryKey: ["getDreams", "p"],
+        queryFn: () => Promise.resolve({ dreams: ["ok"] }),
+        retry: false,
+      })
+      await expect(
+        qc.fetchQuery({
+          queryKey: ["getDreams", "p"],
+          queryFn: () => Promise.reject(new Error("502 maintenance")),
+          retry: false,
+        })
+      ).rejects.toThrow("502 maintenance")
+      expect(qc.getQueryState(["getDreams", "p"])?.status).toBe("error")
+      expect(qc.getQueryState(["getDreams", "p"])?.data).toEqual({ dreams: ["ok"] })
+
+      persistQueries(storage, USER_ID, qc)
+
+      const target = new QueryClient()
+      hydratePersistedQueries(storage, USER_ID, target)
+      expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["ok"] })
+    } finally {
+      consoleErrorSpy.mockRestore()
+    }
   })
 
   it("persistQueries caps the merged snapshot at MAX_PERSISTED_QUERIES, keeping the newest by dataUpdatedAt", () => {
@@ -179,7 +263,10 @@ describe("persistedQueries", () => {
       data: { n: i },
       dataUpdatedAt: i, // p0 oldest ... newest last
     }))
-    storage.setItem(persistedQueriesKey(USER_ID), superjson.stringify(stale))
+    // Seeded out of order: a "keep whatever was inserted last" implementation
+    // (relying on array/Map position instead of sorting by dataUpdatedAt) would
+    // keep the wrong 50 unless it actually sorts.
+    storage.setItem(persistedQueriesKey(USER_ID), encodeEntries(deterministicShuffle(stale)))
 
     persistQueries(storage, USER_ID, new QueryClient()) // empty live cache: pure recap + cap
 
@@ -191,6 +278,37 @@ describe("persistedQueries", () => {
     expect(target.getQueryData(["getDreams", `p${MAX_PERSISTED_QUERIES + 4}`])).toEqual({
       n: MAX_PERSISTED_QUERIES + 4,
     })
+  })
+
+  it("persistQueries skips a single entry larger than PERSIST_ENTRY_MAX_CHARS while still persisting smaller ones", () => {
+    const storage = fakeStorage()
+    const qc = new QueryClient()
+    qc.setQueryData(["getDreams", "huge"], { blob: "x".repeat(PERSIST_ENTRY_MAX_CHARS + 1_000) })
+    qc.setQueryData(["getDreams", "small"], { blob: "ok" })
+
+    persistQueries(storage, USER_ID, qc)
+
+    const target = new QueryClient()
+    hydratePersistedQueries(storage, USER_ID, target)
+    expect(target.getQueryData(["getDreams", "huge"])).toBeUndefined()
+    expect(target.getQueryData(["getDreams", "small"])).toEqual({ blob: "ok" })
+  })
+
+  it("persistQueries drops entries beyond PERSIST_BUDGET_CHARS, keeping the newest that fit", () => {
+    const storage = fakeStorage()
+    const blob = "x".repeat(250_000) // under PERSIST_ENTRY_MAX_CHARS; several exceed the budget
+    const qc = new QueryClient()
+    ;["a", "b", "c", "d", "e", "f", "g"].forEach((k, i) => {
+      vi.setSystemTime(new Date(2026, 8, 27, 10, 0, i)) // a oldest ... g newest
+      qc.setQueryData(["getDreams", k], { blob })
+    })
+
+    persistQueries(storage, USER_ID, qc)
+
+    const target = new QueryClient()
+    hydratePersistedQueries(storage, USER_ID, target)
+    expect(target.getQueryData(["getDreams", "g"])).toEqual({ blob }) // newest: always kept
+    expect(target.getQueryData(["getDreams", "a"])).toBeUndefined() // oldest: budget-dropped
   })
 
   it("persistQueries removes the storage key (not '[]') when the merged snapshot is empty", () => {
@@ -214,9 +332,7 @@ describe("persistedQueries", () => {
 
     vi.advanceTimersByTime(1100)
 
-    const persisted = superjson.parse<{ queryKey: unknown[] }[]>(
-      storage.getItem(persistedQueriesKey(USER_ID))!
-    )
+    const persisted = decodeEntries(storage.getItem(persistedQueriesKey(USER_ID))!)
     expect(persisted).toHaveLength(1)
     expect(persisted[0]!.queryKey).toEqual(["getDreams", "params"])
 
@@ -224,9 +340,7 @@ describe("persistedQueries", () => {
     qc.setQueryData(["getDreams", "otherParams"], { dreams: [] })
     vi.advanceTimersByTime(1100)
 
-    const afterUnsubscribe = superjson.parse<{ queryKey: unknown[] }[]>(
-      storage.getItem(persistedQueriesKey(USER_ID))!
-    )
+    const afterUnsubscribe = decodeEntries(storage.getItem(persistedQueriesKey(USER_ID))!)
     expect(afterUnsubscribe).toHaveLength(1) // the post-unsubscribe write never made it in
   })
 
@@ -271,6 +385,21 @@ describe("persistedQueries", () => {
     vi.advanceTimersByTime(1100)
 
     expect(storage.getItem(persistedQueriesKey(USER_ID))).toBeNull()
+    unsubscribe()
+  })
+
+  it("subscribeQueryPersistence ignores a success on a query outside the allowlist, without even reading storage", () => {
+    const storage = fakeStorage()
+    const getItemSpy = vi.spyOn(storage, "getItem")
+    const qc = new QueryClient()
+    const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc)
+
+    qc.setQueryData(["getDream", "1"], { id: 1 }) // not in PERSISTED_QUERY_KEYS
+    vi.advanceTimersByTime(1100)
+
+    // Not just "storage ends up unchanged" (persistQueries's own allowlist filter
+    // would already guarantee that) but "no read/merge/rewrite cycle ran at all".
+    expect(getItemSpy).not.toHaveBeenCalled()
     unsubscribe()
   })
 })
