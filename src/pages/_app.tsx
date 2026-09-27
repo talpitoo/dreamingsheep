@@ -25,6 +25,7 @@ import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
 import CustomErrorContainer from "src/core/components/CustomErrorContainer"
 import { AuthenticationError, AuthorizationError } from "src/core/errors"
 import { getQueryClient } from "src/core/rpc-client"
+import OfflineSupport from "src/core/offline/OfflineSupport"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { ErrorStatus } from "src/core/components/ErrorStatus"
 import type { AppPage } from "src/core/types"
@@ -85,6 +86,10 @@ export default function App({
                 <CssBaseline />
                 <AppErrorBoundary>
                   <CreateInstantSymbolProvider>
+                    {/* outside AuthGuard and ahead of the page: it mounts in the very first commit,
+                        so its query-cache hydration is done before a private page body first
+                        renders; outside getLayout, so it is identical on every page */}
+                    <OfflineSupport />
                     {getLayout(
                       <AuthGuard Component={Component}>
                         <Component {...pageProps} />
