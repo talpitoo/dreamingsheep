@@ -2,7 +2,13 @@
   "name": "dreamingsheep",
   "version": "5.0.0",
   "keywords": [
-    "BlitzJS",
+    "dream journal",
+    "lucid dreaming",
+    "Next.js",
+    "React",
+    "TypeScript",
+    "MUI",
+    "Tailwind CSS",
     "Prisma",
     "Postgres"
   ],
