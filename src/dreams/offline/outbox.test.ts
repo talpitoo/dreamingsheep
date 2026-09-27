@@ -1,15 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import superjson from "superjson"
 import {
   clearOutbox,
   enqueueDream,
+  MAX_TRANSIENT_ATTEMPTS,
   outboxKey,
   OutboxWriteError,
   readOutbox,
   removeFromOutbox,
+  retryOutboxEntry,
   subscribeOutbox,
   syncOutbox,
 } from "./outbox"
-import type { OutboxStorage } from "./outbox"
+import type { OutboxStorage, PendingDream } from "./outbox"
 
 const NOW = new Date("2026-09-27T10:00:00.000Z")
 
@@ -86,7 +89,7 @@ describe("outbox", () => {
     expect(readOutbox(storage, 1)).toEqual([])
   })
 
-  it("syncOutbox happy path sends every entry oldest-first and empties the outbox", async () => {
+  it("syncOutbox happy path sends every entry oldest-first, empties the outbox, and notifies once per removal", async () => {
     const storage = fakeStorage()
     enqueueDream(storage, 1, { n: 1 })
     enqueueDream(storage, 1, { n: 2 })
@@ -96,19 +99,23 @@ describe("outbox", () => {
       sentOrder.push(values)
       return { ok: true }
     }
+    const notifications: number[] = []
+    const unsubscribe = subscribeOutbox(() => notifications.push(notifications.length))
 
     const result = await syncOutbox(storage, 1, send)
 
     expect(result).toEqual({ synced: 3, authRequired: false, blocked: false })
     expect(sentOrder).toEqual([{ n: 1 }, { n: 2 }, { n: 3 }])
     expect(readOutbox(storage, 1)).toEqual([])
+    expect(notifications).toHaveLength(3)
+    unsubscribe()
   })
 
-  it("syncOutbox stops on a network TypeError, leaving the rest of the queue untouched", async () => {
+  it("syncOutbox stops on a network TypeError, leaving the remaining entries exactly as they were", async () => {
     const storage = fakeStorage()
     enqueueDream(storage, 1, { n: 1 })
-    enqueueDream(storage, 1, { n: 2 })
-    enqueueDream(storage, 1, { n: 3 })
+    const b = enqueueDream(storage, 1, { n: 2 })
+    const c = enqueueDream(storage, 1, { n: 3 })
     let calls = 0
     const send = async () => {
       calls++
@@ -119,13 +126,16 @@ describe("outbox", () => {
     const result = await syncOutbox(storage, 1, send)
 
     expect(result).toEqual({ synced: 1, authRequired: false, blocked: true })
-    expect(readOutbox(storage, 1).map((entry) => entry.values)).toEqual([{ n: 2 }, { n: 3 }])
+    // Full-entry equality (not just a `.values` projection) proves entries 2+3
+    // carry no stray mutation (e.g. an accidental lastError/attempts write).
+    expect(readOutbox(storage, 1)).toEqual([b, c])
   })
 
-  it("syncOutbox stops on an AuthenticationError, leaving the queue untouched", async () => {
+  it("syncOutbox stops on an AuthenticationError, leaving the queue byte-for-byte untouched", async () => {
     const storage = fakeStorage()
     enqueueDream(storage, 1, { n: 1 })
     enqueueDream(storage, 1, { n: 2 })
+    const before = storage.getItem(outboxKey(1))
     const send = async () => {
       throw Object.assign(new Error("x"), { name: "AuthenticationError" })
     }
@@ -133,31 +143,174 @@ describe("outbox", () => {
     const result = await syncOutbox(storage, 1, send)
 
     expect(result).toEqual({ synced: 0, authRequired: true, blocked: false })
-    expect(readOutbox(storage, 1)).toHaveLength(2)
+    expect(storage.getItem(outboxKey(1))).toBe(before)
   })
 
-  it("syncOutbox marks a rejected entry with lastError, keeps going, and never retries it", async () => {
+  it("syncOutbox marks a permanently-rejected entry (AuthorizationError) with lastError, keeps going, never retries it, and notifies on both the removal and the lastError write", async () => {
     const storage = fakeStorage()
     const a = enqueueDream(storage, 1, { n: 1 })
     enqueueDream(storage, 1, { n: 2 })
     enqueueDream(storage, 1, { n: 3 })
     const send = vi.fn(async (values: Record<string, unknown>) => {
-      if (values.n === 1) throw new Error("nope")
+      if (values.n === 1) throw Object.assign(new Error("nope"), { name: "AuthorizationError" })
       return { ok: true }
     })
+    const notifications: number[] = []
+    const unsubscribe = subscribeOutbox(() => notifications.push(notifications.length))
 
     const result = await syncOutbox(storage, 1, send)
 
     expect(result).toEqual({ synced: 2, authRequired: false, blocked: false })
+    expect(notifications).toHaveLength(3) // 1 lastError write (entry a) + 2 removals (b, c)
+    unsubscribe()
     const remaining = readOutbox(storage, 1)
     expect(remaining).toHaveLength(1)
     expect(remaining[0]!.clientId).toBe(a.clientId)
-    expect(remaining[0]!.lastError).toBe("Error: nope")
+    expect(remaining[0]!.lastError).toBe("AuthorizationError: nope")
 
     const second = await syncOutbox(storage, 1, send)
 
     expect(second).toEqual({ synced: 0, authRequired: false, blocked: false })
     expect(send).toHaveBeenCalledTimes(3)
+  })
+
+  it("syncOutbox treats a gateway error as transient: stops, bumps attempts, leaves lastError unset", async () => {
+    const storage = fakeStorage()
+    const a = enqueueDream(storage, 1, { n: 1 })
+    enqueueDream(storage, 1, { n: 2 })
+    const send = async () => {
+      throw Object.assign(new Error("RPC createDream failed (502)"), { statusCode: 502 })
+    }
+
+    const result = await syncOutbox(storage, 1, send)
+
+    expect(result).toEqual({ synced: 0, authRequired: false, blocked: true })
+    const remaining = readOutbox(storage, 1)
+    expect(remaining).toHaveLength(2)
+    expect(remaining[0]!.clientId).toBe(a.clientId)
+    expect(remaining[0]!.attempts).toBe(1)
+    expect(remaining[0]!.lastError).toBeUndefined()
+    expect(remaining[1]!.attempts).toBeUndefined()
+  })
+
+  it("syncOutbox gives up after MAX_TRANSIENT_ATTEMPTS, stamps lastError, and continues to the next entry", async () => {
+    const storage = fakeStorage()
+    const stale: PendingDream = {
+      clientId: "stale-1",
+      userId: 1,
+      values: { n: 1 },
+      queuedAt: NOW,
+      attempts: MAX_TRANSIENT_ATTEMPTS - 1,
+    }
+    storage.setItem(outboxKey(1), superjson.stringify([stale]))
+    enqueueDream(storage, 1, { n: 2 })
+    const send = async (values: Record<string, unknown>) => {
+      if (values.n === 1) throw new Error("still down")
+      return { ok: true }
+    }
+
+    const result = await syncOutbox(storage, 1, send)
+
+    expect(result).toEqual({ synced: 1, authRequired: false, blocked: false })
+    const remaining = readOutbox(storage, 1)
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0]!.clientId).toBe("stale-1")
+    expect(remaining[0]!.attempts).toBe(MAX_TRANSIENT_ATTEMPTS)
+    expect(remaining[0]!.lastError).toBe(
+      `gave up after ${MAX_TRANSIENT_ATTEMPTS} attempts: Error: still down`
+    )
+  })
+
+  it("syncOutbox treats a ZodError as permanent (by name, despite its 500 status): lastError immediately, continues", async () => {
+    const storage = fakeStorage()
+    const a = enqueueDream(storage, 1, { n: 1 })
+    enqueueDream(storage, 1, { n: 2 })
+    const send = async (values: Record<string, unknown>) => {
+      if (values.n === 1) {
+        throw Object.assign(new Error("bad"), { name: "ZodError", statusCode: 500 })
+      }
+      return { ok: true }
+    }
+
+    const result = await syncOutbox(storage, 1, send)
+
+    expect(result).toEqual({ synced: 1, authRequired: false, blocked: false })
+    const remaining = readOutbox(storage, 1)
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0]!.clientId).toBe(a.clientId)
+    expect(remaining[0]!.lastError).toBe("ZodError: bad")
+  })
+
+  it("syncOutbox treats a 404 NotFoundError-shaped rejection as permanent: lastError, continues", async () => {
+    const storage = fakeStorage()
+    const a = enqueueDream(storage, 1, { n: 1 })
+    enqueueDream(storage, 1, { n: 2 })
+    const send = async (values: Record<string, unknown>) => {
+      if (values.n === 1) {
+        throw Object.assign(new Error("This could not be found"), {
+          name: "NotFoundError",
+          statusCode: 404,
+        })
+      }
+      return { ok: true }
+    }
+
+    const result = await syncOutbox(storage, 1, send)
+
+    expect(result).toEqual({ synced: 1, authRequired: false, blocked: false })
+    const remaining = readOutbox(storage, 1)
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0]!.clientId).toBe(a.clientId)
+    expect(remaining[0]!.lastError).toBe("NotFoundError: This could not be found")
+  })
+
+  it("syncOutbox stops on a CSRFTokenMismatchError like an AuthenticationError, queue byte-for-byte untouched", async () => {
+    const storage = fakeStorage()
+    enqueueDream(storage, 1, { n: 1 })
+    enqueueDream(storage, 1, { n: 2 })
+    const before = storage.getItem(outboxKey(1))
+    const send = async () => {
+      throw Object.assign(new Error("CSRF token mismatch"), {
+        name: "CSRFTokenMismatchError",
+        statusCode: 401,
+      })
+    }
+
+    const result = await syncOutbox(storage, 1, send)
+
+    expect(result).toEqual({ synced: 0, authRequired: true, blocked: false })
+    expect(storage.getItem(outboxKey(1))).toBe(before)
+  })
+
+  it("retryOutboxEntry clears lastError and attempts and notifies; the next sync sends the entry again", async () => {
+    const storage = fakeStorage()
+    const a = enqueueDream(storage, 1, { n: 1 })
+    let shouldFail = true
+    const send = vi.fn(async () => {
+      if (shouldFail) throw Object.assign(new Error("bad"), { name: "ZodError", statusCode: 500 })
+      return { ok: true }
+    })
+
+    await syncOutbox(storage, 1, send)
+    expect(readOutbox(storage, 1)[0]!.lastError).toBe("ZodError: bad")
+
+    const notifications: number[] = []
+    const unsubscribe = subscribeOutbox(() => notifications.push(notifications.length))
+
+    retryOutboxEntry(storage, 1, a.clientId)
+
+    expect(notifications).toHaveLength(1)
+    unsubscribe()
+    const retried = readOutbox(storage, 1)[0]!
+    expect(retried.lastError).toBeUndefined()
+    expect(retried.attempts).toBeUndefined()
+
+    shouldFail = false
+    const result = await syncOutbox(storage, 1, send)
+
+    expect(result).toEqual({ synced: 1, authRequired: false, blocked: false })
+    expect(readOutbox(storage, 1)).toEqual([])
+    expect(send).toHaveBeenCalledTimes(2)
   })
 
   it("syncOutbox re-reads storage before each entry, so a concurrent tab's removal wins (two-tab race)", async () => {

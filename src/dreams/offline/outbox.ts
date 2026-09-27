@@ -9,16 +9,23 @@ export interface PendingDream {
   userId: number
   values: Record<string, unknown> // CreateDream-shaped; dreamAt already an ISO string
   queuedAt: Date
-  lastError?: string // set when the server rejected it (non-network, non-auth)
+  lastError?: string // set once the server permanently rejects it (4xx / ZodError / Authorization / NotFound)
+  attempts?: number // transient-failure retry count (network/5xx); capped at MAX_TRANSIENT_ATTEMPTS
 }
 
 export interface SyncResult {
   synced: number
   authRequired: boolean
-  blocked: boolean // network failure mid-run; retry on next trigger
+  blocked: boolean // network or unexhausted transient failure mid-run; retry on next trigger
 }
 
-export class OutboxWriteError extends Error {}
+// R6: how many times a transient (5xx / unclassified) failure is retried
+// before it is given up on and stamped with lastError like a permanent one.
+export const MAX_TRANSIENT_ATTEMPTS = 10
+
+export class OutboxWriteError extends Error {
+  name = "OutboxWriteError"
+}
 
 export function outboxKey(userId: number): string {
   return `ds.outbox.${userId}`
@@ -37,6 +44,26 @@ export function readOutbox(storage: OutboxStorage, userId: number): PendingDream
 
 function writeOutbox(storage: OutboxStorage, userId: number, entries: PendingDream[]): void {
   storage.setItem(outboxKey(userId), superjson.stringify(entries))
+}
+
+// Re-reads storage, patches the one matching entry, writes back, and notifies —
+// the shared tail of every partial update (lastError stamp, attempts bump,
+// retry-clear). Re-reading here (not just at the syncOutbox loop's top) keeps
+// this safe no matter how much async work happened since the caller last read.
+function patchEntry(
+  storage: OutboxStorage,
+  userId: number,
+  clientId: string,
+  patch: Partial<PendingDream>
+): void {
+  writeOutbox(
+    storage,
+    userId,
+    readOutbox(storage, userId).map((entry) =>
+      entry.clientId === clientId ? { ...entry, ...patch } : entry
+    )
+  )
+  notify()
 }
 
 // ---- change notification (mirrors src/auth/client.ts) ----------------------
@@ -85,6 +112,10 @@ export function clearOutbox(storage: OutboxStorage, userId: number): void {
   notify()
 }
 
+export function retryOutboxEntry(storage: OutboxStorage, userId: number, clientId: string): void {
+  patchEntry(storage, userId, clientId, { lastError: undefined, attempts: undefined })
+}
+
 export async function syncOutbox(
   storage: OutboxStorage,
   userId: number,
@@ -96,24 +127,55 @@ export async function syncOutbox(
     // Two-tab safety: re-read on every iteration, skip anything already gone.
     const entry = readOutbox(storage, userId).find((e) => e.clientId === clientId)
     if (!entry || entry.lastError) continue
+
+    // Narrow try: only the network call itself is classified below: a storage
+    // throw from the bookkeeping (removeFromOutbox/patchEntry) must propagate
+    // as-is, never get reinterpreted as a server rejection.
+    let threw = false
+    let error: unknown
     try {
       await send(entry.values)
+    } catch (caught) {
+      threw = true
+      error = caught
+    }
+    if (!threw) {
       removeFromOutbox(storage, userId, clientId)
       synced++
-    } catch (error) {
-      if (error instanceof TypeError) return { synced, authRequired: false, blocked: true }
-      if (error instanceof Error && error.name === "AuthenticationError") {
-        return { synced, authRequired: true, blocked: false }
-      }
-      writeOutbox(
-        storage,
-        userId,
-        readOutbox(storage, userId).map((e) =>
-          e.clientId === clientId ? { ...e, lastError: String(error) } : e
-        )
-      )
-      notify()
+      continue
     }
+
+    // R6 classification, in order:
+    if (error instanceof TypeError) return { synced, authRequired: false, blocked: true }
+
+    const name = error instanceof Error ? error.name : undefined
+    if (name === "AuthenticationError" || name === "CSRFTokenMismatchError") {
+      return { synced, authRequired: true, blocked: false }
+    }
+
+    const statusCode = (error as { statusCode?: number } | null | undefined)?.statusCode
+    const permanent =
+      name === "ZodError" ||
+      name === "AuthorizationError" ||
+      name === "NotFoundError" ||
+      (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500)
+    if (permanent) {
+      patchEntry(storage, userId, clientId, { lastError: String(error) })
+      continue
+    }
+
+    // Transient (5xx, synthesized gateway errors, unknown names, non-Error
+    // throwables): retry a bounded number of times before giving up for good.
+    const attempts = (entry.attempts ?? 0) + 1
+    if (attempts >= MAX_TRANSIENT_ATTEMPTS) {
+      patchEntry(storage, userId, clientId, {
+        attempts,
+        lastError: `gave up after ${MAX_TRANSIENT_ATTEMPTS} attempts: ${String(error)}`,
+      })
+      continue
+    }
+    patchEntry(storage, userId, clientId, { attempts })
+    return { synced, authRequired: false, blocked: true }
   }
   return { synced, authRequired: false, blocked: false }
 }
