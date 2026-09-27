@@ -12,8 +12,9 @@ export default function OfflineBanner() {
 
   if (online && !(authRequired && pending.length > 0)) return null
 
+  // the header's logo sheep (absolute) hangs ~70px below the bar: stack above its AppBar (1100)
   return (
-    <Alert severity="info" className="w-full rounded-none justify-center">
+    <Alert severity="info" className="relative z-1101 w-full rounded-none justify-center">
       {!online
         ? pending.length > 0
           ? `you're offline — ${pending.length} dream${
