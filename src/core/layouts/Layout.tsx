@@ -2,6 +2,7 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import Footer from "src/core/layouts/Footer"
 import Header from "src/core/layouts/Header"
+import OfflineBanner from "src/core/offline/OfflineBanner"
 import React, { Fragment, ReactNode, Suspense } from "react"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import ogCoverImageDefault from "public/assets/cover1200x630.jpg"
@@ -89,6 +90,7 @@ const Layout = ({
         <Suspense fallback={<></>}>
           <Header />
         </Suspense>
+        <OfflineBanner />
         <div
           className={`min-h-screen-minus-header overflow-x-hidden flex flex-col items-center justify-between w-full ${
             childrenContainerClassName || "py-6"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Alert, Snackbar } from "@mui/material"
+import { Snackbar } from "@mui/material"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
@@ -7,6 +7,7 @@ import {
   subscribeQueryPersistence,
 } from "src/core/offline/persistedQueries"
 import { registerServiceWorker } from "src/core/offline/swRegistration"
+import { setSyncAuthRequired } from "src/core/offline/syncStatus"
 import { getQueryClient, invalidateQuery, rpcFetch } from "src/core/rpc-client"
 import { getDreams, getDreamsByMonth } from "src/dreams/client"
 import { syncOutbox } from "src/dreams/offline/outbox"
@@ -43,7 +44,7 @@ async function runSync(userId: number, onResult: (result: SyncResult) => void): 
 }
 
 // app-wide offline behaviour, mounted once in _app: query-cache hydration and persistence, the
-// outbox sync, the offline banner and corner ribbon, the "synced" snackbar
+// outbox sync, the corner ribbon, the "synced" snackbar (the banner lives in Layout)
 export default function OfflineSupport() {
   const online = useOnlineStatus()
   const session = useSession()
@@ -51,7 +52,6 @@ export default function OfflineSupport() {
   // open is its own state so the message keeps its count through the snackbar's exit transition
   const [syncedOpen, setSyncedOpen] = useState(false)
   const [syncedCount, setSyncedCount] = useState(0)
-  const [authRequired, setAuthRequired] = useState(false)
   const [retryTick, setRetryTick] = useState(0)
 
   // boot per login: SW registration + query-cache hydration + persistence subscription.
@@ -83,7 +83,7 @@ export default function OfflineSupport() {
     const userId = session.userId
     let retry: ReturnType<typeof setTimeout> | undefined
     const handle = (result: SyncResult) => {
-      setAuthRequired(result.authRequired)
+      setSyncAuthRequired(result.authRequired)
       if (result.synced > 0) {
         void invalidateQuery(getDreams)
         void invalidateQuery(getDreamsByMonth)
@@ -100,26 +100,14 @@ export default function OfflineSupport() {
 
   return (
     <>
-      {(!online || (authRequired && pending.length > 0)) && (
-        <Alert severity="info" className="fixed top-0 inset-x-0 z-1400 rounded-none justify-center">
-          {!online
-            ? pending.length > 0
-              ? `you're offline — ${pending.length} dream${
-                  pending.length > 1 ? "s" : ""
-                } tucked away, they'll sync when you're back`
-              : "you're offline — dreams you add are saved on this device until you're back"
-            : `please log in again to sync ${pending.length} pending dream${
-                pending.length > 1 ? "s" : ""
-              }`}
-        </Alert>
-      )}
-      {/* a constant cue even when the banner is missed — decorative: screen readers get the banner */}
+      {/* a constant cue after the in-flow banner has scrolled away, compact enough to only mark
+          the corner: taps pass through to the header, screen readers get the banner instead */}
       {!online && (
         <div
           aria-hidden="true"
-          className="fixed top-0 right-0 z-1400 w-24 h-24 overflow-hidden pointer-events-none"
+          className="fixed top-0 right-0 z-1400 w-16 h-16 overflow-hidden pointer-events-none"
         >
-          <span className="absolute block w-36 text-center rotate-45 top-6 -right-9 bg-mui-primary text-white text-xs font-bold uppercase tracking-widest py-1 shadow-md">
+          <span className="absolute block w-32 text-center rotate-45 top-3 -right-8 bg-mui-primary text-white text-[10px] leading-4 font-bold uppercase tracking-wider shadow">
             offline
           </span>
         </div>

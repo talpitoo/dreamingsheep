@@ -293,6 +293,16 @@ const DreamsPage: BlitzPage = () => {
     return { [FORM_RESET]: true }
   }
 
+  // the calendar and the list read ?date= while rendering, and /dreams is statically optimized: on
+  // a direct load the query stays empty until router.isReady. Rendered before that, they show today
+  // first — and the calendar reports its jump to the URL's month as a month change, which pushes
+  // the 1st of that month
+  const calendarFallback = (
+    <Box className="h-full flex min-h-84">
+      <LoadingSpiral />
+    </Box>
+  )
+
   return (
     <Fragment>
       <Container>
@@ -326,16 +336,14 @@ const DreamsPage: BlitzPage = () => {
             className="overflow-x-hidden mb-8 sm:mb-0 rounded-sm"
           >
             {!query && (
-              <Suspense
-                fallback={
-                  <Box className="h-full flex min-h-84">
-                    <LoadingSpiral />
+              <Suspense fallback={calendarFallback}>
+                {router.isReady ? (
+                  <Box className="xsmax:-mx-8">
+                    <DreamsCalendar />
                   </Box>
-                }
-              >
-                <Box className="xsmax:-mx-8">
-                  <DreamsCalendar />
-                </Box>
+                ) : (
+                  calendarFallback
+                )}
               </Suspense>
             )}
           </Grid>
@@ -362,7 +370,7 @@ const DreamsPage: BlitzPage = () => {
             )}
 
             <Suspense fallback={<LoadingSpiral />}>
-              <DreamsList />
+              {router.isReady ? <DreamsList /> : <LoadingSpiral />}
             </Suspense>
 
             <p className="mt-4 text-right">
