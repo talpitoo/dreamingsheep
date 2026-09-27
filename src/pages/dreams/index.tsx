@@ -1,6 +1,13 @@
 import Image from "next/image"
 import { useRouter } from "next/router"
-import { usePaginatedQuery, useMutation, useQuery, invalidateQuery } from "src/core/rpc-client"
+import {
+  usePaginatedQuery,
+  useMutation,
+  useQuery,
+  invalidateQuery,
+  getQueryClient,
+  queryKeyFor,
+} from "src/core/rpc-client"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
@@ -13,9 +20,11 @@ import React, { Fragment, Suspense, useEffect, useMemo, useState } from "react"
 import { DateTime } from "luxon"
 import titleDreams from "public/assets/title-dreams.png"
 import sheepDreams from "public/assets/sheep-dreamingsheep.png"
+import sheepOffline from "public/assets/sheep-offline.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import SheepLink from "src/core/components/SheepLink"
 import {
+  Alert,
   Button,
   Card,
   CardContent,
@@ -30,14 +39,16 @@ import { PickersDayProps, StaticDatePicker } from "@mui/x-date-pickers"
 import { getDreamsByMonth } from "src/dreams/client"
 import { renderDreamDay } from "src/dreams/components/DreamCalendarDay"
 import { DreamItemFooter, DreamList } from "src/dreams/components/DreamList"
+import { PendingDreamList } from "src/dreams/components/PendingDreamList"
 import { DreamForm, FORM_ERROR, FORM_RESET } from "src/dreams/components/DreamForm"
 import { SleepingTimeForm } from "src/sleepingTimes/components/SleepingTimeForm"
 import { DreamTime, DreamType, RecallTime } from "db"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 import classnames from "src/utils/classnames"
-import { isBrowserOnline } from "src/core/offline/onlineStatus"
+import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import { enqueueDream, OutboxWriteError } from "src/dreams/offline/outbox"
+import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
 import { clearPersistedQueries } from "src/core/offline/persistedQueries"
 
 function getDateTime(date: string | string[] | undefined): DateTime {
@@ -78,26 +89,49 @@ const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 export const DreamsCalendar = () => {
   const router = useRouter()
+  const online = useOnlineStatus()
+  const pending = usePendingDreams()
   const today = useMemo(() => getParamDateOrDefault(router.query.date), [router.query.date]) // today will be the date set on param (default: current date)
   const paramDate = useMemo(() => getParamDateOrDefault(router.query.date), [router.query.date]) // paramDate will be the date set on param (default: current month)
   const month = useMemo(() => getCurrentMonthRange(paramDate), [paramDate]) // current month will be based on the value of paramDate
   const debugParam = router.query.debug?.toString()
 
-  const [dreamsByMonth] = useQuery(getDreamsByMonth, {
+  const params = {
     where: { dreamAt: { gt: month[0], lt: month[1] } },
     userTimezone: userTimezone, // add userTimezone as a parameter
-  })
+  }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getDreamsByMonth, params))
+  // offline, a month never fetched on this device renders unmarked (data undefined, no suspense)
+  const [dreamsByMonth] = useQuery(getDreamsByMonth, params, { enabled: online || hasCached })
 
   if (debugParam === "true") {
     console.debug(`userTimezone ${userTimezone}`)
     console.debug("[dreamsByMonth] " + JSON.stringify(dreamsByMonth, null, 2))
   }
 
+  // dreams still waiting in the outbox mark their days too
+  const merged = useMemo(() => {
+    const result: Record<string, { count: number; dreams: string[] }> = {
+      ...(dreamsByMonth ?? {}),
+    }
+    for (const entry of pending) {
+      const iso = DateTime.fromISO(entry.values.dreamAt as string)
+        .setZone(userTimezone)
+        .toISODate()
+      const existing = result[iso]
+      result[iso] = {
+        count: (existing?.count ?? 0) + 1,
+        dreams: [...(existing?.dreams ?? []), "pending sync"],
+      }
+    }
+    return result
+  }, [dreamsByMonth, pending])
+
   const renderWeekPickerDay = (
     day: DateTime,
     selectedDates: Array<DateTime | null>,
     pickersDayProps: PickersDayProps<DateTime>
-  ) => renderDreamDay(day, dreamsByMonth, DateTime.fromJSDate(today), pickersDayProps, debugParam)
+  ) => renderDreamDay(day, merged, DateTime.fromJSDate(today), pickersDayProps, debugParam)
 
   return (
     <StaticDatePicker<DateTime>
@@ -133,31 +167,52 @@ export const DreamsCalendar = () => {
 
 export const DreamsList = () => {
   const router = useRouter()
+  const online = useOnlineStatus()
   const query = router.query.q as string | undefined
   const today = useMemo(() => getParamDateOrDefault(router.query.date), [router.query.date]) // today will be the date set on param (default: current date)
   const tomorrow = useMemo(() => getTomorrow(today), [today])
+  const dateIso = DateTime.fromJSDate(today).setZone(userTimezone).toISODate()
 
   // convert today and tomorrow to local timezone before the DB query // NOTE: possible UTC/local timezone conflict, double-check
   const localToday = DateTime.fromJSDate(today).setZone(userTimezone).toJSDate()
   const localTomorrow = DateTime.fromJSDate(tomorrow).setZone(userTimezone).toJSDate()
 
-  const [{ dreams, count }, { isLoading, refetch }] = usePaginatedQuery(getDreams, {
+  const params = {
     orderBy: { id: "asc" },
     skip: 0,
     take: ITEMS_PER_PAGE,
     ...(query
       ? { where: { OR: [{ title: { contains: query } }, { description: { contains: query } }] } }
       : { where: { dreamAt: { gte: localToday, lt: localTomorrow } } }),
+  }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getDreams, params))
+  const [data, { isLoading, refetch }] = usePaginatedQuery(getDreams, params, {
+    enabled: online || hasCached,
   })
 
+  // offline, a day never fetched on this device has no data: `undefined` (no suspense), or — after
+  // navigating from another day — that day's dreams, which keepPreviousData passes off as this one's
+  if (!data || (!online && !hasCached))
+    return (
+      <>
+        <PendingDreamList dateIso={dateIso} />
+        <Alert severity="info">
+          you&apos;re offline and this day isn&apos;t cached on this device yet
+        </Alert>
+      </>
+    )
+
   return (
-    <DreamList
-      isLoading={isLoading}
-      dreams={dreams}
-      count={count}
-      refetchList={refetch}
-      noDreamMessage={query ? "No dreams matching your query." : "No dreams on this day yet."}
-    />
+    <>
+      <PendingDreamList dateIso={dateIso} />
+      <DreamList
+        isLoading={isLoading}
+        dreams={data.dreams}
+        count={data.count}
+        refetchList={refetch}
+        noDreamMessage={query ? "No dreams matching your query." : "No dreams on this day yet."}
+      />
+    </>
   )
 }
 
@@ -189,6 +244,7 @@ const DreamsPage: BlitzPage = () => {
   )
   const [showForm, setShowForm] = useState(false)
   const session = useSession()
+  const online = useOnlineStatus()
   const [offlineSnackbar, setOfflineSnackbar] = useState(false)
 
   // the sheep leads back to today, the journal's home. Null while you are already there — which
@@ -252,7 +308,7 @@ const DreamsPage: BlitzPage = () => {
             >
               <SheepLink href={sheepHref}>
                 <Image
-                  src={sheepDreams}
+                  src={online ? sheepDreams : sheepOffline}
                   alt="dreams sheep"
                   width={384}
                   height={384}
