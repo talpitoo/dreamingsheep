@@ -144,6 +144,9 @@ export const DreamsCalendar = () => {
         value < DateTime.fromFormat("yyyy-MM-dd", "2020-01-01").startOf("day")
       }
       onMonthChange={(value) => {
+        // the picker also reports a month change when `value` itself moves to another month (the
+        // sheep link, browser Back): only a switch away from the URL's own month navigates
+        if (value.hasSame(DateTime.fromJSDate(paramDate), "month")) return
         router.push(Routes.DreamsPage({ date: value.toFormat("yyyy-MM-dd") }))
       }}
       onChange={(newValue) => {
@@ -294,9 +297,8 @@ const DreamsPage: BlitzPage = () => {
   }
 
   // the calendar and the list read ?date= while rendering, and /dreams is statically optimized: on
-  // a direct load the query stays empty until router.isReady. Rendered before that, they show today
-  // first — and the calendar reports its jump to the URL's month as a month change, which pushes
-  // the 1st of that month
+  // a direct load the query stays empty until router.isReady — rendered before that, they would
+  // show (and fetch) today first, then jump to the URL's day
   const calendarFallback = (
     <Box className="h-full flex min-h-84">
       <LoadingSpiral />

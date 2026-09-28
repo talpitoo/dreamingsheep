@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Snackbar } from "@mui/material"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
+import { AuthenticationError } from "src/core/errors"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
   hydratePersistedQueries,
@@ -16,18 +17,28 @@ import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
 
 // module-level: at most one sync run per tab, whatever re-renders happen …
 let syncing = false
+// … but a trigger arriving mid-run (a "retry" click, a new entry, a login) is not dropped: the run
+// may already have walked past that entry, so it gets one more pass afterwards, for the latest
+// caller (after a logout → login mid-run, that is the new session's user)
+let rerunRequested: { userId: number; onResult: (result: SyncResult) => void } | null = null
 
 // … and at most one per browser: the `online` event fires in every open tab at once, and two
 // tabs replaying the same entry would create it twice. The Web Locks API (Chrome 69+,
 // Firefox 96+, Safari 15.4+, no dependency) serialises them; `ifAvailable` makes the loser
 // skip instead of queueing. Older browsers fall back to the per-tab guard.
 async function runSync(userId: number, onResult: (result: SyncResult) => void): Promise<void> {
-  if (syncing) return
+  if (syncing) {
+    rerunRequested = { userId, onResult }
+    return
+  }
   syncing = true
   const run = async () => {
-    const result = await syncOutbox(window.localStorage, userId, (values) =>
-      rpcFetch("createDream", values)
-    )
+    const result = await syncOutbox(window.localStorage, userId, (values) => {
+      // a run can outlive its session (a request hanging across logout → login as someone else):
+      // one user's queued dreams must never go out with another user's cookie
+      if (readPublicDataFromCookie().userId !== userId) throw new AuthenticationError()
+      return rpcFetch("createDream", values)
+    })
     onResult(result)
   }
   try {
@@ -40,6 +51,9 @@ async function runSync(userId: number, onResult: (result: SyncResult) => void): 
     }
   } finally {
     syncing = false
+    const next = rerunRequested
+    rerunRequested = null
+    if (next) void runSync(next.userId, next.onResult).catch(() => undefined)
   }
 }
 
@@ -61,11 +75,19 @@ export default function OfflineSupport() {
   // are then paused without data on an offline cold start. Never hydrate during render: it would
   // change the first client render vs. the SSR output.
   useEffect(() => {
+    // a new session starts without the previous one's "log in again"
+    setSyncAuthRequired(false)
     registerServiceWorker()
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
     if (!userId) return
-    hydratePersistedQueries(window.localStorage, userId, getQueryClient())
-    return subscribeQueryPersistence(window.localStorage, userId, getQueryClient())
+    // localStorage can be blocked while cookies work: then the app runs without the offline
+    // cache instead of throwing into the error boundary on every page
+    try {
+      hydratePersistedQueries(window.localStorage, userId, getQueryClient())
+      return subscribeQueryPersistence(window.localStorage, userId, getQueryClient())
+    } catch {
+      return undefined
+    }
   }, [session.userId])
 
   // sync on: coming online, app start, login (userId change), new queue entries. A `blocked`
@@ -94,7 +116,8 @@ export default function OfflineSupport() {
         retry = setTimeout(() => setRetryTick((tick) => tick + 1), 60_000)
       }
     }
-    void runSync(userId, handle)
+    // a storage failure inside the run must not surface as an unhandled rejection
+    void runSync(userId, handle).catch(() => undefined)
     return () => clearTimeout(retry)
   }, [online, session.userId, syncable, retryTick])
 
