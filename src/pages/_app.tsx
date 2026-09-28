@@ -19,13 +19,15 @@ import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles"
 import { LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon"
 import Layout from "src/core/layouts/Layout"
-import { Alert, Container, Grid, Box } from "@mui/material"
+import { Alert, Button, Container, Grid, Box } from "@mui/material"
 import sheepSignup from "public/assets/sheep-signup.png"
+import sheepOffline from "public/assets/sheep-offline.png"
 import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
 import CustomErrorContainer from "src/core/components/CustomErrorContainer"
 import { AuthenticationError, AuthorizationError } from "src/core/errors"
 import { getQueryClient } from "src/core/rpc-client"
 import OfflineSupport from "src/core/offline/OfflineSupport"
+import { isBrowserOnline } from "src/core/offline/onlineStatus"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { ErrorStatus } from "src/core/components/ErrorStatus"
 import type { AppPage } from "src/core/types"
@@ -214,6 +216,31 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
             statusCode={error.statusCode}
             title="Sorry, you are not authorized to access this"
           />
+        </CustomErrorContainer>
+      </Layout>
+    )
+  }
+
+  // a query with no cached data destructured offline throws a plain TypeError (not one
+  // of our own error classes) — caught here instead of falling through to the generic
+  // "unexpected failure" branch below, so a dropped connection doesn't look like a bug
+  if (error instanceof TypeError && !isBrowserOnline()) {
+    return (
+      <Layout>
+        <CustomErrorContainer>
+          <Image
+            src={sheepOffline}
+            alt="offline sheep"
+            width={192}
+            height={192}
+            className="w-1/3 max-w-48 h-auto mx-auto"
+          />
+          <Alert severity="info" className="mb-4">
+            this page needs a connection — your dreams are safe on this device
+          </Alert>
+          <Button variant="contained" onClick={resetErrorBoundary}>
+            try again
+          </Button>
         </CustomErrorContainer>
       </Layout>
     )

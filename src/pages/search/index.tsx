@@ -2,16 +2,18 @@ import classnames from "src/utils/classnames"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { usePaginatedQuery, useQuery } from "src/core/rpc-client"
+import { getQueryClient, queryKeyFor, usePaginatedQuery, useQuery } from "src/core/rpc-client"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { getDreams } from "src/dreams/client"
 import React, { Fragment, Suspense, useMemo } from "react"
 import titleSearch from "public/assets/title-search.png"
 import sheepSearch from "public/assets/sheep-search.png"
-import { Button, Container, Grid, Typography, Box } from "@mui/material"
+import sheepOffline from "public/assets/sheep-offline.png"
+import { Alert, Button, Container, Grid, Typography, Box } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import { DreamList } from "src/dreams/components/DreamList"
 import { DreamSearchForm } from "src/dreams/components/DreamSearchForm"
@@ -59,13 +61,22 @@ export const SearchList = () => {
 const SearchPage: BlitzPage = () => {
   const router = useRouter()
   const user = useCurrentUser()
-  const [{ symbols }, { isLoading }] = useQuery(getSymbols, {
+  const online = useOnlineStatus()
+  const symbolsParams = {
     where: {
       id: {
         in: parseDreamSearchQuery(router.query).symbolIds,
       },
     },
+  }
+  const hasCachedSymbols = !!getQueryClient().getQueryData(queryKeyFor(getSymbols, symbolsParams))
+  // offline and this exact symbol filter was never cached: `symbolsResult` stays
+  // undefined (paused fetch, no suspense) — read it via optional chaining below
+  // rather than destructuring, so the page can't crash on it
+  const [symbolsResult, { isLoading }] = useQuery(getSymbols, symbolsParams, {
+    enabled: online || hasCachedSymbols,
   })
+  const symbols = symbolsResult?.symbols
   // the sheep leads back to the first page of THESE results: every filter kept, `page` dropped.
   // Null on page 1, where it would only reload what you are looking at
   const sheepHref = useMemo(() => {
@@ -83,7 +94,7 @@ const SearchPage: BlitzPage = () => {
       mood: values.mood as number[],
       recall: values.recall as RecallTime[],
       type: values.type as DreamType[],
-      symbols: symbols as Symbol[] | [],
+      symbols: (symbols ?? []) as Symbol[],
     }
   }, [router.query, symbols])
 
@@ -125,7 +136,7 @@ const SearchPage: BlitzPage = () => {
             >
               <SheepLink href={sheepHref}>
                 <Image
-                  src={sheepSearch}
+                  src={online ? sheepSearch : sheepOffline}
                   alt="dreams sheep"
                   width={384}
                   height={384}
@@ -143,17 +154,30 @@ const SearchPage: BlitzPage = () => {
               <span className="sr-only">Search</span>
             </h1>
 
-            {!isLoading && (
-              <DreamSearchForm
-                initialValues={initialValues}
-                onSubmit={async (values) => search(values)}
-                resetOnInitialValuesChange
-              />
-            )}
+            {online ? (
+              // the collapsible filter panel keeps SymbolsAutocomplete mounted underneath
+              // (same "Collapse never unmounts" shape as the stats filter panel), and that
+              // fires its own symbols query — so the form joins SearchList behind the same
+              // online check rather than staying up as chrome
+              <Fragment>
+                {!isLoading && (
+                  <DreamSearchForm
+                    initialValues={initialValues}
+                    onSubmit={async (values) => search(values)}
+                    resetOnInitialValuesChange
+                  />
+                )}
 
-            <Suspense fallback={<LoadingSpiral />}>
-              <SearchList />
-            </Suspense>
+                <Suspense fallback={<LoadingSpiral />}>
+                  <SearchList />
+                </Suspense>
+              </Fragment>
+            ) : (
+              <Alert severity="info">
+                search isn&apos;t available offline — your dreams are safe, finding them needs a
+                connection
+              </Alert>
+            )}
 
             {/* mirrors the stats page's "View as list": carries the current filters over.
                 the stats page defaults to the "all" range for these (search has no range) */}

@@ -9,6 +9,7 @@ import React, { Fragment, Suspense, useEffect, useMemo, useState } from "react"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
 import Layout from "src/core/layouts/Layout"
 import {
+  Alert,
   Button,
   Collapse,
   Container,
@@ -22,6 +23,8 @@ import { KeyboardArrowDown, Settings } from "@mui/icons-material"
 import { DateTime } from "luxon"
 import titleStats from "public/assets/title-stats.png"
 import sheepStats from "public/assets/sheep-stats.png"
+import sheepOffline from "public/assets/sheep-offline.png"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { getDreams } from "src/dreams/client"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
@@ -95,6 +98,7 @@ export const Stats = () => {
   const router = useRouter()
   const session = useSession()
   const user = useCurrentUser()
+  const online = useOnlineStatus()
   // const theme = useTheme()
   // const breakpointSm = useMediaQuery(theme.breakpoints.down("sm"))
   const [range, setRange] = useState<Range>(DEFAULT_RANGE)
@@ -187,7 +191,7 @@ export const Stats = () => {
               )}
             >
               <Image
-                src={sheepStats}
+                src={online ? sheepStats : sheepOffline}
                 alt="Stats sheep"
                 width={384}
                 height={384}
@@ -275,70 +279,85 @@ export const Stats = () => {
             </Box>
 
             {/* the from–to window for the "custom" range — expands (same Collapse animation
-                as the Filters panel) with two dream-highlighted date pickers */}
-            <Collapse in={range === "custom"}>
-              <Card className="bg-white mt-4 p-4">
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <DreamDatePicker
-                      label="from"
-                      value={custom?.from ? DateTime.fromISO(custom.from) : null}
-                      onChange={(value) =>
-                        value?.isValid && changeCustom({ from: value.toISODate()! })
-                      }
-                      disableFuture
-                      maxDate={custom?.to ? DateTime.fromISO(custom.to) : undefined}
-                    />
+                as the Filters panel) with two dream-highlighted date pickers.
+                DreamDatePicker fires its own getDreamsByMonth query as soon as it mounts
+                (the Collapse above keeps it mounted whatever `range` is), so it only
+                renders online — offline it would query a month that was never cached and
+                index into `undefined` for the day tint */}
+            {online && (
+              <Collapse in={range === "custom"}>
+                <Card className="bg-white mt-4 p-4">
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <DreamDatePicker
+                        label="from"
+                        value={custom?.from ? DateTime.fromISO(custom.from) : null}
+                        onChange={(value) =>
+                          value?.isValid && changeCustom({ from: value.toISODate()! })
+                        }
+                        disableFuture
+                        maxDate={custom?.to ? DateTime.fromISO(custom.to) : undefined}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <DreamDatePicker
+                        label="to"
+                        value={custom?.to ? DateTime.fromISO(custom.to) : null}
+                        onChange={(value) =>
+                          value?.isValid && changeCustom({ to: value.toISODate()! })
+                        }
+                        disableFuture
+                        minDate={custom?.from ? DateTime.fromISO(custom.from) : undefined}
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <DreamDatePicker
-                      label="to"
-                      value={custom?.to ? DateTime.fromISO(custom.to) : null}
-                      onChange={(value) =>
-                        value?.isValid && changeCustom({ to: value.toISODate()! })
-                      }
-                      disableFuture
-                      minDate={custom?.from ? DateTime.fromISO(custom.from) : undefined}
-                    />
-                  </Grid>
-                </Grid>
-              </Card>
-            </Collapse>
+                </Card>
+              </Collapse>
+            )}
           </Grid>
         </Grid>
 
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
-            {/* opted in: everything centers around the filtered advanced chart + its facets;
-                the sleep chart (range-driven, independent of the filters) slots in between
-                the filter panel and the charts */}
-            {user?.advancedCharting ? (
-              <Suspense fallback={<LoadingSpiral />}>
-                <AdvancedStats range={range} custom={custom} filtersOpen={advancedOpen}>
-                  {user?.trackSleepingTime && (
-                    <Box className="mb-6">
-                      <Suspense fallback={<LoadingSpiral />}>
-                        <SleepChart range={range} custom={custom} />
-                      </Suspense>
-                    </Box>
-                  )}
-                </AdvancedStats>
-              </Suspense>
-            ) : (
+            {online ? (
+              // opted in: everything centers around the filtered advanced chart + its facets;
+              // the sleep chart (range-driven, independent of the filters) slots in between
+              // the filter panel and the charts
               <Fragment>
-                {/* 7th stat: full-width sleep pattern, only when bedtime/wake-up tracking is on */}
-                {user?.trackSleepingTime && (
-                  <Box className="mb-6">
+                {user?.advancedCharting ? (
+                  <Suspense fallback={<LoadingSpiral />}>
+                    <AdvancedStats range={range} custom={custom} filtersOpen={advancedOpen}>
+                      {user?.trackSleepingTime && (
+                        <Box className="mb-6">
+                          <Suspense fallback={<LoadingSpiral />}>
+                            <SleepChart range={range} custom={custom} />
+                          </Suspense>
+                        </Box>
+                      )}
+                    </AdvancedStats>
+                  </Suspense>
+                ) : (
+                  <Fragment>
+                    {/* 7th stat: full-width sleep pattern, only when bedtime/wake-up tracking is on */}
+                    {user?.trackSleepingTime && (
+                      <Box className="mb-6">
+                        <Suspense fallback={<LoadingSpiral />}>
+                          <SleepChart range={range} custom={custom} />
+                        </Suspense>
+                      </Box>
+                    )}
                     <Suspense fallback={<LoadingSpiral />}>
-                      <SleepChart range={range} custom={custom} />
+                      <StaticStatsCharts range={range} custom={custom} />
                     </Suspense>
-                  </Box>
+                  </Fragment>
                 )}
-                <Suspense fallback={<LoadingSpiral />}>
-                  <StaticStatsCharts range={range} custom={custom} />
-                </Suspense>
               </Fragment>
+            ) : (
+              <Alert severity="info">
+                stats aren&apos;t available offline — your dreams are safe, the charts need the
+                mothership
+              </Alert>
             )}
           </Grid>
         </Grid>

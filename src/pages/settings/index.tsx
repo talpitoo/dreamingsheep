@@ -3,39 +3,55 @@ import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
-import { useQuery } from "src/core/rpc-client"
+import { getQueryClient, queryKeyFor, useQuery } from "src/core/rpc-client"
 import { useRouter } from "next/router"
 import React, { Fragment, Suspense, useEffect } from "react"
 import Layout from "src/core/layouts/Layout"
 import { getUser } from "src/users/client"
 import { UpdateUserForm } from "src/users/components/UpdateUserForm"
-import { Container, Grid, Box } from "@mui/material"
+import { Alert, Container, Grid, Box } from "@mui/material"
 import titleSettings from "public/assets/title-settings.png"
 import sheepSettings from "public/assets/sheep-settings.png"
+import sheepOffline from "public/assets/sheep-offline.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 
 export const Settings = () => {
   const router = useRouter()
   const session = useSession()
-  const [user, { refetch }] = useQuery(
-    getUser,
-    { id: session.userId! },
-    {
-      // NOTE: `staleTime: Infinity` was a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110 —
-      // it ensured the query never refreshes and overwrites the form data while the user is editing
-      // staleTime: Infinity,
-      enabled: !!session.userId,
-    }
-  )
+  const online = useOnlineStatus()
+  const params = { id: session.userId! }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getUser, params))
+  const [user, { refetch }] = useQuery(getUser, params, {
+    // NOTE: `staleTime: Infinity` was a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110 —
+    // it ensured the query never refreshes and overwrites the form data while the user is editing
+    // staleTime: Infinity,
+    enabled: !!session.userId && (online || hasCached),
+  })
 
   useEffect(() => {
     if (!session.userId) router.push(Routes.Home())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // never cached on this device and offline: nothing to show, and nothing to edit
+  if (!user)
+    return (
+      <Container>
+        <Alert severity="info" className="mb-4">
+          settings aren&apos;t available offline — reconnect to change anything here
+        </Alert>
+      </Container>
+    )
+
   return (
     <Fragment>
       <Container>
+        {!online && (
+          <Alert severity="info" className="mb-4">
+            settings aren&apos;t available offline — reconnect to change anything here
+          </Alert>
+        )}
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
@@ -46,7 +62,7 @@ export const Settings = () => {
               )}
             >
               <Image
-                src={sheepSettings}
+                src={online ? sheepSettings : sheepOffline}
                 alt="settings sheep"
                 width={384}
                 height={384}
