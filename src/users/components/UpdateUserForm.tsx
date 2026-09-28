@@ -77,12 +77,13 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
     <Fragment>
       {/* a disabled fieldset disables every native input/button inside, including MUI's
           IconButtons, so nothing here can be edited or submitted offline — reconnecting
-          re-enables it live, no remount needed. min-w-0 neutralises fieldset's own
-          min-content sizing; the dimming is the visual cue */}
+          re-enables it live, no remount needed. pointer-events-none because some engines
+          still route clicks into a disabled button's children. min-w-0 neutralises
+          fieldset's own min-content sizing; the dimming is the visual cue */}
       <fieldset
         disabled={!online}
         aria-disabled={!online}
-        className="border-0 p-0 m-0 min-w-0 aria-disabled:opacity-60"
+        className="border-0 p-0 m-0 min-w-0 aria-disabled:opacity-60 aria-disabled:pointer-events-none"
       >
         <Form<S>
           id="user"

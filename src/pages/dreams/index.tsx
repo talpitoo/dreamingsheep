@@ -286,10 +286,10 @@ const DreamsPage: BlitzPage = () => {
         clearPersistedQueries(window.localStorage, session.userId)
         enqueueDream(window.localStorage, session.userId, values)
       }
-    } catch (error) {
-      if (error instanceof OutboxWriteError)
-        return { [FORM_ERROR]: "couldn't save on this device — storage seems unavailable" }
-      throw error
+    } catch {
+      // any throw while queueing (a blocked localStorage throws SecurityError on access, a
+      // failing read throws before the write) must still reach the form, never escape onSubmit
+      return { [FORM_ERROR]: "couldn't save on this device — storage seems unavailable" }
     }
     setShowForm(false)
     setOfflineSnackbar(true)
