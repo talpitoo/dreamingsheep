@@ -40,6 +40,7 @@ export const Routes = {
   ArticlePageTheExplainerVideoIsStillInTheWorks: route(
     "/blog/the-explainer-video-is-still-in-the-works"
   ),
+  ArticlePageUseCaseFourDreamingOffline: route("/blog/use-case-four-dreaming-offline"),
   ArticlePageUseCaseOneCustomDrawing: route("/blog/use-case-one-custom-drawing"),
   ArticlePageUseCaseThreeOffTheCharts: route("/blog/use-case-three-off-the-charts"),
   ArticlePageUseCaseTwoAddToHomeScreen: route("/blog/use-case-two-add-to-home-screen"),

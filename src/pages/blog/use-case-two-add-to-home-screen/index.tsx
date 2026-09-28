@@ -85,10 +85,14 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage<{ related: Blog[] }> = ({ 
                   . This way, you can keep your phone by your pillow (of course, in airplane mode to
                   keep your sweet dreams undisturbed) in case you awaken in the middle of the night.
                   Then, record a few initial keywords right away while your memories are fresh (for
-                  this, you need to be online). Later, while sipping your morning coffee and
-                  indulging in cherry pie, log in from your laptop to fill in the gaps, correct any
-                  typos, or, who knows, maybe they were intentional? Attach symbols, arrange your
-                  dream garden, and keep an eye on the Stats page as those charts come to life.
+                  this, you used to need to be online — not anymore, see{" "}
+                  <Link href={Routes.ArticlePageUseCaseFourDreamingOffline()} passHref={true}>
+                    use case four
+                  </Link>
+                  ). Later, while sipping your morning coffee and indulging in cherry pie, log in
+                  from your laptop to fill in the gaps, correct any typos, or, who knows, maybe they
+                  were intentional? Attach symbols, arrange your dream garden, and keep an eye on
+                  the Stats page as those charts come to life.
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   To add the app to the home screen:
