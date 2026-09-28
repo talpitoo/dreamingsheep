@@ -2,6 +2,7 @@ import { getQueryClient, useQuery } from "src/core/rpc-client"
 import { useInstantDreamDialog } from "src/contexts/CreateInstantSymbolContext"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
 import { useOnlineStatus } from "src/core/offline/onlineStatus"
+import { AUTOCOMPLETE_SYMBOLS_QUERY_KEY } from "src/core/offline/persistedQueries"
 import { getAutocompleteSymbols } from "src/symbols/client"
 import { Symbol } from "db"
 import React, { Fragment } from "react"
@@ -28,7 +29,7 @@ export const SymbolsAutocomplete = ({ allowCreate = false }: { allowCreate?: boo
   const { setValues: setDialogValue, toggleDialog, state } = useInstantDreamDialog()
   const [, setCb] = state
   // the explicit key (not the stub's) is what CreateInstantSymbolDialog refetches after a create
-  const queryKey = ["get-symbols-autocomplete"]
+  const queryKey = [AUTOCOMPLETE_SYMBOLS_QUERY_KEY]
   const hasCached = !!getQueryClient().getQueryData(queryKey)
   // offline and never cached on this device, the query stays disabled: no data, no suspense and
   // isLoading stuck at true — the picker renders empty (not "Loading…") instead of crashing

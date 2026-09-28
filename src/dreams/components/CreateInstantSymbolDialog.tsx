@@ -13,6 +13,7 @@ import {
 } from "@mui/material"
 import { useInstantDreamDialog } from "src/contexts/CreateInstantSymbolContext"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import { AUTOCOMPLETE_SYMBOLS_QUERY_KEY } from "src/core/offline/persistedQueries"
 import { createSymbol } from "src/symbols/client"
 import React from "react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -32,7 +33,7 @@ export const CreateInstantSymbolDialog = () => {
       ...values,
       icon: "lucidicon-tag",
     })
-    await queryClient.refetchQueries(["get-symbols-autocomplete"])
+    await queryClient.refetchQueries([AUTOCOMPLETE_SYMBOLS_QUERY_KEY])
     cb?.(symbol)
     closeDialog()
   }

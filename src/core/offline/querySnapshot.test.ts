@@ -6,7 +6,6 @@ import {
   MAX_PERSISTED_QUERIES,
   PERSIST_ENTRY_MAX_CHARS,
   selectForStorage,
-  serializeQueryKey,
 } from "src/core/offline/querySnapshot"
 import type { PersistedQueryEntry } from "src/core/offline/querySnapshot"
 
@@ -81,10 +80,7 @@ describe("querySnapshot", () => {
       dataUpdatedAt: 12345,
     }
 
-    const decoded = decodeSnapshot(
-      encodeSnapshot(selectForStorage([], [entry], new Set())),
-      ALLOW_ALL
-    )
+    const decoded = decodeSnapshot(encodeSnapshot(selectForStorage([], [entry])), ALLOW_ALL)
 
     expect(decoded).toHaveLength(1)
     expect(decoded[0]!.dataUpdatedAt).toBe(12345)
@@ -105,10 +101,7 @@ describe("querySnapshot", () => {
       dataUpdatedAt: 2,
     }
 
-    const decoded = decodeSnapshot(
-      encodeSnapshot(selectForStorage([stale], [liveOnly], new Set())),
-      ALLOW_ALL
-    )
+    const decoded = decodeSnapshot(encodeSnapshot(selectForStorage([stale], [liveOnly])), ALLOW_ALL)
 
     expect(decoded).toContainEqual(stale)
     expect(decoded).toContainEqual(liveOnly)
@@ -119,7 +112,7 @@ describe("querySnapshot", () => {
     const prevNewer: PersistedQueryEntry = { queryKey: key, data: { v: "prev" }, dataUpdatedAt: 10 }
     const liveOlder: PersistedQueryEntry = { queryKey: key, data: { v: "live" }, dataUpdatedAt: 5 }
     const decodedA = decodeSnapshot(
-      encodeSnapshot(selectForStorage([prevNewer], [liveOlder], new Set())),
+      encodeSnapshot(selectForStorage([prevNewer], [liveOlder])),
       ALLOW_ALL
     )
     expect(decodedA[0]!.data).toEqual({ v: "prev" }) // previous is newer: live must not clobber it
@@ -127,19 +120,10 @@ describe("querySnapshot", () => {
     const prevOlder: PersistedQueryEntry = { queryKey: key, data: { v: "prev" }, dataUpdatedAt: 5 }
     const liveNewer: PersistedQueryEntry = { queryKey: key, data: { v: "live" }, dataUpdatedAt: 10 }
     const decodedB = decodeSnapshot(
-      encodeSnapshot(selectForStorage([prevOlder], [liveNewer], new Set())),
+      encodeSnapshot(selectForStorage([prevOlder], [liveNewer])),
       ALLOW_ALL
     )
     expect(decodedB[0]!.data).toEqual({ v: "live" }) // live is newer: it replaces the stale previous copy
-  })
-
-  it("selectForStorage drops an entry from both previous and live when its key is in droppedKeys", () => {
-    const key = ["getDreams", "p"]
-    const inPrevious: PersistedQueryEntry = { queryKey: key, data: { v: 1 }, dataUpdatedAt: 1 }
-    const inLive: PersistedQueryEntry = { queryKey: key, data: { v: 2 }, dataUpdatedAt: 2 }
-    const droppedKeys = new Set([serializeQueryKey(key)])
-
-    expect(selectForStorage([inPrevious], [inLive], droppedKeys)).toEqual([])
   })
 
   it("selectForStorage caps at MAX_PERSISTED_QUERIES, keeping the newest by dataUpdatedAt regardless of input order", () => {
@@ -154,7 +138,7 @@ describe("querySnapshot", () => {
     // Seeded out of order: a "keep whatever was inserted/positioned last"
     // implementation would keep the wrong 50 unless it actually sorts.
     const decoded = decodeSnapshot(
-      encodeSnapshot(selectForStorage([], deterministicShuffle(entries), new Set())),
+      encodeSnapshot(selectForStorage([], deterministicShuffle(entries))),
       ALLOW_ALL
     )
     const keys = decoded.map((entry) => entry.queryKey[1])
@@ -178,10 +162,7 @@ describe("querySnapshot", () => {
       dataUpdatedAt: 1,
     }
 
-    const decoded = decodeSnapshot(
-      encodeSnapshot(selectForStorage([], [huge, small], new Set())),
-      ALLOW_ALL
-    )
+    const decoded = decodeSnapshot(encodeSnapshot(selectForStorage([], [huge, small])), ALLOW_ALL)
 
     expect(decoded.map((entry) => entry.queryKey[1])).toEqual(["small"])
   })
@@ -200,7 +181,7 @@ describe("querySnapshot", () => {
     }
 
     const decoded = decodeSnapshot(
-      encodeSnapshot(selectForStorage([], [...bigEntries, tiny], new Set())),
+      encodeSnapshot(selectForStorage([], [...bigEntries, tiny])),
       ALLOW_ALL
     )
     const keys = decoded.map((entry) => entry.queryKey[1])
@@ -225,13 +206,11 @@ describe("querySnapshot", () => {
     )
 
     const withoutPriority = decodeSnapshot(
-      encodeSnapshot(selectForStorage([], [oldIdentity, ...newerBurst], new Set())),
+      encodeSnapshot(selectForStorage([], [oldIdentity, ...newerBurst])),
       ALLOW_ALL
     )
     const withPriority = decodeSnapshot(
-      encodeSnapshot(
-        selectForStorage([], [oldIdentity, ...newerBurst], new Set(), ["getCurrentUser"])
-      ),
+      encodeSnapshot(selectForStorage([], [oldIdentity, ...newerBurst], ["getCurrentUser"])),
       ALLOW_ALL
     )
 

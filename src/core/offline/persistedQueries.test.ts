@@ -34,7 +34,7 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-// The pure selection/codec policy (merge, drop, priority order, cap, budget,
+// The pure selection/codec policy (merge, priority order, cap, budget,
 // encode/decode validation) is unit-tested directly on plain arrays in
 // querySnapshot.test.ts. These tests cover only what that file can't: the
 // react-query-specific glue — reading real Query/QueryObserver state,
@@ -153,18 +153,25 @@ describe("persistedQueries", () => {
     }
   })
 
-  it("persistQueries neither persists an INACTIVE invalidated cache entry nor keeps its old snapshot copy", () => {
+  it("persistQueries keeps an INACTIVE invalidated query's data, both its snapshot copy and a first write", () => {
     const storage = fakeStorage()
     const qc = new QueryClient()
     qc.setQueryData(["getDreams", "p"], { dreams: ["v1"] })
     persistQueries(storage, USER_ID, qc) // the old snapshot now holds this entry
+    qc.setQueryData(["getDreams", "q"], { dreams: ["never stored yet"] })
 
-    qc.getQueryCache().find(["getDreams", "p"])!.invalidate() // still has data, now isInvalidated
+    // what invalidateQuery(getDreams) does after every online create and every sync: it marks
+    // every day variant invalidated, and none of these has an observer to refetch it
+    void qc.invalidateQueries({ queryKey: ["getDreams"] })
+    expect(qc.getQueryState(["getDreams", "p"])?.isInvalidated).toBe(true)
+    expect(qc.getQueryState(["getDreams", "q"])?.isInvalidated).toBe(true)
+
     persistQueries(storage, USER_ID, qc)
 
     const target = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "p"])).toBeUndefined()
+    expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["v1"] })
+    expect(target.getQueryData(["getDreams", "q"])).toEqual({ dreams: ["never stored yet"] })
   })
 
   it("persistQueries keeps an ACTIVE invalidated query's stored copy (a refetch mid-flight or failed must not erase it)", () => {
@@ -232,6 +239,27 @@ describe("persistedQueries", () => {
     const targetAfter = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, targetAfter)
     expect(targetAfter.getQueryData(["getDreams", "otherParams"])).toBeUndefined() // never persisted
+  })
+
+  it("subscribeQueryPersistence skips the write when shouldWrite says no at the moment it fires", () => {
+    const storage = fakeStorage()
+    const qc = new QueryClient()
+    let sameSession = true
+    const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc, () => sameSession)
+
+    qc.setQueryData(["getDreams", "a"], { dreams: [] })
+    sameSession = false // e.g. a logout in another tab lands inside the debounce window
+    vi.advanceTimersByTime(1100)
+
+    expect(storage.getItem(persistedQueriesKey(USER_ID))).toBeNull()
+
+    // the same subscription still writes once the predicate agrees again
+    sameSession = true
+    qc.setQueryData(["getDreams", "b"], { dreams: [] })
+    vi.advanceTimersByTime(1100)
+
+    expect(storage.getItem(persistedQueriesKey(USER_ID))).not.toBeNull()
+    unsubscribe()
   })
 
   it("unsubscribing before the debounce fires cancels the pending write", () => {

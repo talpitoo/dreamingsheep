@@ -4,6 +4,7 @@ import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
   hydratePersistedQueries,
+  PERSISTED_QUERY_KEYS,
   subscribeQueryPersistence,
 } from "src/core/offline/persistedQueries"
 import { registerServiceWorker } from "src/core/offline/swRegistration"
@@ -37,11 +38,24 @@ export default function OfflineSupport() {
     registerServiceWorker()
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
     if (!userId) return
+    // before hydrating, so the replayed queries are built with it: react-query drops a query
+    // nobody observes once cacheTime (5 min by default) has passed, which would silently turn a
+    // cached day into "not cached" offline while the snapshot on disk still has it
+    for (const key of PERSISTED_QUERY_KEYS) {
+      getQueryClient().setQueryDefaults([key], { cacheTime: Infinity })
+    }
     // localStorage can be blocked while cookies work: then the app runs without the offline
     // cache instead of throwing into the error boundary on every page
     try {
       hydratePersistedQueries(window.localStorage, userId, getQueryClient())
-      return subscribeQueryPersistence(window.localStorage, userId, getQueryClient())
+      // another tab's logout purges this user's snapshot before this tab's session store
+      // notices (on focus or its next RPC): a write in between must not re-create it
+      return subscribeQueryPersistence(
+        window.localStorage,
+        userId,
+        getQueryClient(),
+        () => readPublicDataFromCookie().userId === userId
+      )
     } catch {
       return undefined
     }

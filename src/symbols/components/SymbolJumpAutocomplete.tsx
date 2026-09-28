@@ -15,6 +15,7 @@ import { Symbol } from "db"
 import React from "react"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
 import { useOnlineStatus } from "src/core/offline/onlineStatus"
+import { AUTOCOMPLETE_SYMBOLS_QUERY_KEY } from "src/core/offline/persistedQueries"
 import { getAutocompleteSymbols } from "src/symbols/client"
 
 interface SymbolJumpAutocompleteProps {
@@ -36,7 +37,7 @@ export const SymbolJumpAutocomplete = ({
   const router = useRouter()
   const online = useOnlineStatus()
   // the explicit key must include the filter, or toggling it would serve stale options
-  const queryKey = ["get-symbols-autocomplete", customOnly]
+  const queryKey = [AUTOCOMPLETE_SYMBOLS_QUERY_KEY, customOnly]
   const hasCached = !!getQueryClient().getQueryData(queryKey)
   // offline and never cached on this device: no options (and no "Loading…") instead of a crash —
   // the list below carries the notice

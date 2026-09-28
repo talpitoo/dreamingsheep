@@ -43,9 +43,7 @@ function isValidEntry(
 }
 
 // Identifies an entry across the previous snapshot and the live cache so one
-// replaces the other instead of both ending up stored side by side. Exported so
-// callers building a `droppedKeys` set (persistedQueries.ts, from react-query
-// state this module can't see) key it identically to selectForStorage's own use.
+// replaces the other instead of both ending up stored side by side.
 export function serializeQueryKey(queryKey: readonly unknown[]): string {
   return superjson.stringify(queryKey)
 }
@@ -84,10 +82,9 @@ export function decodeSnapshot(
 // Merges `live` onto `previous` (same-key entries: whichever has the newer
 // dataUpdatedAt wins — never "live always wins", since all tabs share one storage
 // key and a backgrounded tab's stale in-memory copy must not clobber a fresher one
-// another tab already wrote), drops any entry (from either side) whose key is in
-// `droppedKeys`, orders `priorityKeys` first (small identity/symbol-list entries a
-// page needs on every load) with everything else newest-first, then walks that
-// order keeping entries under the limits above. An entry over
+// another tab already wrote), orders `priorityKeys` first (small identity/symbol-list
+// entries a page needs on every load) with everything else newest-first, then walks
+// that order keeping entries under the limits above. An entry over
 // PERSIST_ENTRY_MAX_CHARS is skipped outright; once the running total would exceed
 // PERSIST_BUDGET_CHARS a later, smaller entry can still fit in what's left, so that
 // check skips rather than stops the walk — only the absolute MAX_PERSISTED_QUERIES
@@ -97,17 +94,12 @@ export function decodeSnapshot(
 export function selectForStorage(
   previous: PersistedQueryEntry[],
   live: PersistedQueryEntry[],
-  droppedKeys: ReadonlySet<string>,
   priorityKeys?: readonly string[]
 ): string[] {
   const merged = new Map<string, PersistedQueryEntry>()
-  for (const entry of previous) {
-    const mapKey = serializeQueryKey(entry.queryKey)
-    if (!droppedKeys.has(mapKey)) merged.set(mapKey, entry)
-  }
+  for (const entry of previous) merged.set(serializeQueryKey(entry.queryKey), entry)
   for (const entry of live) {
     const mapKey = serializeQueryKey(entry.queryKey)
-    if (droppedKeys.has(mapKey)) continue
     const existing = merged.get(mapKey)
     if (!existing || entry.dataUpdatedAt >= existing.dataUpdatedAt) merged.set(mapKey, entry)
   }
@@ -136,9 +128,10 @@ export function selectForStorage(
   return kept
 }
 
-// Reuses the measured strings selectForStorage already produced: joining them is
-// byte-identical to superjson-serializing the whole kept array at once, without
-// walking that data a second time.
+// Reuses the measured strings selectForStorage already produced, without
+// serializing that data a second time: joined, they are the JSON array of
+// per-entry superjson envelopes decodeSnapshot reads — not one superjson document
+// for the whole array.
 export function encodeSnapshot(serializedEntries: string[]): string | null {
   return serializedEntries.length === 0 ? null : `[${serializedEntries.join(",")}]`
 }

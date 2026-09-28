@@ -5,7 +5,10 @@
 const VERSION = "v2"
 const PRECACHE = `ds-precache-${VERSION}` // install-time shells + the offline sheep; survives logout
 const PAGES_CACHE = `ds-pages-${VERSION}` // navigations cached as they happen; wiped on logout
-const STATIC_CACHE = `ds-static-${VERSION}` // content-hashed /_next/static files; unbounded (see fetch handler)
+// content-hashed /_next/static files; unbounded (see fetch handler). Unversioned on purpose: hashed
+// URLs never collide, and a VERSION bump must not delete the chunks an open session already
+// loaded — the precached shell of the next offline cold start still needs them
+const STATIC_CACHE = "ds-static"
 const ASSETS_CACHE = `ds-assets-${VERSION}` // /assets, /fonts, manifest…
 const FALLBACK_PATH = "/dreams"
 const OFFLINE_SHEEP = "/assets/sheep-offline.png"
@@ -53,6 +56,8 @@ async function refreshPrecache() {
   } catch {}
 }
 
+// no network I/O here: until activate settles, every fetch of the pages this worker controls
+// (RPC POSTs included) waits for it. install already filled the precache.
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
@@ -60,7 +65,6 @@ self.addEventListener("activate", (event) => {
       for (const key of await caches.keys()) {
         if (key.startsWith("ds-") && !keep.includes(key)) await caches.delete(key)
       }
-      await refreshPrecache()
       await self.clients.claim()
     })()
   )
@@ -110,8 +114,9 @@ async function navigationHandler(event) {
         if (!res.ok) return undefined
         // posts publish after users install; catch up the precache on every /blog visit
         if (key === "/blog") event.waitUntil(refreshPrecache())
-        // never cache under "/" — this response is "/"'s followed-redirect target, not a page
-        // of its own, and a redirected response replayed to a later navigation is a network error
+        // a logged-in "/" never gets this far: navigations fetch with redirect mode "manual", so
+        // its 307 is an opaqueredirect that `!res.ok` already rejected. What is left is the
+        // logged-out landing page, which must never shadow the shell "/" is served offline
         if (key === "/") return undefined
         return putLimited(PAGES_CACHE, key, res.clone(), PAGES_LIMIT)
       })
