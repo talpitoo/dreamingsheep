@@ -2,7 +2,10 @@ import Link from "next/link"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { useRouter } from "next/router"
-import { useMutation } from "src/core/rpc-client"
+import { getQueryClient, rpcFetch, useMutation } from "src/core/rpc-client"
+import { clearPersistedQueries } from "src/core/offline/persistedQueries"
+import { isBrowserOnline } from "src/core/offline/onlineStatus"
+import { clearOutbox, readOutbox, syncOutbox } from "src/dreams/offline/outbox"
 import {
   AppBar,
   Box,
@@ -71,7 +74,32 @@ export function Header() {
   }, [router.events])
 
   async function handleLogout() {
+    // captured before the mutation resolves: the session cookie carrying it is gone the
+    // moment logout succeeds, and everything purged below is keyed by this id
+    const userId = session.userId
+    if (userId && isBrowserOnline() && readOutbox(window.localStorage, userId).length > 0) {
+      // runs while the session is still valid, ahead of the mutation and the outbox purge
+      // below — the only remaining chance to hand offline-queued dreams to the server
+      // instead of dropping them; best effort, so a failure here is swallowed
+      try {
+        await syncOutbox(window.localStorage, userId, (values) => rpcFetch("createDream", values))
+      } catch {
+        // ignored — logout still proceeds; any dreams left queued are dropped below
+      }
+    }
     await logoutMutation()
+    // query keys carry no userId and the QueryClient is a module singleton: without this,
+    // user A's cached dreams would sit in memory for user B and get persisted under B's key
+    getQueryClient().clear()
+    try {
+      if (userId) {
+        clearOutbox(window.localStorage, userId)
+        clearPersistedQueries(window.localStorage, userId)
+      }
+    } catch {
+      // a storage exception here (quota, private mode) must not stop the logout
+    }
+    navigator.serviceWorker?.controller?.postMessage("ds-logout")
     if (isAuthenticatedPage(router.pathname)) {
       // full page load instead of a client-side push: the dead session would make the still-mounted
       // authenticated page throw AuthenticationError (issue #10), and a reload also flushes
