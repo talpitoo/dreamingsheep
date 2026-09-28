@@ -5,7 +5,7 @@ import { useRouter } from "next/router"
 import { getQueryClient, useMutation } from "src/core/rpc-client"
 import { clearPersistedQueries } from "src/core/offline/persistedQueries"
 import { isBrowserOnline } from "src/core/offline/onlineStatus"
-import { clearOutbox, readOutbox } from "src/dreams/offline/outbox"
+import { clearOutbox } from "src/dreams/offline/outbox"
 import { syncNow } from "src/dreams/offline/syncRunner"
 import {
   AppBar,
@@ -78,11 +78,11 @@ export function Header() {
     // captured before the mutation resolves: the session cookie carrying it is gone the
     // moment logout succeeds, and everything purged below is keyed by this id
     const userId = session.userId
-    if (userId && isBrowserOnline() && readOutbox(window.localStorage, userId).length > 0) {
+    if (userId && isBrowserOnline()) {
       // runs while the session is still valid, ahead of the mutation and the outbox purge
       // below — the only remaining chance to hand offline-queued dreams to the server
-      // instead of dropping them; syncNow never throws, so a failure here just leaves the
-      // dream(s) for the purge below to drop
+      // instead of dropping them; syncNow reads the outbox and never throws itself, so
+      // logout proceeds whatever happens here
       await syncNow(userId)
     }
     await logoutMutation()
