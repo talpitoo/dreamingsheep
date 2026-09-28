@@ -223,25 +223,41 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 
   // a query with no cached data destructured offline throws a plain TypeError (not one
   // of our own error classes) — caught here instead of falling through to the generic
-  // "unexpected failure" branch below, so a dropped connection doesn't look like a bug
+  // "unexpected failure" branch below, so a dropped connection doesn't look like a bug.
+  // Built on the AuthenticationError branch's own Container/Grid layout, not
+  // CustomErrorContainer: that component always renders its own generic error sheep +
+  // title regardless of what's passed as children, which would put two sheep on the
+  // page here — and it needs its own noindex tag for the same reason that branch does
   if (error instanceof TypeError && !isBrowserOnline()) {
     return (
       <Layout>
-        <CustomErrorContainer>
-          <Image
-            src={sheepOffline}
-            alt="offline sheep"
-            width={192}
-            height={192}
-            className="w-1/3 max-w-48 h-auto mx-auto"
-          />
-          <Alert severity="info" className="mb-4">
-            this page needs a connection — your dreams are safe on this device
-          </Alert>
-          <Button variant="contained" onClick={resetErrorBoundary}>
-            try again
-          </Button>
-        </CustomErrorContainer>
+        <Container>
+          <Head>
+            <meta name="robots" content="noindex" />
+          </Head>
+          <Grid container>
+            <Grid item md={2} className="grid-spacer-md-2" />
+            <Grid item xs={12} sm={6} md={4}>
+              <Box className="w-1/2 sm:w-full mt-0 mx-auto -mb-8 sm:m-auto">
+                <Image
+                  src={sheepOffline}
+                  alt="offline sheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              </Box>
+            </Grid>
+            <Grid item sm={6} md={4} className="text-center w-full">
+              <Alert severity="info" className="mb-4">
+                this page needs a connection — your dreams are safe on this device
+              </Alert>
+              <Button variant="contained" onClick={resetErrorBoundary}>
+                try again
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
       </Layout>
     )
   }

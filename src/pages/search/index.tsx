@@ -70,9 +70,10 @@ const SearchPage: BlitzPage = () => {
     },
   }
   const hasCachedSymbols = !!getQueryClient().getQueryData(queryKeyFor(getSymbols, symbolsParams))
-  // offline and this exact symbol filter was never cached: `symbolsResult` stays
-  // undefined (paused fetch, no suspense) — read it via optional chaining below
-  // rather than destructuring, so the page can't crash on it
+  // offline and this exact symbol filter was never cached: the query is disabled
+  // (enabled: false), so `symbolsResult` stays undefined without suspending — read
+  // it via optional chaining below rather than destructuring, so the page can't
+  // crash on it
   const [symbolsResult, { isLoading }] = useQuery(getSymbols, symbolsParams, {
     enabled: online || hasCachedSymbols,
   })
