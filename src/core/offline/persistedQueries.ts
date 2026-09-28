@@ -30,7 +30,9 @@ export const PERSISTED_QUERY_KEYS = [
   "getDreams",
   "getDreamsByMonth",
   "getSymbols",
-  "getAutocompleteSymbols", // the dream form's symbol picker query
+  // not a stub name: the explicit queryKey the symbol pickers (the dream form's, the symbols
+  // page's jump box) pass instead of getAutocompleteSymbols' own key
+  "get-symbols-autocomplete",
 ] as const
 
 // Kept ahead of the recency walk (selectForStorage's priorityKeys): small
@@ -40,7 +42,7 @@ const PRIORITY_QUERY_KEYS: readonly string[] = [
   "getCurrentUser",
   "getUser",
   "getSymbols",
-  "getAutocompleteSymbols",
+  "get-symbols-autocomplete",
 ]
 
 const ALLOWLIST: readonly string[] = PERSISTED_QUERY_KEYS

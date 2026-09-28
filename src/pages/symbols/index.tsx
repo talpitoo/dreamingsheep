@@ -9,6 +9,7 @@ import Layout from "src/core/layouts/Layout"
 import React, { Suspense, useState } from "react"
 import titleSymbols from "public/assets/title-symbols.png"
 import sheepSymbols from "public/assets/sheep-symbols.png"
+import sheepOffline from "public/assets/sheep-offline.png"
 import { Button, Card, CardActions, CardContent, Container, Grid, Box } from "@mui/material"
 import { FORM_ERROR, FORM_RESET, SymbolForm } from "src/symbols/components/SymbolForm"
 import { CreateSymbol } from "src/symbols/validations"
@@ -18,6 +19,7 @@ import SheepLink from "src/core/components/SheepLink"
 import { SymbolsList } from "src/symbols/components/SymbolsList"
 import { SymbolJumpAutocomplete } from "src/symbols/components/SymbolJumpAutocomplete"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 
 const SymbolsPage: BlitzPage = () => {
   const router = useRouter()
@@ -25,6 +27,7 @@ const SymbolsPage: BlitzPage = () => {
   const [showForm, setShowForm] = useState(false)
   const [customOnly, setCustomOnly] = useState(false)
   const user = useCurrentUser()
+  const online = useOnlineStatus()
 
   // the sheep leads back to the start of the section — the first page, with any ?id= dropped.
   // `id` has to count too, not just the page: a deep link from a dream opens that symbol's card
@@ -56,7 +59,7 @@ const SymbolsPage: BlitzPage = () => {
           >
             <SheepLink href={sheepHref}>
               <Image
-                src={sheepSymbols}
+                src={online ? sheepSymbols : sheepOffline}
                 alt="symbols sheep"
                 width={384}
                 height={384}
