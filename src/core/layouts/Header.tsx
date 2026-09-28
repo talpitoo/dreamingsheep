@@ -2,10 +2,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { useRouter } from "next/router"
-import { getQueryClient, rpcFetch, useMutation } from "src/core/rpc-client"
+import { getQueryClient, useMutation } from "src/core/rpc-client"
 import { clearPersistedQueries } from "src/core/offline/persistedQueries"
 import { isBrowserOnline } from "src/core/offline/onlineStatus"
-import { clearOutbox, readOutbox, syncOutbox } from "src/dreams/offline/outbox"
+import { clearOutbox, readOutbox } from "src/dreams/offline/outbox"
+import { syncNow } from "src/dreams/offline/syncRunner"
 import {
   AppBar,
   Box,
@@ -80,12 +81,9 @@ export function Header() {
     if (userId && isBrowserOnline() && readOutbox(window.localStorage, userId).length > 0) {
       // runs while the session is still valid, ahead of the mutation and the outbox purge
       // below — the only remaining chance to hand offline-queued dreams to the server
-      // instead of dropping them; best effort, so a failure here is swallowed
-      try {
-        await syncOutbox(window.localStorage, userId, (values) => rpcFetch("createDream", values))
-      } catch {
-        // ignored — logout still proceeds; any dreams left queued are dropped below
-      }
+      // instead of dropping them; syncNow never throws, so a failure here just leaves the
+      // dream(s) for the purge below to drop
+      await syncNow(userId)
     }
     await logoutMutation()
     // query keys carry no userId and the QueryClient is a module singleton: without this,

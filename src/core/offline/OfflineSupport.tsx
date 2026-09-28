@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Snackbar } from "@mui/material"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
-import { AuthenticationError } from "src/core/errors"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
   hydratePersistedQueries,
@@ -9,53 +8,11 @@ import {
 } from "src/core/offline/persistedQueries"
 import { registerServiceWorker } from "src/core/offline/swRegistration"
 import { setSyncAuthRequired } from "src/core/offline/syncStatus"
-import { getQueryClient, invalidateQuery, rpcFetch } from "src/core/rpc-client"
+import { getQueryClient, invalidateQuery } from "src/core/rpc-client"
 import { getDreams, getDreamsByMonth } from "src/dreams/client"
-import { syncOutbox } from "src/dreams/offline/outbox"
 import type { SyncResult } from "src/dreams/offline/outbox"
+import { runSync } from "src/dreams/offline/syncRunner"
 import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
-
-// module-level: at most one sync run per tab, whatever re-renders happen …
-let syncing = false
-// … but a trigger arriving mid-run (a "retry" click, a new entry, a login) is not dropped: the run
-// may already have walked past that entry, so it gets one more pass afterwards, for the latest
-// caller (after a logout → login mid-run, that is the new session's user)
-let rerunRequested: { userId: number; onResult: (result: SyncResult) => void } | null = null
-
-// … and at most one per browser: the `online` event fires in every open tab at once, and two
-// tabs replaying the same entry would create it twice. The Web Locks API (Chrome 69+,
-// Firefox 96+, Safari 15.4+, no dependency) serialises them; `ifAvailable` makes the loser
-// skip instead of queueing. Older browsers fall back to the per-tab guard.
-async function runSync(userId: number, onResult: (result: SyncResult) => void): Promise<void> {
-  if (syncing) {
-    rerunRequested = { userId, onResult }
-    return
-  }
-  syncing = true
-  const run = async () => {
-    const result = await syncOutbox(window.localStorage, userId, (values) => {
-      // a run can outlive its session (a request hanging across logout → login as someone else):
-      // one user's queued dreams must never go out with another user's cookie
-      if (readPublicDataFromCookie().userId !== userId) throw new AuthenticationError()
-      return rpcFetch("createDream", values)
-    })
-    onResult(result)
-  }
-  try {
-    if (navigator.locks) {
-      await navigator.locks.request(`ds.outbox.sync.${userId}`, { ifAvailable: true }, (lock) =>
-        lock ? run() : Promise.resolve()
-      )
-    } else {
-      await run()
-    }
-  } finally {
-    syncing = false
-    const next = rerunRequested
-    rerunRequested = null
-    if (next) void runSync(next.userId, next.onResult).catch(() => undefined)
-  }
-}
 
 // app-wide offline behaviour, mounted once in _app: query-cache hydration and persistence, the
 // outbox sync, the corner ribbon, the "synced" snackbar (the banner lives in Layout)
