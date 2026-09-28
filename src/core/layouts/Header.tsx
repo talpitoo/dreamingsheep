@@ -81,8 +81,8 @@ export function Header() {
     if (userId && isBrowserOnline()) {
       // runs while the session is still valid, ahead of the mutation and the outbox purge
       // below — the only remaining chance to hand offline-queued dreams to the server
-      // instead of dropping them; syncNow reads the outbox and never throws itself, so
-      // logout proceeds whatever happens here
+      // instead of dropping them. syncNow reads the outbox and never throws, so logout always
+      // follows; but only its wait for a run already in progress is bounded, not its own requests
       await syncNow(userId)
     }
     await logoutMutation()

@@ -10,17 +10,18 @@ export interface PendingDream {
   values: Record<string, unknown> // CreateDream-shaped; dreamAt already an ISO string
   queuedAt: Date
   lastError?: string // set once the server permanently rejects it (4xx / ZodError / Authorization / NotFound)
-  attempts?: number // transient-failure retry count (network/5xx); capped at MAX_TRANSIENT_ATTEMPTS
+  attempts?: number // counted transient failures; capped at MAX_TRANSIENT_ATTEMPTS
 }
 
 export interface SyncResult {
   synced: number
   authRequired: boolean
-  blocked: boolean // network or unexhausted transient failure mid-run; retry on next trigger
+  blocked: boolean // network, gateway or unexhausted transient failure; retry on next trigger
 }
 
-// R6: how many times a transient (5xx / unclassified) failure is retried
-// before it is given up on and stamped with lastError like a permanent one.
+// How many times a counted transient failure (a 5xx other than a gateway outage,
+// an unclassified error) is retried before it is given up on and stamped with
+// lastError like a permanent one.
 export const MAX_TRANSIENT_ATTEMPTS = 10
 
 export class OutboxWriteError extends Error {
@@ -145,7 +146,7 @@ export async function syncOutbox(
       continue
     }
 
-    // R6 classification, in order:
+    // Classification, in order:
     if (error instanceof TypeError) return { synced, authRequired: false, blocked: true }
 
     const name = error instanceof Error ? error.name : undefined
@@ -164,8 +165,14 @@ export async function syncOutbox(
       continue
     }
 
-    // Transient (5xx, synthesized gateway errors, unknown names, non-Error
-    // throwables): retry a bounded number of times before giving up for good.
+    // A gateway outage (nginx's maintenance page during a deploy) is not this
+    // entry's fault: wait it out, however long, without spending its attempts.
+    if (statusCode === 502 || statusCode === 503 || statusCode === 504) {
+      return { synced, authRequired: false, blocked: true }
+    }
+
+    // Any other transient failure (a 5xx, an unknown name, a non-Error
+    // throwable): retry a bounded number of times before giving up for good.
     const attempts = (entry.attempts ?? 0) + 1
     if (attempts >= MAX_TRANSIENT_ATTEMPTS) {
       patchEntry(storage, userId, clientId, {

@@ -9,10 +9,15 @@ export default function OfflineBanner() {
   const online = useOnlineStatus()
   const pending = usePendingDreams()
   const authRequired = useSyncAuthRequired()
+  const authPrompt = authRequired && pending.length > 0
+  // parked dreams (rejected for good, or out of attempts) never move by themselves: online too,
+  // only a retry or a discard on their day does
+  const parked = pending.filter((entry) => entry.lastError).length
 
-  if (online && !(authRequired && pending.length > 0)) return null
+  if (online && !authPrompt && parked === 0) return null
 
-  // the header's logo sheep (absolute) hangs ~70px below the bar: stack above its AppBar (1100)
+  // one banner, most pressing message first: offline, then the session, then parked dreams.
+  // The header's logo sheep (absolute) hangs ~70px below the bar: stack above its AppBar (1100)
   return (
     <Alert severity="info" className="relative z-1101 w-full rounded-none justify-center">
       {!online
@@ -21,9 +26,13 @@ export default function OfflineBanner() {
               pending.length > 1 ? "s" : ""
             } tucked away, they'll sync when you're back`
           : "you're offline — dreams you add are saved on this device until you're back"
-        : `please log in again to sync ${pending.length} pending dream${
+        : authPrompt
+        ? `please log in again to sync ${pending.length} pending dream${
             pending.length > 1 ? "s" : ""
-          }`}
+          }`
+        : parked > 1
+        ? `${parked} dreams need a look — open their day to retry or discard`
+        : "1 dream needs a look — open its day to retry or discard"}
     </Alert>
   )
 }

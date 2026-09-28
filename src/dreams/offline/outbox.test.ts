@@ -174,12 +174,12 @@ describe("outbox", () => {
     expect(send).toHaveBeenCalledTimes(3)
   })
 
-  it("syncOutbox treats a gateway error as transient: stops, bumps attempts, leaves lastError unset", async () => {
+  it("syncOutbox treats a server error (500) as a counted transient failure: stops, bumps attempts, leaves lastError unset", async () => {
     const storage = fakeStorage()
     const a = enqueueDream(storage, 1, { n: 1 })
     enqueueDream(storage, 1, { n: 2 })
     const send = async () => {
-      throw Object.assign(new Error("RPC createDream failed (502)"), { statusCode: 502 })
+      throw Object.assign(new Error("RPC createDream failed (500)"), { statusCode: 500 })
     }
 
     const result = await syncOutbox(storage, 1, send)
@@ -192,6 +192,45 @@ describe("outbox", () => {
     expect(remaining[0]!.lastError).toBeUndefined()
     expect(remaining[1]!.attempts).toBeUndefined()
   })
+
+  it.each([502, 503, 504])(
+    "syncOutbox waits out a gateway outage (%i): blocked, attempts untouched however many runs it lasts",
+    async (statusCode) => {
+      const storage = fakeStorage()
+      const send = vi.fn(async () => {
+        throw Object.assign(new Error(`RPC createDream failed (${statusCode})`), { statusCode })
+      })
+
+      // a fresh entry keeps attempts undefined, past the point a counted failure would park it …
+      const fresh = enqueueDream(storage, 1, { n: 1 })
+      for (let run = 0; run <= MAX_TRANSIENT_ATTEMPTS; run++) {
+        expect(await syncOutbox(storage, 1, send)).toEqual({
+          synced: 0,
+          authRequired: false,
+          blocked: true,
+        })
+      }
+      expect(readOutbox(storage, 1)).toEqual([fresh])
+
+      // … and one that earlier failures left a single attempt short of the cap keeps its count
+      clearOutbox(storage, 1)
+      const worn: PendingDream = {
+        clientId: "worn-1",
+        userId: 1,
+        values: { n: 2 },
+        queuedAt: NOW,
+        attempts: MAX_TRANSIENT_ATTEMPTS - 1,
+      }
+      storage.setItem(outboxKey(1), superjson.stringify([worn]))
+
+      expect(await syncOutbox(storage, 1, send)).toEqual({
+        synced: 0,
+        authRequired: false,
+        blocked: true,
+      })
+      expect(readOutbox(storage, 1)).toEqual([worn])
+    }
+  )
 
   it("syncOutbox gives up after MAX_TRANSIENT_ATTEMPTS, stamps lastError, and continues to the next entry", async () => {
     const storage = fakeStorage()

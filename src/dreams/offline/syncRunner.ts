@@ -4,8 +4,8 @@ import { rpcFetch } from "src/core/rpc-client"
 import { readOutbox, syncOutbox } from "src/dreams/offline/outbox"
 import type { SyncResult } from "src/dreams/offline/outbox"
 
-// syncNow (below) waits rather than skips, but not forever: a stalled request — this tab's own
-// or another tab's, holding the lock or the in-flight claim — must not hold up logout indefinitely
+// how long syncNow (below) waits for a run already in progress before logout goes ahead without
+// it. It bounds that wait only — never the run syncNow then makes itself
 const SYNC_NOW_TIMEOUT_MS = 10_000
 
 // shared by runSync and syncNow: the one resource name both must lock/reference so a run
@@ -51,6 +51,9 @@ export async function runSync(
   syncing = true
   const run = async () => {
     const result = await syncOutbox(window.localStorage, userId, sendFor(userId))
+    // a run that outlived its session (logout → login as someone else) must not set the next
+    // session's banner or snackbar
+    if (readPublicDataFromCookie().userId !== userId) return
     onResult(result)
   }
   const done = (async () => {
@@ -77,20 +80,30 @@ export async function runSync(
 // The logout path's counterpart to runSync: instead of skipping when busy (runSync's
 // ifAvailable), this WAITS for the same lock — or, without Web Locks, the same per-tab guard —
 // so it can never overlap a run and double-submit an entry. It reads the outbox itself, before
-// requesting anything: an empty outbox means there is nothing worth waiting for. The wait is
-// bounded (SYNC_NOW_TIMEOUT_MS) so a stalled request can't hold up logout indefinitely, and the
-// whole thing never throws — logout must proceed whatever happens here (blocked storage, a
-// timed-out wait, a failed sync, ...).
+// requesting anything: an empty outbox means there is nothing worth waiting for. Only the wait
+// for another run is bounded (SYNC_NOW_TIMEOUT_MS; without Web Locks the deadline is checked
+// between hand-offs, not during one run): once syncNow runs itself, its requests take as long
+// as the network does. It never throws — logout must proceed whatever happens here (blocked
+// storage, a timed-out wait, a failed sync, ...).
 export async function syncNow(userId: number): Promise<SyncResult | undefined> {
   try {
     if (readOutbox(window.localStorage, userId).length === 0) return undefined
 
     if (navigator.locks) {
-      return await navigator.locks.request(
-        outboxLockName(userId),
-        { signal: AbortSignal.timeout(SYNC_NOW_TIMEOUT_MS) },
-        () => syncOutbox(window.localStorage, userId, sendFor(userId))
-      )
+      // not AbortSignal.timeout: engines with Web Locks but without it (Safari 15.4–15.7,
+      // Chrome 69–102, Firefox 96–99) would throw here and skip the sync. The signal only
+      // cancels a request still waiting for the lock, never a granted one.
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), SYNC_NOW_TIMEOUT_MS)
+      try {
+        return await navigator.locks.request(
+          outboxLockName(userId),
+          { signal: controller.signal },
+          () => syncOutbox(window.localStorage, userId, sendFor(userId))
+        )
+      } finally {
+        clearTimeout(timer)
+      }
     }
 
     // No Web Locks: wait for whatever is in flight. A loop, not one snapshot of `current` —
