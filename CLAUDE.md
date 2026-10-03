@@ -88,8 +88,10 @@ the rules every change must keep:
 - **Offline is create-only.** Only new dreams can be written offline (queued in a localStorage
   outbox, sent in order on reconnect → no conflicts to resolve). Everything else is read-only
   offline: dream/symbol cards hide edit/delete, an edit already open keeps its typed text with
-  Update disabled, settings/stats/search show a notice. Do not add an offline mutation without
-  reopening the conflict question.
+  Update disabled, settings/stats/search show a notice. Every secondary write — a dialog, a
+  picker that saves on close, an upload — checks `isBrowserOnline()` itself, because a
+  react-query mutation started offline does not fail, it pauses and fires on reconnect. Do not
+  add an offline mutation without reopening the conflict question.
 - **Persist only allowlisted, never sensitive data.** `PERSISTED_QUERY_KEYS` in
   `src/core/offline/persistedQueries.ts` is the entire list of react-query results mirrored to
   `localStorage`; `getUser` (the full row, `hashedPassword` included) must never be on it. A new
@@ -98,12 +100,16 @@ the rules every change must keep:
 - **The device forgets on logout and on account deletion** through `forgetDeviceData()`
   (`src/core/offline/deviceData.ts`): query cache, `ds.outbox.<userId>`, `ds.queries.<userId>`,
   the worker's page cache. At boot, snapshots of _other_ users are dropped too
-  (`forgetOtherUsersSnapshots`), never their outboxes. Any new per-user client-side storage must
-  be cleared in both places.
-- **The worker never caches `/api/`, `/_next/data/` or `/`**, stores only `ok && !redirected`
-  same-origin GETs, and private pages are cached as data-free static shells (they SSR without user
-  data — keep it that way). Bump `VERSION` in `public/sw.js` only when its caching logic changes;
-  `npm run build` regenerates the git-ignored `public/sw-precache.json` first.
+  (`forgetOtherUsersSnapshots`), never their outboxes. Sign-out is refused offline (the session
+  cookie is HttpOnly) and while any dream is still unsynced after the pre-logout sync — a
+  logout never drops a dream. Any new per-user client-side storage must be cleared in both
+  places.
+- **The worker never caches `/api/`, `/_next/data/` or `/`**, stores only `ok` same-origin GET
+  responses (pages additionally `!redirected`), and private pages are cached as data-free static
+  shells (they SSR without user data — keep it that way). On a slow link it serves a cached shell
+  only from the runtime page cache, never the install-day precache (whose chunks are gone after a
+  deploy); the precache is for offline. Bump `VERSION` in `public/sw.js` only when its caching
+  logic changes; `npm run build` regenerates the git-ignored `public/sw-precache.json` first.
 - **Regression testing is mandatory** for changes touching queries, forms, `Header`/`Layout`,
   `_app`, the dreams page or anything under `src/*/offline/`: `npm test` (outbox, syncRunner,
   persistedQueries, querySnapshot) and `test/e2e/offline.e2e.test.ts` (headless Chromium,

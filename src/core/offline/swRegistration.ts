@@ -1,7 +1,17 @@
 export function registerServiceWorker(): void {
   if (typeof window === "undefined") return
-  if (process.env.NODE_ENV !== "production") return
   if (!("serviceWorker" in navigator)) return
+  if (process.env.NODE_ENV !== "production") {
+    // a worker installed by a local production run (`yarn build && yarn start` on the same origin
+    // as `next dev`) would keep serving dev chunks cache-first and hide every edit: let go of it
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) =>
+        registrations.forEach((registration) => void registration.unregister())
+      )
+      .catch(() => undefined)
+    return
+  }
   const register = () => {
     navigator.serviceWorker.register("/sw.js").catch(() => undefined)
     void requestPersistentStorage()

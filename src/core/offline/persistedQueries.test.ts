@@ -1,5 +1,6 @@
 import { QueryClient, QueryObserver } from "@tanstack/react-query"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import superjson from "superjson"
 import type { KeyValueStorage } from "src/core/offline/storage"
 import {
   clearPersistedQueries,
@@ -12,6 +13,9 @@ import {
 } from "src/core/offline/persistedQueries"
 
 const USER_ID = 1
+
+// a getDreams key as queryKeyFor builds it: the params travel as a superjson string
+const dreamsKey = (params: object) => ["getDreams", superjson.stringify(params)]
 
 function fakeStorage(): KeyValueStorage {
   const map = new Map<string, string>()
@@ -59,6 +63,28 @@ function fakeEnumerableStorage() {
 }
 
 describe("persistedQueries", () => {
+  it("persists getDreams only when it is a paginated list: the whole-journal stats/search variants stay out", () => {
+    const storage = fakeStorage()
+    const source = new QueryClient()
+    source.setQueryData(dreamsKey({ take: 20, skip: 0 }), { dreams: ["a day"], count: 1 })
+    source.setQueryData(["getDreams", { where: { dreamAt: { gte: "2026-01-01" } } }], {
+      dreams: ["the whole journal"],
+      count: 1,
+    })
+
+    persistQueries(storage, USER_ID, source)
+    const target = new QueryClient()
+    hydratePersistedQueries(storage, USER_ID, target)
+
+    expect(target.getQueryData(dreamsKey({ take: 20, skip: 0 }))).toEqual({
+      dreams: ["a day"],
+      count: 1,
+    })
+    expect(
+      target.getQueryData(["getDreams", { where: { dreamAt: { gte: "2026-01-01" } } }])
+    ).toBeUndefined()
+  })
+
   it("forgetOtherUsersSnapshots drops other users' query snapshots only — never an outbox, never unrelated keys", () => {
     const storage = fakeEnumerableStorage()
     storage.setItem(persistedQueriesKey(1), "mine")
@@ -85,9 +111,9 @@ describe("persistedQueries", () => {
   it("persistQueries + hydratePersistedQueries round-trip restores only allowlisted keys with their dataUpdatedAt", () => {
     const storage = fakeStorage()
     const source = new QueryClient()
-    source.setQueryData(["getDreams", "params"], { dreams: [], count: 0 })
+    source.setQueryData(dreamsKey({ take: 20 }), { dreams: [], count: 0 })
     source.setQueryData(["notAllowlisted", "x"], 1)
-    const dataUpdatedAt = source.getQueryState(["getDreams", "params"])!.dataUpdatedAt
+    const dataUpdatedAt = source.getQueryState(dreamsKey({ take: 20 }))!.dataUpdatedAt
 
     persistQueries(storage, USER_ID, source)
 
@@ -100,31 +126,31 @@ describe("persistedQueries", () => {
     const target = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, target)
 
-    expect(target.getQueryData(["getDreams", "params"])).toEqual({ dreams: [], count: 0 })
-    expect(target.getQueryState(["getDreams", "params"])?.dataUpdatedAt).toBe(dataUpdatedAt)
+    expect(target.getQueryData(dreamsKey({ take: 20 }))).toEqual({ dreams: [], count: 0 })
+    expect(target.getQueryState(dreamsKey({ take: 20 }))?.dataUpdatedAt).toBe(dataUpdatedAt)
     expect(target.getQueryData(["notAllowlisted", "x"])).toBeUndefined()
   })
 
   it("hydratePersistedQueries never clobbers fresher in-memory data, but does replay a newer snapshot", () => {
     const storage = fakeStorage()
     const source = new QueryClient()
-    source.setQueryData(["getDreams", "params"], { dreams: ["stale"] }) // dataUpdatedAt = 10:00:00
+    source.setQueryData(dreamsKey({ take: 20 }), { dreams: ["stale"] }) // dataUpdatedAt = 10:00:00
     persistQueries(storage, USER_ID, source)
 
     const target = new QueryClient()
     vi.setSystemTime(new Date("2026-09-27T10:05:00.000Z"))
-    target.setQueryData(["getDreams", "params"], { dreams: ["fresh"] }) // newer than the snapshot
+    target.setQueryData(dreamsKey({ take: 20 }), { dreams: ["fresh"] }) // newer than the snapshot
 
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "params"])).toEqual({ dreams: ["fresh"] })
+    expect(target.getQueryData(dreamsKey({ take: 20 }))).toEqual({ dreams: ["fresh"] })
 
     // A newer snapshot than the target's current data DOES get replayed.
     vi.setSystemTime(new Date("2026-09-27T10:10:00.000Z"))
-    source.setQueryData(["getDreams", "params"], { dreams: ["newest"] })
+    source.setQueryData(dreamsKey({ take: 20 }), { dreams: ["newest"] })
     persistQueries(storage, USER_ID, source)
 
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "params"])).toEqual({ dreams: ["newest"] })
+    expect(target.getQueryData(dreamsKey({ take: 20 }))).toEqual({ dreams: ["newest"] })
   })
 
   it("persistQueries swallows a setItem failure instead of throwing", () => {
@@ -135,7 +161,7 @@ describe("persistedQueries", () => {
       },
     }
     const qc = new QueryClient()
-    qc.setQueryData(["getDreams", "params"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20 }), { dreams: [] })
 
     expect(() => persistQueries(storage, USER_ID, qc)).not.toThrow()
   })
@@ -143,7 +169,7 @@ describe("persistedQueries", () => {
   it("clearPersistedQueries removes the persisted key", () => {
     const storage = fakeStorage()
     const qc = new QueryClient()
-    qc.setQueryData(["getDreams", "params"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20 }), { dreams: [] })
     persistQueries(storage, USER_ID, qc)
     expect(storage.getItem(persistedQueriesKey(USER_ID))).not.toBeNull()
 
@@ -171,25 +197,25 @@ describe("persistedQueries", () => {
       const storage = fakeStorage()
       const qc = new QueryClient()
       await qc.fetchQuery({
-        queryKey: ["getDreams", "p"],
+        queryKey: dreamsKey({ take: 20, p: 1 }),
         queryFn: () => Promise.resolve({ dreams: ["ok"] }),
         retry: false,
       })
       await expect(
         qc.fetchQuery({
-          queryKey: ["getDreams", "p"],
+          queryKey: dreamsKey({ take: 20, p: 1 }),
           queryFn: () => Promise.reject(new Error("502 maintenance")),
           retry: false,
         })
       ).rejects.toThrow("502 maintenance")
-      expect(qc.getQueryState(["getDreams", "p"])?.status).toBe("error")
-      expect(qc.getQueryState(["getDreams", "p"])?.data).toEqual({ dreams: ["ok"] })
+      expect(qc.getQueryState(dreamsKey({ take: 20, p: 1 }))?.status).toBe("error")
+      expect(qc.getQueryState(dreamsKey({ take: 20, p: 1 }))?.data).toEqual({ dreams: ["ok"] })
 
       persistQueries(storage, USER_ID, qc)
 
       const target = new QueryClient()
       hydratePersistedQueries(storage, USER_ID, target)
-      expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["ok"] })
+      expect(target.getQueryData(dreamsKey({ take: 20, p: 1 }))).toEqual({ dreams: ["ok"] })
     } finally {
       consoleErrorSpy.mockRestore()
     }
@@ -198,28 +224,30 @@ describe("persistedQueries", () => {
   it("persistQueries keeps an INACTIVE invalidated query's data, both its snapshot copy and a first write", () => {
     const storage = fakeStorage()
     const qc = new QueryClient()
-    qc.setQueryData(["getDreams", "p"], { dreams: ["v1"] })
+    qc.setQueryData(dreamsKey({ take: 20, p: 1 }), { dreams: ["v1"] })
     persistQueries(storage, USER_ID, qc) // the old snapshot now holds this entry
-    qc.setQueryData(["getDreams", "q"], { dreams: ["never stored yet"] })
+    qc.setQueryData(dreamsKey({ take: 20, q: 1 }), { dreams: ["never stored yet"] })
 
     // what invalidateQuery(getDreams) does after every online create and every sync: it marks
     // every day variant invalidated, and none of these has an observer to refetch it
     void qc.invalidateQueries({ queryKey: ["getDreams"] })
-    expect(qc.getQueryState(["getDreams", "p"])?.isInvalidated).toBe(true)
-    expect(qc.getQueryState(["getDreams", "q"])?.isInvalidated).toBe(true)
+    expect(qc.getQueryState(dreamsKey({ take: 20, p: 1 }))?.isInvalidated).toBe(true)
+    expect(qc.getQueryState(dreamsKey({ take: 20, q: 1 }))?.isInvalidated).toBe(true)
 
     persistQueries(storage, USER_ID, qc)
 
     const target = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["v1"] })
-    expect(target.getQueryData(["getDreams", "q"])).toEqual({ dreams: ["never stored yet"] })
+    expect(target.getQueryData(dreamsKey({ take: 20, p: 1 }))).toEqual({ dreams: ["v1"] })
+    expect(target.getQueryData(dreamsKey({ take: 20, q: 1 }))).toEqual({
+      dreams: ["never stored yet"],
+    })
   })
 
   it("persistQueries keeps an ACTIVE invalidated query's stored copy (a refetch mid-flight or failed must not erase it)", () => {
     const storage = fakeStorage()
     const qc = new QueryClient()
-    qc.setQueryData(["getDreams", "p"], { dreams: ["v1"] })
+    qc.setQueryData(dreamsKey({ take: 20, p: 1 }), { dreams: ["v1"] })
     persistQueries(storage, USER_ID, qc) // the old snapshot now holds this entry
 
     // An observer subscribed to the query is what "active" means (isActive()
@@ -227,18 +255,20 @@ describe("persistedQueries", () => {
     // this from triggering an actual fetch, so the test stays synchronous and
     // deterministic; only invalidate() is what flips isInvalidated.
     const observer = new QueryObserver(qc, {
-      queryKey: ["getDreams", "p"],
+      queryKey: dreamsKey({ take: 20, p: 1 }),
       enabled: true,
       refetchOnMount: false,
     })
     const unsubscribeObserver = observer.subscribe(() => undefined)
-    qc.getQueryCache().find(["getDreams", "p"])!.invalidate()
+    qc.getQueryCache()
+      .find(dreamsKey({ take: 20, p: 1 }))!
+      .invalidate()
 
     persistQueries(storage, USER_ID, qc)
 
     const target = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "p"])).toEqual({ dreams: ["v1"] })
+    expect(target.getQueryData(dreamsKey({ take: 20, p: 1 }))).toEqual({ dreams: ["v1"] })
 
     unsubscribeObserver()
   })
@@ -265,14 +295,14 @@ describe("persistedQueries", () => {
     const qc = new QueryClient()
     const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc)
 
-    qc.setQueryData(["getDreams", "params"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20 }), { dreams: [] })
     expect(storage.getItem(persistedQueriesKey(USER_ID))).toBeNull() // debounced, not yet written
 
     vi.advanceTimersByTime(1100)
 
     const target = new QueryClient()
     hydratePersistedQueries(storage, USER_ID, target)
-    expect(target.getQueryData(["getDreams", "params"])).toEqual({ dreams: [] })
+    expect(target.getQueryData(dreamsKey({ take: 20 }))).toEqual({ dreams: [] })
 
     unsubscribe()
     qc.setQueryData(["getDreams", "otherParams"], { dreams: [] })
@@ -289,7 +319,7 @@ describe("persistedQueries", () => {
     let sameSession = true
     const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc, () => sameSession)
 
-    qc.setQueryData(["getDreams", "a"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20, day: "a" }), { dreams: [] })
     sameSession = false // e.g. a logout in another tab lands inside the debounce window
     vi.advanceTimersByTime(1100)
 
@@ -297,7 +327,7 @@ describe("persistedQueries", () => {
 
     // the same subscription still writes once the predicate agrees again
     sameSession = true
-    qc.setQueryData(["getDreams", "b"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20, day: "b" }), { dreams: [] })
     vi.advanceTimersByTime(1100)
 
     expect(storage.getItem(persistedQueriesKey(USER_ID))).not.toBeNull()
@@ -309,7 +339,7 @@ describe("persistedQueries", () => {
     const qc = new QueryClient()
     const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc)
 
-    qc.setQueryData(["getDreams", "params"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20 }), { dreams: [] })
     unsubscribe()
     vi.advanceTimersByTime(1100)
 
@@ -322,11 +352,11 @@ describe("persistedQueries", () => {
     const qc = new QueryClient()
     const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc)
 
-    qc.setQueryData(["getDreams", "a"], { n: 1 })
+    qc.setQueryData(dreamsKey({ take: 20, day: "a" }), { n: 1 })
     vi.advanceTimersByTime(400)
-    qc.setQueryData(["getDreams", "b"], { n: 2 })
+    qc.setQueryData(dreamsKey({ take: 20, day: "b" }), { n: 2 })
     vi.advanceTimersByTime(400)
-    qc.setQueryData(["getDreams", "c"], { n: 3 })
+    qc.setQueryData(dreamsKey({ take: 20, day: "c" }), { n: 3 })
     vi.advanceTimersByTime(1100)
 
     expect(setItemSpy).toHaveBeenCalledTimes(1)
@@ -336,12 +366,14 @@ describe("persistedQueries", () => {
   it("subscribeQueryPersistence ignores cache events that are not a data-changing success", () => {
     const storage = fakeStorage()
     const qc = new QueryClient()
-    qc.setQueryData(["getDreams", "params"], { dreams: [] })
+    qc.setQueryData(dreamsKey({ take: 20 }), { dreams: [] })
     const unsubscribe = subscribeQueryPersistence(storage, USER_ID, qc)
 
     // A state patch that is not a 'success' action (no fetch, no setQueryData) —
     // e.g. what an observer mounting/re-rendering or an invalidate triggers.
-    qc.getQueryCache().find(["getDreams", "params"])!.setState({ isInvalidated: true })
+    qc.getQueryCache()
+      .find(dreamsKey({ take: 20 }))!
+      .setState({ isInvalidated: true })
     vi.advanceTimersByTime(1100)
 
     expect(storage.getItem(persistedQueriesKey(USER_ID))).toBeNull()

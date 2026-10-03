@@ -4,6 +4,7 @@ import { useRouter } from "next/router"
 import { useSession } from "src/auth/client"
 import { useMutation } from "src/core/rpc-client"
 import { forgetDeviceData } from "src/core/offline/deviceData"
+import { showOfflineNotice } from "src/core/offline/offlineNotice"
 import { Routes } from "src/routes"
 import { Form, FormProps } from "src/core/components/Form"
 import { LabeledTextField } from "src/core/components/LabeledTextField"
@@ -64,11 +65,17 @@ export function UpdateUserForm<S extends z.ZodType<any, any>>({
     // captured first: the session, and the cookie carrying this id, die with the account
     const userId = session.userId
     await deleteFolder()
-    await deleteUserMutation()
+    // deleteUser resolves false instead of throwing when its transaction or the session revoke
+    // fails: the account still exists then, and so must the device copy of its dreams
+    const deleted = await deleteUserMutation()
+    setDeleteDialogVisibility(false)
+    if (!deleted) {
+      showOfflineNotice({ kind: "deleteFailed" })
+      return
+    }
     // the account is gone from the server, so the device must not keep a copy of its dreams: the
     // offline journal snapshot, dreams still waiting to sync, the worker's page cache
     forgetDeviceData(userId)
-    setDeleteDialogVisibility(false)
     router.push(Routes.Home())
   }
 

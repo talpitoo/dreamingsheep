@@ -1,12 +1,13 @@
 import Image from "next/image"
 import { useRouter } from "next/router"
 import {
-  usePaginatedQuery,
-  useMutation,
-  useQuery,
-  invalidateQuery,
   getQueryClient,
+  invalidateQuery,
   queryKeyFor,
+  rpcFetch,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
 } from "src/core/rpc-client"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
@@ -47,7 +48,11 @@ import classnames from "src/utils/classnames"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import { enqueueDream, OutboxWriteError } from "src/dreams/offline/outbox"
 import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
-import { clearPersistedQueries } from "src/core/offline/persistedQueries"
+import { autocompleteSymbolsParams } from "src/dreams/components/SymbolsAutocomplete"
+import {
+  AUTOCOMPLETE_SYMBOLS_QUERY_KEY,
+  clearPersistedQueries,
+} from "src/core/offline/persistedQueries"
 import { showOfflineNotice } from "src/core/offline/offlineNotice"
 
 function getDateTime(date: string | string[] | undefined): DateTime {
@@ -218,6 +223,9 @@ export const DreamsList = () => {
   )
 }
 
+// the symbol picker's list, prefetched once per session and user (see autocompleteSymbolsParams)
+let symbolsPrefetchedFor: number | null = null
+
 const DreamsPage: BlitzPage = () => {
   const router = useRouter()
   const user = useCurrentUser()
@@ -246,6 +254,19 @@ const DreamsPage: BlitzPage = () => {
   )
   const [showForm, setShowForm] = useState(false)
   const session = useSession()
+
+  // online, warm the symbol picker's query once per session so symbols can be attached offline
+  // even if the picker (behind the form's "More") was never opened online on this device; the
+  // result is persisted like the picker's own fetch
+  useEffect(() => {
+    const userId = user?.id
+    if (!userId || symbolsPrefetchedFor === userId || !isBrowserOnline()) return
+    symbolsPrefetchedFor = userId
+    void getQueryClient().prefetchQuery({
+      queryKey: [AUTOCOMPLETE_SYMBOLS_QUERY_KEY],
+      queryFn: () => rpcFetch("getAutocompleteSymbols", autocompleteSymbolsParams(userId)),
+    })
+  }, [user?.id])
 
   // the sheep leads back to today, the journal's home. Null while you are already there — which
   // includes a bare /dreams, since the effect below is about to put today in the URL anyway

@@ -92,7 +92,10 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
                   What works without a signal:
                 </Typography>
                 <ul>
-                  <li>the journal: your recent days, the calendar, and a brand-new dream;</li>
+                  <li>
+                    the journal: the days you opened while online, the calendar, and a brand-new
+                    dream;
+                  </li>
                   <li>
                     attaching the symbols you already have (creating new ones needs you online);
                   </li>
@@ -107,8 +110,7 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
                   phones, iPhones in particular, may spring-clean an app that has not been opened
                   for about a week, so on a long trip do open it now and then. Until they sync,
                   offline dreams exist only in this browser&apos;s storage on this device. Clearing
-                  the site data or the browser cache before then deletes them for good, so reconnect
-                  first.
+                  this site&apos;s data before then deletes them for good, so reconnect first.
                 </Typography>
                 <Typography variant="body1">
                   If you happen to be without a signal in the mountains, well, that is rather the

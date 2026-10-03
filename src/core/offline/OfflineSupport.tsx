@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { IconButton, Snackbar } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
 import WifiIcon from "@mui/icons-material/Wifi"
 import WifiOffIcon from "@mui/icons-material/WifiOff"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
@@ -31,6 +32,35 @@ function noticeContent(notice: OfflineNotice) {
       <span className="flex items-center gap-2">
         <WifiOffIcon fontSize="small" />
         {"saved on this device — it syncs when you're back online"}
+      </span>
+    )
+  }
+  if (notice.kind === "signOutOffline") {
+    return (
+      <span className="flex items-center gap-2">
+        <WifiOffIcon fontSize="small" />
+        {"you're offline — signing out needs a connection"}
+      </span>
+    )
+  }
+  if (notice.kind === "signOutPending") {
+    const plural = notice.count > 1
+    return (
+      <span className="flex items-center gap-2">
+        <ErrorOutlineIcon fontSize="small" />
+        {`${notice.count} dream${
+          plural ? "s" : ""
+        } still waiting to sync — try again in a moment, or open ${
+          plural ? "their" : "its"
+        } day to retry or discard`}
+      </span>
+    )
+  }
+  if (notice.kind === "deleteFailed") {
+    return (
+      <span className="flex items-center gap-2">
+        <ErrorOutlineIcon fontSize="small" />
+        {"the account could not be deleted — please try again"}
       </span>
     )
   }
@@ -74,7 +104,12 @@ export default function OfflineSupport() {
     setSyncAuthRequired(false)
     registerServiceWorker()
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
-    if (typeof hydratedFor === "number" && hydratedFor !== userId) getQueryClient().clear()
+    // resetQueries, not clear: clear() leaves the mounted observers pointing at removed queries,
+    // so the previous user's data would stay on screen until the next render; a reset empties
+    // every query and refetches the active ones under the new session
+    if (typeof hydratedFor === "number" && hydratedFor !== userId) {
+      void getQueryClient().resetQueries()
+    }
     hydratedFor = userId
     // a shared device keeps no other user's journal copy (their outbox stays, see the helper)
     try {

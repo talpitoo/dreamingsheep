@@ -147,8 +147,8 @@ const TermsOfServicePage: BlitzPage = () => {
                     <li>Backups are performed regularly, but data loss is possible</li>
                     <li>
                       Dreams written offline stay on your device until the app reconnects and syncs
-                      them; logging out, deleting your account or clearing the browser&apos;s site
-                      data before that removes them
+                      them; deleting your account or clearing the browser&apos;s site data before
+                      that removes them (signing out waits until they have synced)
                     </li>
                   </ul>
                 </Typography>

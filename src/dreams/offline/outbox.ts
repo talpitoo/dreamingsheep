@@ -175,14 +175,19 @@ export async function syncOutbox(
 
     const statusCode = (error as { statusCode?: number } | null | undefined)?.statusCode
     // 408 (request timeout) and 429 (too many requests) are 4xx by number only:
-    // the server asks for later, it does not reject the dream — they wait it out
-    // with the gateway outages below instead of parking the entry
-    const askedToWait = statusCode === 408 || statusCode === 429
+    // the server asks for later, it does not reject the dream. A 2xx/3xx whose
+    // body was not our JSON (a captive portal, a proxy page) never reached the
+    // API at all. Neither rejects the dream: they wait it out with the gateway
+    // outages below instead of parking the entry or spending its attempts
+    const waitItOut =
+      statusCode === 408 ||
+      statusCode === 429 ||
+      (typeof statusCode === "number" && statusCode < 400)
     const permanent =
       name === "ZodError" ||
       name === "AuthorizationError" ||
       name === "NotFoundError" ||
-      (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500 && !askedToWait)
+      (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500 && !waitItOut)
     if (permanent) {
       patchEntry(storage, userId, clientId, { lastError: String(error) })
       continue
@@ -190,7 +195,7 @@ export async function syncOutbox(
 
     // A gateway outage (nginx's maintenance page during a deploy) is not this
     // entry's fault: wait it out, however long, without spending its attempts.
-    if (askedToWait || statusCode === 502 || statusCode === 503 || statusCode === 504) {
+    if (waitItOut || statusCode === 502 || statusCode === 503 || statusCode === 504) {
       return { synced, authRequired: false, blocked: true }
     }
 

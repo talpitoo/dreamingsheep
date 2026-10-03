@@ -1,10 +1,16 @@
 import { useSyncExternalStore } from "react"
 
-// the one offline notification slot ("saved on this device", "synced"): the latest message
-// replaces the previous one and stays until the user dismisses it — nothing auto-hides, so it is
-// always clear what happened. Written by the dreams page and the sync engine, shown by
-// OfflineSupport. Mirrors the tiny external store of src/auth/client.ts
-export type OfflineNotice = { kind: "saved" | "synced"; count: number }
+// the one persistent notification slot ("saved on this device", "synced", a refused offline
+// sign-out, a failed account deletion): the latest message replaces the previous one and stays
+// until the user dismisses it — nothing auto-hides, so it is always clear what happened. Written
+// by the dreams page, the sync engine, Header and the settings form; shown by OfflineSupport,
+// which owns the copy. Mirrors the tiny external store of src/auth/client.ts
+export type OfflineNotice =
+  | { kind: "saved"; count: number }
+  | { kind: "synced"; count: number }
+  | { kind: "signOutOffline" }
+  | { kind: "signOutPending"; count: number }
+  | { kind: "deleteFailed" }
 
 let notice: OfflineNotice | null = null
 const listeners = new Set<() => void>()

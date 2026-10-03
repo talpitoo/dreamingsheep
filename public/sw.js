@@ -18,6 +18,9 @@ const MANIFEST = "/sw-precache.json"
 const NAV_TIMEOUT_MS = 4000
 const PAGES_LIMIT = 50
 const ASSET_LIMIT = 100
+// the precache is caught up once per worker start (a worker lives ~30 s past its last event, so
+// this is roughly once per app session): the manifest fetch below is a conditional request
+let precacheChecked = false
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -118,7 +121,9 @@ async function navigationHandler(event) {
   const key = pageKey(request.url)
   // a logged-in "/" is always a redirect and never gets its own cache entry — look up the
   // shell as "/"'s offline stand-in instead of falling through to the network's own TCP
-  // timeout on an up-but-dead connection.
+  // timeout on an up-but-dead connection. Only the runtime cache can stand in for "/": a
+  // logged-out visitor has no /dreams there (wiped at logout, never put without a login), so
+  // a slow landing page is waited for instead of being replaced by the journal's shell
   const lookupKey = key === "/" ? FALLBACK_PATH : key
   const network = fetch(request)
   // whatever the network eventually returns refreshes the shell — even after the timeout
@@ -128,8 +133,13 @@ async function navigationHandler(event) {
     network
       .then((res) => {
         if (!res.ok) return undefined
-        // posts publish after users install; catch up the precache on every /blog visit
-        if (key === "/blog") event.waitUntil(refreshPrecache())
+        // posts publish after users install; catch up the precache on the first successful
+        // navigation of this worker's life (the Blog link is a client-side navigation, so a
+        // /blog-only hook would hardly ever run)
+        if (!precacheChecked) {
+          precacheChecked = true
+          event.waitUntil(refreshPrecache())
+        }
         // a logged-in "/" never gets this far: navigations fetch with redirect mode "manual", so
         // its 307 is an opaqueredirect that `!res.ok` already rejected. What is left is the
         // logged-out landing page, which must never shadow the shell "/" is served offline
@@ -138,7 +148,11 @@ async function navigationHandler(event) {
       })
       .catch(() => undefined)
   )
-  const cached = await matchAny(lookupKey, [PAGES_CACHE, PRECACHE])
+  // only a shell that came from a real navigation is good enough to serve while the network is
+  // merely slow: its chunks went through cacheFirst, and it is refreshed on every online visit.
+  // The precache is the install-day build — after a deploy its /_next/static chunks are gone from
+  // the server, so serving it online would 404 its own scripts; it is for offline only (below)
+  const cached = await matchAny(lookupKey, [PAGES_CACHE])
   if (cached) {
     // slow is not offline: give the network a moment, then serve the cached shell
     const res = await Promise.race([network.catch(() => undefined), delay(NAV_TIMEOUT_MS)])
@@ -147,10 +161,11 @@ async function navigationHandler(event) {
   try {
     return await network
   } catch {
-    // private pages SSR as static shells (no user data in the HTML) — safe to serve. Prefer
-    // PAGES_CACHE first: it's refreshed on every online visit, PRECACHE is only the install-day
-    // build and its chunks eventually vanish from /_next/static.
+    // offline: the page's own precached shell if it has one (FAQ, blog), else the journal's shell
+    // — private pages SSR as static shells (no user data in the HTML), safe to serve. PAGES_CACHE
+    // first: it is refreshed on every online visit, PRECACHE is only the install-day build.
     return (
+      (await matchAny(lookupKey, [PRECACHE])) ||
       (await matchAny(FALLBACK_PATH, [PAGES_CACHE, PRECACHE])) ||
       new Response("you are offline and this page was never cached — Meh!", {
         status: 503,
@@ -207,7 +222,10 @@ async function offlineImage(event) {
   const isStatic = url.pathname.startsWith("/_next/static/")
   if (isStatic && (file.startsWith("title-") || file.startsWith("logo-"))) return transparentImage()
   const name = file.split(".")[0]
-  const cover = file.startsWith("blog-") || (await coverNames()).includes(name)
+  // a sheep drawing is a page sheep first, even where a post borrows it as its cover
+  // (sheep-privacy, sheep-matrix): the offline sheep is its natural stand-in
+  const cover =
+    !file.startsWith("sheep-") && (file.startsWith("blog-") || (await coverNames()).includes(name))
   const standIn = cover ? OFFLINE_BLOG_COVER : OFFLINE_SHEEP
   const cached = (await safeMatch(PRECACHE, standIn)) || (await safeMatch(PRECACHE, OFFLINE_SHEEP))
   if (cached) return cached

@@ -23,6 +23,19 @@ function label(options: Symbol[]): PartialSymbol[] {
 
 // allowCreate: only the dream create/edit form may offer the `Add "…"` instant-symbol
 // option; the search/stats filter panels pick from existing symbols only
+// the picker's query, shared with DreamsPage's once-per-session prefetch: the picker sits behind
+// the form's "More" and fetches only when opened, so without the prefetch a device whose user never
+// opened it online would have no symbols to attach offline
+export function autocompleteSymbolsParams(userId: number | undefined) {
+  return {
+    orderBy: { name: "asc" as const },
+    // NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
+    // where: { OR: [{ relatedToId: userId }, { authorId: userId }] },
+    where: { OR: [{ relatedTo: { some: { id: userId } } }, { authorId: userId }] },
+    take: 200,
+  }
+}
+
 export const SymbolsAutocomplete = ({ allowCreate = false }: { allowCreate?: boolean }) => {
   const user = useCurrentUser()
   const online = useOnlineStatus()
@@ -35,13 +48,7 @@ export const SymbolsAutocomplete = ({ allowCreate = false }: { allowCreate?: boo
   // isLoading stuck at true — the picker renders empty (not "Loading…") instead of crashing
   const [symbolsResult, { isLoading }] = useQuery(
     getAutocompleteSymbols,
-    {
-      orderBy: { name: "asc" },
-      // NOTE: fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110
-      // where: { OR: [{ relatedToId: user?.id }, { authorId: user?.id }] },
-      where: { OR: [{ relatedTo: { some: { id: user?.id } } }, { authorId: user?.id }] },
-      take: 200,
-    },
+    autocompleteSymbolsParams(user?.id),
     { queryKey, enabled: online || hasCached }
   )
   const symbols = symbolsResult?.symbols ?? []

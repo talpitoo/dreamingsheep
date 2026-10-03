@@ -1,5 +1,5 @@
 import { getQueryClient, queryKeyFor, rpcFetch, useMutation, useQuery } from "src/core/rpc-client"
-import { useOnlineStatus } from "src/core/offline/onlineStatus"
+import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import { Form } from "src/core/components/Form"
 export { FORM_ERROR } from "src/core/components/Form"
 import { Button, Grid, Snackbar, TextField, TextFieldProps } from "@mui/material"
@@ -166,6 +166,9 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
   // value files to the previous day's row. Returns true when handled here so
   // the viewed day's field stays untouched.
   async function saveBedtimeToNight(value: Date): Promise<boolean> {
+    // offline is read-only: the picker dialog is a portal outside the disabled fieldset, so its
+    // "now" button and its close still reach here — "handled" with nothing saved, field untouched
+    if (!isBrowserOnline()) return true
     const targetDay = bedtimeNightTarget(value)
     if (!targetDay || targetDay === currentDate) return false
     try {
@@ -235,6 +238,8 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
                     />
                   )}
                   onChangeSubmit={async (value) => {
+                    // see saveBedtimeToNight: offline the mutation would only pause until reconnect
+                    if (!isBrowserOnline()) return
                     try {
                       if (!sleepingTime) {
                         await createSleepingTimeMutation({
@@ -275,6 +280,8 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
                     />
                   )}
                   onChangeSubmit={async (value) => {
+                    // see saveBedtimeToNight: offline the mutation would only pause until reconnect
+                    if (!isBrowserOnline()) return
                     try {
                       if (!sleepingTime) {
                         await createSleepingTimeMutation({

@@ -111,6 +111,14 @@ the ones after it.
   307 to `/dreams`, and a redirected response handed to a navigation is a browser
   network error (found in review, 2026-09-27). Next's per-page data
   (`/_next/data/*.json`, sent `no-store`) is passed through untouched, like `/api/`.
+
+  > **Superseded (2026-09-28, then 2026-10-03):** the caches are `ds-*-v2` behind a constant
+  > `VERSION`; `ds-static` is unversioned on purpose (hashed URLs never collide, and a bump must
+  > not delete the chunks an open session uses) — there is no build-id versioning and no
+  > activate-time chunk cleanup. Since the holistic review the 4 s race serves only the runtime
+  > page cache (a shell from a real navigation, chunks cached); the install-day precache is for
+  > offline only, and the precache catch-up runs once per worker start, not on `/blog` visits.
+
 - **Two page caches**: `ds-precache-v1` holds the install-time shells (`/dreams`, FAQ,
   blog index, every post) plus the offline sheep and **survives logout**; `ds-pages-v1`
   holds runtime-cached navigations and is wiped on logout.
@@ -163,8 +171,10 @@ the ones after it.
   linger for user B on a shared device). Cache keys embed the userId. Because a
   purge would silently discard dreams written offline, the logout first runs a
   best-effort sync of the outbox when online — through the same lock-guarded runner
-  the sync engine uses (implementation review, 2026-09-28); an offline logout still
-  purges (privacy first), a confirmation dialog is a follow-up.
+  the sync engine uses (implementation review, 2026-09-28). An offline sign-out is refused
+  with a notice (Copilot review, 2026-10-03): the session cookie is HttpOnly, only the server
+  can end a session, and a local purge alone would leave the device logged in on the next
+  load — react-query would just hold the mutation paused until reconnect. Pending dreams stay.
 
 ### C. Dream outbox + sync (`src/dreams/offline/outbox.ts`)
 
@@ -367,4 +377,36 @@ What was checked and what changed, so the next reader does not redo it:
 - **Accepted and documented:** the offline copy is plaintext in the browser's storage (the policy
   says so: lock the device, log out on shared computers); a session that expires without logout
   leaves the owner's own snapshot on the owner's device until the next boot as someone else, or
-  until site data is cleared; an offline logout drops pending dreams (privacy over data).
+  until site data is cleared; sign-out needs a connection (see B) and is refused with a notice
+  while any dream is still unsynced after the pre-logout sync (parked, blocked or slower than
+  its 10 s bound) — a logout never drops a dream; the dream's day offers retry and discard.
+
+## Holistic review (2026-10-03, three independent read-only passes over the whole diff)
+
+After several rounds of local fixes the whole branch was reviewed as one object. Fixed:
+
+- the navigation race served the install-day precache on a slow link while online — after a
+  deploy its chunks 404 — and handed the `/dreams` shell to a logged-out visitor opening `/`;
+  it now races against the runtime page cache only (precache = offline only); the new-post
+  catch-up moved from `/blog` hard visits (the Blog link is client-side) to once per worker start
+- sign-out purged dreams the pre-logout sync could not deliver: refused with a notice instead
+- writes that outlived a connection drop: the delete dialog (delete disabled, hint), the symbol
+  picture upload (hidden offline, spinner reset on failure), the bedtime/wake-up picker handlers
+  (a portal outside the disabled fieldset)
+- a non-JSON 2xx/3xx answer (captive portal) no longer spends the dream's attempts
+- only paginated `getDreams` variants are persisted (stats/search ranges crowded out days and
+  were serialised on every write); the dreams page prefetches the symbol picker's list once per
+  session so offline symbol attachment does not depend on having opened the picker online
+- a cross-tab user change resets queries (refetch on screen) instead of orphaning observers;
+  the mobile menu collapses on a refused sign-out; the banner says only "you're offline" to
+  logged-out visitors; `sheep-*` images always get the sheep stand-in; dev unregisters a worker
+  left by a local production run; copy: bedtime/wake-up times are listed in the policy, the ToS
+  no longer names sign-out as a way to lose pending dreams, the post says "the days you opened
+  while online"
+- e2e: the open edit, the refused sign-out and the delete dialog are pinned
+
+Left as documented trade-offs: "discard" on a pending card has no confirmation; a deep link can
+open an edit offline (consistent: Cancel + disabled Update); the "log in again" banner is
+reachable only on a CSRF mismatch; counted transient failures (real 5xx) park after ten
+one-minute retries, visible in the banner; whole-journal `getDreams` stays in memory for the
+session (`cacheTime: Infinity` by key); a failed cross-origin image shows the stand-in online too.

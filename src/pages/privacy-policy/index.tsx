@@ -219,11 +219,14 @@ const PrivacyPolicyPage: BlitzPage = () => {
                     </li>
                     <li>
                       <strong>Offline storage</strong> — So the journal works without a connection,
-                      this browser keeps a local copy of your profile, your symbols and the dreams
-                      you recently viewed, plus any dreams written offline that are waiting to sync
-                      (essential, localStorage keys <code>ds.*</code>). The app&apos;s pages and
-                      images are cached by a service worker. None of it leaves your device, and it
-                      is removed when you log out or delete your account.
+                      this browser keeps a local copy of your profile, your symbols, your bedtime
+                      and wake-up times and the dreams you recently viewed, plus any dreams written
+                      offline that are waiting to sync (essential, localStorage keys{" "}
+                      <code>ds.*</code>). The copies stay on your device and are removed when you
+                      log out or delete your account; dreams written offline are sent to our server
+                      once you reconnect, exactly as a dream saved online would be. The app&apos;s
+                      own pages, scripts and images, which contain no personal data, are cached by a
+                      service worker and stay cached.
                     </li>
                   </ul>
                 </Typography>

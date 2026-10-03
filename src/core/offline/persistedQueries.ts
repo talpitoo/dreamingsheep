@@ -1,4 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query"
+import superjson from "superjson"
 import {
   decodeSnapshot,
   encodeSnapshot,
@@ -74,8 +75,25 @@ export function forgetOtherUsersSnapshots(
   for (const key of foreign) storage.removeItem(key)
 }
 
+// getDreams is also the stats and search query: without `take` it is a range of the whole
+// journal, never shown offline (both pages render a notice) — keeping it would only crowd out
+// cached days and cost a serialisation on every write. The paginated day lists are what is kept.
 function isAllowlisted(queryKey: readonly unknown[]): boolean {
-  return typeof queryKey[0] === "string" && ALLOWLIST.includes(queryKey[0])
+  const [key, params] = queryKey
+  if (typeof key !== "string" || !ALLOWLIST.includes(key)) return false
+  if (key !== "getDreams") return true
+  return isPaginated(params)
+}
+
+// queryKeyFor stores the params as a superjson string, so the shape is read back from it
+function isPaginated(serializedParams: unknown): boolean {
+  if (typeof serializedParams !== "string") return false
+  try {
+    const params = superjson.parse<unknown>(serializedParams)
+    return typeof params === "object" && params !== null && "take" in params
+  } catch {
+    return false
+  }
 }
 
 export function persistQueries(storage: KeyValueStorage, userId: number, qc: QueryClient): void {

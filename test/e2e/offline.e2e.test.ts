@@ -156,6 +156,75 @@ function isMarkedInCalendar(page: Page, day: Day) {
   }, day.dayOfMonth)
 }
 
+// the one edit in progress (its card no longer shows the title as text — it sits in the input)
+function editState(page: Page) {
+  return page.evaluate(() => {
+    const form = document.querySelector('form[id^="update-dream_"]') as HTMLFormElement | null
+    const card = form?.closest(".MuiCard-root") as HTMLElement | null
+    const buttons = card ? [...card.querySelectorAll("button")] : []
+    const update = buttons.find((button) => button.textContent?.trim() === "Update")
+    return {
+      mounted: !!form,
+      titleValue:
+        (form?.querySelector('input[name="title"]') as HTMLInputElement | null)?.value ?? null,
+      cancel: buttons.some((button) => button.textContent?.trim() === "Cancel"),
+      update: update ? (update.disabled ? "disabled" : "enabled") : "absent",
+      trash: !!card?.querySelector("span.lucidicon-trash"),
+    }
+  })
+}
+
+async function clickPencilInCard(page: Page, title: string) {
+  const clicked = await page.evaluate((title: string) => {
+    const card = [...document.querySelectorAll(".MuiCard-root")].find((candidate) =>
+      candidate.textContent?.includes(title)
+    )
+    const pencil = card?.querySelector("span.lucidicon-pencil")?.closest("button")
+    ;(pencil as HTMLElement | undefined)?.click()
+    return !!pencil
+  }, title)
+  if (!clicked) throw new Error(`No pencil in the card "${title}"`)
+}
+
+async function clickCancelInEdit(page: Page) {
+  const clicked = await page.evaluate(() => {
+    const card = document.querySelector('form[id^="update-dream_"]')?.closest(".MuiCard-root")
+    const cancel = [...(card?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent?.trim() === "Cancel"
+    )
+    ;(cancel as HTMLElement | undefined)?.click()
+    return !!cancel
+  })
+  if (!clicked) throw new Error("No Cancel in the open edit")
+}
+
+// the desktop account dropdown (the pages open at 1280px wide), then its Sign out entry
+async function clickSignOut(page: Page) {
+  await page.click('button[aria-label="Account of current user"]')
+  await page.waitForSelector('[role="menu"]', { timeout: 10_000 })
+  const clicked = await page.evaluate(() => {
+    const item = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (candidate) => candidate.textContent?.trim() === "Sign out"
+    )
+    ;(item as HTMLElement | undefined)?.click()
+    return !!item
+  })
+  if (!clicked) throw new Error("No Sign out entry in the account menu")
+}
+
+function deleteDialogState(page: Page) {
+  return page.evaluate(() => {
+    const dialog = document.querySelector(".MuiDialog-root") as HTMLElement | null
+    const buttons = dialog ? [...dialog.querySelectorAll("button")] : []
+    const confirm = buttons.find((button) => button.textContent?.trim() !== "Cancel")
+    return {
+      open: !!dialog && dialog.innerText.includes("Delete dream?"),
+      deleteDisabled: !!confirm?.disabled,
+      hint: dialog?.innerText.includes("deleting needs a connection") ?? false,
+    }
+  })
+}
+
 function deviceStorage(page: Page): Promise<Record<string, string>> {
   return page.evaluate(() =>
     Object.fromEntries(
@@ -305,8 +374,78 @@ describe("offline dreams: the outbox round trip", () => {
     expect(storage[outboxKey.replace("ds.outbox.", "ds.queries.")]).toContain('"getDreams"')
   })
 
-  it("deletes the synced dream and it disappears", async () => {
+  it("an edit opened online keeps its text offline, read-only, and sign out is refused offline", async () => {
+    await clickPencilInCard(page, title)
+    await page.waitForSelector('form[id^="update-dream_"] input[name="title"]', { timeout: 15_000 })
+    await page.type('form[id^="update-dream_"] input[name="title"]', " (offline edit)")
+    expect(await editState(page)).toMatchObject({
+      mounted: true,
+      update: "enabled",
+      trash: true,
+    })
+
+    await page.setOfflineMode(true)
+    const edit = await until(
+      () => editState(page),
+      (state) => state.update === "disabled",
+      "the open edit going read-only"
+    )
+    // the form stays with what was typed: a connection drop never discards an edit
+    expect(edit).toEqual({
+      mounted: true,
+      titleValue: `${title} (offline edit)`,
+      cancel: true,
+      update: "disabled",
+      trash: false,
+    })
+
+    // the session cookie is HttpOnly — only the server can end a session, so sign out waits
+    await clickSignOut(page)
+    await until(
+      () => snackbarMessages(page),
+      (messages) => messages.some((message) => message.includes("signing out needs a connection")),
+      "the refused sign-out notice"
+    )
+    expect((await bodyText(page)).toLowerCase()).toContain("zhuangzi")
+    expect(
+      (await deviceStorage(page))[outboxKey.replace("ds.outbox.", "ds.queries.")]
+    ).toBeDefined()
+
+    await page.setOfflineMode(false)
+    await until(
+      () => editState(page),
+      (state) => state.update === "enabled",
+      "the open edit back online"
+    )
+    await clickCancelInEdit(page)
+    await until(
+      () => editState(page),
+      (state) => !state.mounted,
+      "the edit closed"
+    )
+    expect(await dreamCards(page, title)).toEqual(["synced"])
+  })
+
+  it("the delete dialog refuses offline, then deletes the synced dream online", async () => {
     await clickTrashInCard(page, title)
+    await until(
+      () => deleteDialogState(page),
+      (state) => state.open,
+      "the delete dialog"
+    )
+    await page.setOfflineMode(true)
+    const refused = await until(
+      () => deleteDialogState(page),
+      (state) => state.deleteDisabled,
+      "the delete dialog refusing offline"
+    )
+    expect(refused).toEqual({ open: true, deleteDisabled: true, hint: true })
+    await page.setOfflineMode(false)
+    await until(
+      () => deleteDialogState(page),
+      (state) => !state.deleteDisabled,
+      "the delete dialog back online"
+    )
     await confirmDeletionDialog(page)
     await waitForText(page, title, { absent: true })
 

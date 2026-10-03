@@ -215,8 +215,8 @@ describe("outbox", () => {
     expect(remaining[1]!.attempts).toBeUndefined()
   })
 
-  it.each([408, 429, 502, 503, 504])(
-    "syncOutbox waits out a gateway outage or a 'later' answer (%i): blocked, attempts untouched however many runs it lasts",
+  it.each([200, 408, 429, 502, 503, 504])(
+    "syncOutbox waits out a gateway outage, a 'later' answer or a non-JSON 2xx (%i): blocked, attempts untouched however many runs it lasts",
     async (statusCode) => {
       const storage = fakeStorage()
       const send = vi.fn(async () => {

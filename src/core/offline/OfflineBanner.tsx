@@ -1,5 +1,6 @@
 import { Alert } from "@mui/material"
 import WifiOffIcon from "@mui/icons-material/WifiOff"
+import { useSession } from "src/auth/client"
 import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { useSyncAuthRequired } from "src/core/offline/syncStatus"
 import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
@@ -8,6 +9,7 @@ import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
 // scrolls away with it, so it never covers the navigation (the corner ribbon stays put instead)
 export default function OfflineBanner() {
   const online = useOnlineStatus()
+  const { userId } = useSession()
   const pending = usePendingDreams()
   const authRequired = useSyncAuthRequired()
   const authPrompt = authRequired && pending.length > 0
@@ -31,7 +33,9 @@ export default function OfflineBanner() {
           ? `you're offline — ${pending.length} dream${
               pending.length > 1 ? "s" : ""
             } tucked away, they'll sync when you're back`
-          : "you're offline — dreams you add are saved on this device until you're back"
+          : userId
+          ? "you're offline — dreams you add are saved on this device until you're back"
+          : "you're offline"
         : authPrompt
         ? `please log in again to sync ${pending.length} pending dream${
             pending.length > 1 ? "s" : ""
