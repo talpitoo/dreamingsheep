@@ -31,6 +31,7 @@ export const PERSISTED_QUERY_KEYS = [
   "getUser",
   "getDreams",
   "getDreamsByMonth",
+  "getSleepingTime",
   "getSymbols",
   AUTOCOMPLETE_SYMBOLS_QUERY_KEY,
 ] as const
@@ -41,6 +42,7 @@ export const PERSISTED_QUERY_KEYS = [
 const PRIORITY_QUERY_KEYS: readonly string[] = [
   "getCurrentUser",
   "getUser",
+  "getSleepingTime",
   "getSymbols",
   AUTOCOMPLETE_SYMBOLS_QUERY_KEY,
 ]

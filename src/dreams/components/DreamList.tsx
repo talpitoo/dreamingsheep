@@ -1,6 +1,7 @@
 import SymbolName from "src/symbols/components/SymbolName"
 import Link from "next/link"
 import { useMutation } from "src/core/rpc-client"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { useRouter } from "next/router"
 import { Routes } from "src/routes"
 import {
@@ -92,6 +93,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
   const dreamRef = useRef<null | HTMLDivElement>(null)
   const isDreamPage = Routes.DreamsPage().pathname === router.pathname
   const [formValues, setFormValues] = useState<any>(dream)
+  const online = useOnlineStatus()
   const [isEdit, setEdit] = useState(false)
   const [updateDreamMutation, { isLoading: isUpdateDreamLoading }] = useMutation(updateDream)
   const [deleteDreamMutation] = useMutation(deleteDream)
@@ -117,6 +119,12 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
       setEdit(edit)
     }
   }, [edit])
+
+  // offline is read-only: an edit in progress would only pause its save until reconnect
+  useEffect(() => {
+    if (!online && isEdit) changeEdit(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online])
 
   return (
     <Fragment key={dream.id}>
@@ -214,40 +222,43 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                 />
               )}
             </Box>
-            <Box className="flex flex-row ml-0">
-              <IconButton
-                color="primary"
-                className="mr-auto ml-0 md:ml-4"
-                onClick={() => setDeleteDialogVisibility(true)}
-              >
-                <span className="lucidicon-trash"></span>
-              </IconButton>
-              {isEdit && (
-                <Fragment>
-                  <Button onClick={() => changeEdit(false)} disabled={isUpdateDreamLoading}>
-                    Cancel
-                  </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    form={"update-dream_" + dream.id}
-                    disabled={isUpdateDreamLoading}
-                    className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
-                      isUpdateDreamLoading ? "max-w-[113px]" : "max-w-[89px]"
-                    }`}
-                    endIcon={isUpdateDreamLoading && <HourglassTopIcon className="opacity-50" />}
-                  >
-                    Update
-                  </Button>
-                </Fragment>
-              )}
-              {!isEdit && (
-                <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
-                  <span className="lucidicon-pencil"></span>
+            {/* offline, dreams can only be added — no edit/delete controls */}
+            {online && (
+              <Box className="flex flex-row ml-0">
+                <IconButton
+                  color="primary"
+                  className="mr-auto ml-0 md:ml-4"
+                  onClick={() => setDeleteDialogVisibility(true)}
+                >
+                  <span className="lucidicon-trash"></span>
                 </IconButton>
-              )}
-            </Box>
+                {isEdit && (
+                  <Fragment>
+                    <Button onClick={() => changeEdit(false)} disabled={isUpdateDreamLoading}>
+                      Cancel
+                    </Button>
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      form={"update-dream_" + dream.id}
+                      disabled={isUpdateDreamLoading}
+                      className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
+                        isUpdateDreamLoading ? "max-w-[113px]" : "max-w-[89px]"
+                      }`}
+                      endIcon={isUpdateDreamLoading && <HourglassTopIcon className="opacity-50" />}
+                    >
+                      Update
+                    </Button>
+                  </Fragment>
+                )}
+                {!isEdit && (
+                  <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
+                    <span className="lucidicon-pencil"></span>
+                  </IconButton>
+                )}
+              </Box>
+            )}
           </CardActions>
         </Card>
       </Grid>
