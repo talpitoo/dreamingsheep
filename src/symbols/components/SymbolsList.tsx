@@ -75,7 +75,12 @@ export const SymbolsList = ({ customOnly }: { customOnly: boolean }) => {
   // (no suspense), or — after paging or filtering — the previous page's symbols, which
   // keepPreviousData passes off as this one's
   if (!data || (!online && !hasCached))
-    return <Alert severity="info">symbols aren&apos;t cached on this device yet</Alert>
+    return (
+      <Alert severity="info">
+        you&apos;re offline and the symbols haven&apos;t been loaded on this device yet — open this
+        page online once and they&apos;ll be here next time
+      </Alert>
+    )
 
   return (
     <>

@@ -23,7 +23,6 @@ import { KeyboardArrowDown, Settings } from "@mui/icons-material"
 import { DateTime } from "luxon"
 import titleStats from "public/assets/title-stats.png"
 import sheepStats from "public/assets/sheep-stats.png"
-import sheepOffline from "public/assets/sheep-offline.png"
 import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { getDreams } from "src/dreams/client"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
@@ -191,7 +190,7 @@ export const Stats = () => {
               )}
             >
               <Image
-                src={online ? sheepStats : sheepOffline}
+                src={sheepStats}
                 alt="Stats sheep"
                 width={384}
                 height={384}
@@ -208,75 +207,83 @@ export const Stats = () => {
               <Image src={titleStats} alt="Stats" width="77" height="55" />
               <span className="sr-only">Stats</span>
             </h1>
-            <Box className="flex justify-between items-start flex-wrap gap-4">
-              <Card className="bg-white inline-block">
-                <ToggleButtonGroup
-                  value={range}
-                  // NOTE: wrapping via a class instead of orientation={breakpointSm ? "vertical" : "horizontal"}
-                  color="primary"
-                  exclusive
-                  className="flex-wrap"
-                  onChange={(_, value) => {
-                    if (value !== null) {
-                      changeRange(value)
-                    }
-                  }}
-                >
-                  {/* day/week/month — [from–to] — all: the custom toggle is a direct child
+            {/* offline the page is sheep + title + notice: the range and filter controls would
+                drive charts that are not rendered */}
+            {online && (
+              <Box className="flex justify-between items-start flex-wrap gap-4">
+                <Card className="bg-white inline-block">
+                  <ToggleButtonGroup
+                    value={range}
+                    // NOTE: wrapping via a class instead of orientation={breakpointSm ? "vertical" : "horizontal"}
+                    color="primary"
+                    exclusive
+                    className="flex-wrap"
+                    onChange={(_, value) => {
+                      if (value !== null) {
+                        changeRange(value)
+                      }
+                    }}
+                  >
+                    {/* day/week/month — [from–to] — all: the custom toggle is a direct child
                       of the group (Fragments would break MUI's child cloning) so it stays
                       between month and all; its label becomes the chosen span once set */}
-                  {[
-                    ...RANGE_BUTTONS.filter((button) => button.value !== "all"),
-                    { value: "custom" as Range, label: customLabel, shortLabel: customShortLabel },
-                    ...RANGE_BUTTONS.filter((button) => button.value === "all"),
-                  ].map(({ value, label, shortLabel }) => (
-                    <ToggleButton
-                      key={value}
-                      value={value}
-                      // the xs value is !important, so it outranks the sm media rule at EVERY
-                      // width and these buttons stay 48px wide even on desktop. Pre-existing and
-                      // preserved: min-w-[48px]! reproduces it exactly (the contracts pin it)
-                      className="min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]"
-                    >
-                      <Box component="span" className="hidden sm:inline">
-                        {label}
-                      </Box>
-                      <Box component="span" className="inline sm:hidden">
-                        {shortLabel}
-                      </Box>
-                    </ToggleButton>
-                  ))}
-                </ToggleButtonGroup>
-              </Card>
-              {/* range buttons left — gap — Filters toggle (search-page pattern);
-                  the filter panel expands above all charts */}
-              {user?.advancedCharting && (
-                <Card className="bg-white inline-block">
-                  <Button
-                    size="large"
-                    onClick={toggleAdvanced}
-                    aria-expanded={advancedOpen}
-                    aria-controls="advanced-stats-panel"
-                    className="px-4 py-[11px]"
-                    endIcon={
-                      // arbitrary values, not rotate-180/transition-transform: v4's rotate-*
-                      // drives the `rotate` property while this transition names `transform`
-                      <KeyboardArrowDown
-                        className={classnames(
-                          "[transition:transform_0.2s]",
-                          advancedOpen && "[transform:rotate(180deg)]"
-                        )}
-                      />
-                    }
-                  >
-                    <Settings className="inline sm:hidden" />
-                    <Box component="span" className="hidden sm:inline">
-                      Filters
-                    </Box>
-                  </Button>
+                    {[
+                      ...RANGE_BUTTONS.filter((button) => button.value !== "all"),
+                      {
+                        value: "custom" as Range,
+                        label: customLabel,
+                        shortLabel: customShortLabel,
+                      },
+                      ...RANGE_BUTTONS.filter((button) => button.value === "all"),
+                    ].map(({ value, label, shortLabel }) => (
+                      <ToggleButton
+                        key={value}
+                        value={value}
+                        // the xs value is !important, so it outranks the sm media rule at EVERY
+                        // width and these buttons stay 48px wide even on desktop. Pre-existing and
+                        // preserved: min-w-[48px]! reproduces it exactly (the contracts pin it)
+                        className="min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]"
+                      >
+                        <Box component="span" className="hidden sm:inline">
+                          {label}
+                        </Box>
+                        <Box component="span" className="inline sm:hidden">
+                          {shortLabel}
+                        </Box>
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
                 </Card>
-              )}
-            </Box>
+                {/* range buttons left — gap — Filters toggle (search-page pattern);
+                  the filter panel expands above all charts */}
+                {user?.advancedCharting && (
+                  <Card className="bg-white inline-block">
+                    <Button
+                      size="large"
+                      onClick={toggleAdvanced}
+                      aria-expanded={advancedOpen}
+                      aria-controls="advanced-stats-panel"
+                      className="px-4 py-[11px]"
+                      endIcon={
+                        // arbitrary values, not rotate-180/transition-transform: v4's rotate-*
+                        // drives the `rotate` property while this transition names `transform`
+                        <KeyboardArrowDown
+                          className={classnames(
+                            "[transition:transform_0.2s]",
+                            advancedOpen && "[transform:rotate(180deg)]"
+                          )}
+                        />
+                      }
+                    >
+                      <Settings className="inline sm:hidden" />
+                      <Box component="span" className="hidden sm:inline">
+                        Filters
+                      </Box>
+                    </Button>
+                  </Card>
+                )}
+              </Box>
+            )}
 
             {/* the from–to window for the "custom" range — expands (same Collapse animation
                 as the Filters panel) with two dream-highlighted date pickers.
@@ -366,13 +373,13 @@ export const Stats = () => {
   )
 }
 
+// no wrapping <div>: inside Layout's centered flex column a plain div shrinks to its content, and
+// offline the content is one Alert — the Container must stay the flex item, like every other page
 const StatsPage: BlitzPage = () => {
   return (
-    <div>
-      <Suspense fallback={<LoadingSpiral />}>
-        <Stats />
-      </Suspense>
-    </div>
+    <Suspense fallback={<LoadingSpiral />}>
+      <Stats />
+    </Suspense>
   )
 }
 

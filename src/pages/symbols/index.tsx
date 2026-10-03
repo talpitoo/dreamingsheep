@@ -9,7 +9,6 @@ import Layout from "src/core/layouts/Layout"
 import React, { Suspense, useState } from "react"
 import titleSymbols from "public/assets/title-symbols.png"
 import sheepSymbols from "public/assets/sheep-symbols.png"
-import sheepOffline from "public/assets/sheep-offline.png"
 import { Button, Card, CardActions, CardContent, Container, Grid, Box } from "@mui/material"
 import { FORM_ERROR, FORM_RESET, SymbolForm } from "src/symbols/components/SymbolForm"
 import { CreateSymbol } from "src/symbols/validations"
@@ -59,7 +58,7 @@ const SymbolsPage: BlitzPage = () => {
           >
             <SheepLink href={sheepHref}>
               <Image
-                src={online ? sheepSymbols : sheepOffline}
+                src={sheepSymbols}
                 alt="symbols sheep"
                 width={384}
                 height={384}
@@ -83,19 +82,24 @@ const SymbolsPage: BlitzPage = () => {
               : "All symbols"}
           </Typography> */}
           <Suspense fallback={<LoadingSpiral />}>
-            {/* quick jump — the list below is paginated, this finds a symbol directly */}
-            <SymbolJumpAutocomplete
-              customOnly={customOnly}
-              onCustomOnlyChange={onCustomOnlyChange}
-            />
+            {/* quick jump — the list below is paginated, this finds a symbol directly. Offline the
+                list is read-only from the cache: no jump box or filter (they query), no new symbol */}
+            {online && (
+              <SymbolJumpAutocomplete
+                customOnly={customOnly}
+                onCustomOnlyChange={onCustomOnlyChange}
+              />
+            )}
             <SymbolsList customOnly={customOnly} />
           </Suspense>
-          <p className="mt-6 text-right">
-            <Button variant="contained" onClick={() => setShowForm(true)}>
-              New symbol
-            </Button>
-          </p>
-          {showForm && (
+          {online && (
+            <p className="mt-6 text-right">
+              <Button variant="contained" onClick={() => setShowForm(true)}>
+                New symbol
+              </Button>
+            </p>
+          )}
+          {online && showForm && (
             <Grid className="mt-4">
               <Card className="-mx-4">
                 <CardContent>

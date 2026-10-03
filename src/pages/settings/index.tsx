@@ -12,7 +12,6 @@ import { UpdateUserForm } from "src/users/components/UpdateUserForm"
 import { Alert, Container, Grid, Box } from "@mui/material"
 import titleSettings from "public/assets/title-settings.png"
 import sheepSettings from "public/assets/sheep-settings.png"
-import sheepOffline from "public/assets/sheep-offline.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import { useOnlineStatus } from "src/core/offline/onlineStatus"
 
@@ -34,24 +33,9 @@ export const Settings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // never cached on this device and offline: nothing to show, and nothing to edit
-  if (!user)
-    return (
-      <Container>
-        <Alert severity="info" className="mb-4">
-          settings aren&apos;t available offline — reconnect to change anything here
-        </Alert>
-      </Container>
-    )
-
   return (
     <Fragment>
       <Container>
-        {!online && (
-          <Alert severity="info" className="mb-4">
-            settings aren&apos;t available offline — reconnect to change anything here
-          </Alert>
-        )}
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} sm={6} md={4}>
@@ -62,7 +46,7 @@ export const Settings = () => {
               )}
             >
               <Image
-                src={online ? sheepSettings : sheepOffline}
+                src={sheepSettings}
                 alt="settings sheep"
                 width={384}
                 height={384}
@@ -73,15 +57,23 @@ export const Settings = () => {
         </Grid>
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
-          <Grid item md={8}>
+          <Grid item xs={12} md={8}>
             <h1 className="heading">
               <Image src={titleSettings} alt="Settings" width="130" height="55" />
               <span className="sr-only">Settings</span>
             </h1>
-            {/* NOTE: reload instead of refetch is a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110.
-                TODO (future-feature): debug further and restore the refetch variant */}
-            {/* <UpdateUserForm initialValues={{ ...user }} onSuccess={refetch} /> */}
-            <UpdateUserForm initialValues={{ ...user }} onSuccess={router.reload} />
+            {/* offline the page is sheep + title + notice — nothing here can be changed without
+                the server, so nothing is shown (a settings save would only pause until reconnect) */}
+            {online && user ? (
+              // NOTE: reload instead of refetch is a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110.
+              // TODO (future-feature): debug further and restore the refetch variant
+              // <UpdateUserForm initialValues={{ ...user }} onSuccess={refetch} />
+              <UpdateUserForm initialValues={{ ...user }} onSuccess={router.reload} />
+            ) : (
+              <Alert severity="info">
+                settings aren&apos;t available offline — reconnect to change anything here
+              </Alert>
+            )}
           </Grid>
         </Grid>
       </Container>
@@ -89,13 +81,13 @@ export const Settings = () => {
   )
 }
 
+// no wrapping <div>: inside Layout's centered flex column a plain div shrinks to its content, and
+// offline the content is one Alert — the Container must stay the flex item, like every other page
 const SettingsPage: BlitzPage = () => {
   return (
-    <div>
-      <Suspense fallback={<LoadingSpiral />}>
-        <Settings />
-      </Suspense>
-    </div>
+    <Suspense fallback={<LoadingSpiral />}>
+      <Settings />
+    </Suspense>
   )
 }
 

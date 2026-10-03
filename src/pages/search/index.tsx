@@ -12,7 +12,6 @@ import { getDreams } from "src/dreams/client"
 import React, { Fragment, Suspense, useMemo } from "react"
 import titleSearch from "public/assets/title-search.png"
 import sheepSearch from "public/assets/sheep-search.png"
-import sheepOffline from "public/assets/sheep-offline.png"
 import { Alert, Button, Container, Grid, Typography, Box } from "@mui/material"
 import { DreamTime, DreamType, RecallTime, Symbol } from "db"
 import { DreamList } from "src/dreams/components/DreamList"
@@ -137,7 +136,7 @@ const SearchPage: BlitzPage = () => {
             >
               <SheepLink href={sheepHref}>
                 <Image
-                  src={online ? sheepSearch : sheepOffline}
+                  src={sheepSearch}
                   alt="dreams sheep"
                   width={384}
                   height={384}
@@ -149,7 +148,7 @@ const SearchPage: BlitzPage = () => {
         </Grid>
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
-          <Grid item md={8}>
+          <Grid item xs={12} md={8}>
             <h1 className="heading">
               <Image src={titleSearch} alt="Search" width="100" height="55" />
               <span className="sr-only">Search</span>
@@ -182,7 +181,7 @@ const SearchPage: BlitzPage = () => {
 
             {/* mirrors the stats page's "View as list": carries the current filters over.
                 the stats page defaults to the "all" range for these (search has no range) */}
-            {user?.advancedCharting && (
+            {online && user?.advancedCharting && (
               <Box className="mt-4 text-right">
                 <Link href={Routes.StatsPage(statsQuery)} passHref={true}>
                   <Button variant="contained">View stats</Button>
