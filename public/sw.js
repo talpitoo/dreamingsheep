@@ -14,6 +14,7 @@ const FALLBACK_PATH = "/dreams"
 const OFFLINE_SHEEP = "/assets/sheep-offline.png"
 // blog covers (article pages, the blog index cards, "more from the blog") get their own stand-in
 const OFFLINE_BLOG_COVER = "/assets/blog-offline.png"
+const MANIFEST = "/sw-precache.json"
 const NAV_TIMEOUT_MS = 4000
 const PAGES_LIMIT = 50
 const ASSET_LIMIT = 100
@@ -48,7 +49,12 @@ async function refreshPrecache() {
     let urls = [FALLBACK_PATH, OFFLINE_SHEEP, OFFLINE_BLOG_COVER]
     try {
       const res = await fetch("/sw-precache.json", { cache: "no-cache" })
-      if (res.ok) urls = urls.concat(await res.json())
+      if (res.ok) {
+        // the manifest itself is kept too: offlineImage reads the cover names from it
+        await cache.put(MANIFEST, res.clone())
+        const manifest = await res.json()
+        urls = urls.concat(Array.isArray(manifest) ? manifest : manifest.pages || [])
+      }
     } catch {}
     const missing = []
     for (const url of urls) {
@@ -191,15 +197,17 @@ async function offlineImage(event) {
   // every uncached image offline gets a stand-in, both precached at install: blog covers the
   // generic cover, everything else the offline sheep — except the app's own handwritten
   // titles and logo (static imports named title-*/logo-*), which vanish rather than turn into
-  // a tiny sheep. A cover is any /assets image a blog page asks for (index cards, "more from
-  // the blog" — whatever the file is called), any file named blog-*, or a static import on a
-  // blog page that is not the page sheep (sheep-*). The gray SVG only covers a failed precache.
+  // a tiny sheep. A cover is recognised by name: the build lists every post's cover in the
+  // manifest (they are called anything — blog-*, sheep-matrix, a pexels photo), and the name
+  // is the same whether the file comes from /assets, as a content-hashed static import or
+  // from another host. Pages cannot tell: a client's URL is its creation URL and does not
+  // follow in-app navigation. The gray SVG only covers a failed precache.
   const url = new URL(event.request.url)
   const file = url.pathname.split("/").pop() || ""
   const isStatic = url.pathname.startsWith("/_next/static/")
   if (isStatic && (file.startsWith("title-") || file.startsWith("logo-"))) return transparentImage()
-  const pageSheep = isStatic && file.startsWith("sheep-")
-  const cover = file.startsWith("blog-") || (!pageSheep && (await onBlogPage(event)))
+  const name = file.split(".")[0]
+  const cover = file.startsWith("blog-") || (await coverNames()).includes(name)
   const standIn = cover ? OFFLINE_BLOG_COVER : OFFLINE_SHEEP
   const cached = (await safeMatch(PRECACHE, standIn)) || (await safeMatch(PRECACHE, OFFLINE_SHEEP))
   if (cached) return cached
@@ -211,12 +219,13 @@ async function offlineImage(event) {
   return new Response(svg, { headers: { "Content-Type": "image/svg+xml" } })
 }
 
-async function onBlogPage(event) {
+async function coverNames() {
   try {
-    const client = event.clientId && (await self.clients.get(event.clientId))
-    return !!client && new URL(client.url).pathname.startsWith("/blog")
+    const manifest = await safeMatch(PRECACHE, MANIFEST)
+    const data = manifest ? await manifest.json() : null
+    return (data && !Array.isArray(data) && data.covers) || []
   } catch {
-    return false
+    return []
   }
 }
 

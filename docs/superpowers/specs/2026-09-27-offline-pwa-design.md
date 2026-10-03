@@ -329,9 +329,12 @@ The heart of the critical scenario.
   every uncached blog cover (file names starting with `blog-`, on article pages, the blog index
   and "more from the blog"); the announcement post uses it as its own cover and the grayscale
   placeholder cover is gone.
-- **Which stand-in (2026-10-03):** the worker decides by context, not by file name — any `/assets`
-  image a blog page requests, any `blog-*` file, or a non-sheep static import on a blog page is a
-  cover (→ `blog-offline.png`); `title-*`/`logo-*` static imports vanish (transparent); everything
-  else gets `sheep-offline.png`. Cross-origin covers (two posts) are never cached but get the
-  generic cover when their fetch fails, and the blog index / "more from the blog" covers also swap
-  to it on their own error event — the only help for a precached page that could not hydrate.
+- **Which stand-in (2026-10-03):** the build lists every post's cover name in `sw-precache.json`
+  (`{ pages, covers }`, from the `data.md` `imageUrl`s — article covers are the same files) and
+  the worker keeps that manifest in its precache: an uncached image whose name is a cover (or
+  starts with `blog-`) gets `blog-offline.png`, `title-*`/`logo-*` static imports vanish
+  (transparent), everything else gets `sheep-offline.png`. Deciding by page was tried and
+  dropped: a client's URL is its creation URL and does not follow in-app navigation. Cross-origin
+  covers (two posts) are never cached but get the generic cover when their fetch fails, and the
+  blog index / "more from the blog" covers also swap to it on their own error event — the only
+  help for a precached page that could not hydrate.
