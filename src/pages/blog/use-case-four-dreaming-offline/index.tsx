@@ -12,7 +12,7 @@ import RelatedPosts from "src/core/components/RelatedPosts"
 import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
 import type { GetStaticProps } from "next"
 import Image from "next/image"
-import blogDreamingOffline from "public/assets/blog-dreaming-offline.jpg"
+import blogOffline from "public/assets/blog-offline.png"
 import Link from "next/link"
 
 const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({ related }) => {
@@ -60,8 +60,8 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
               <CardHeader subheader="Sun Sep 27 2026" className="py-0" />
               <CardContent>
                 <Image
-                  src={blogDreamingOffline}
-                  alt="The Floating Island by Araiko-O"
+                  src={blogOffline}
+                  alt="the offline sheep"
                   width={900}
                   height={692}
                   className="w-full h-auto"
@@ -136,7 +136,7 @@ ArticlePageUseCaseFourDreamingOffline.getLayout = (page) => (
   <Layout
     title="Use case four: Dreaming offline"
     description="dreamingsheep now works offline: open the journal without a signal, write the dream down, and it quietly syncs the next time you are connected."
-    ogCoverImage={blogDreamingOffline.src}
+    ogCoverImage={blogOffline.src}
     ogCoverImageSecondary={ogCoverImageBlog.src}
   >
     {page}

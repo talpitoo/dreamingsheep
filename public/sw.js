@@ -12,6 +12,8 @@ const STATIC_CACHE = "ds-static"
 const ASSETS_CACHE = `ds-assets-${VERSION}` // /assets, /fonts, manifest…
 const FALLBACK_PATH = "/dreams"
 const OFFLINE_SHEEP = "/assets/sheep-offline.png"
+// blog covers (article pages, the blog index cards, "more from the blog") get their own stand-in
+const OFFLINE_BLOG_COVER = "/assets/blog-offline.png"
 const NAV_TIMEOUT_MS = 4000
 const PAGES_LIMIT = 50
 const ASSET_LIMIT = 100
@@ -43,7 +45,7 @@ function pageKey(url) {
 async function refreshPrecache() {
   try {
     const cache = await caches.open(PRECACHE)
-    let urls = [FALLBACK_PATH, OFFLINE_SHEEP]
+    let urls = [FALLBACK_PATH, OFFLINE_SHEEP, OFFLINE_BLOG_COVER]
     try {
       const res = await fetch("/sw-precache.json", { cache: "no-cache" })
       if (res.ok) urls = urls.concat(await res.json())
@@ -153,7 +155,7 @@ async function cacheFirst(event, cacheName, limit) {
     if (response.ok) event.waitUntil(putLimited(cacheName, request, response.clone(), limit))
     return response
   } catch {
-    if (request.destination === "image") return offlineImage()
+    if (request.destination === "image") return offlineImage(request)
     return new Response("", { status: 504 })
   }
 }
@@ -173,15 +175,19 @@ async function staleWhileRevalidate(event, cacheName, limit) {
   }
   const response = await network
   if (response) return response
-  if (request.destination === "image") return offlineImage()
+  if (request.destination === "image") return offlineImage(request)
   return new Response("", { status: 504 })
 }
 
-async function offlineImage() {
-  // the offline sheep, precached at install: every uncached image offline becomes a sheep,
-  // even a never-visited blog cover. The gray SVG only covers a failed precache.
-  const sheep = await safeMatch(PRECACHE, OFFLINE_SHEEP)
-  if (sheep) return sheep
+async function offlineImage(request) {
+  // every uncached image offline becomes a sheep: blog covers (file names start with "blog-",
+  // whether served from /assets or as content-hashed /_next/static/media imports) get the
+  // generic blog cover, everything else the offline sheep — both precached at install.
+  // The gray SVG only covers a failed precache.
+  const file = new URL(request.url).pathname.split("/").pop() || ""
+  const standIn = file.startsWith("blog-") ? OFFLINE_BLOG_COVER : OFFLINE_SHEEP
+  const cached = (await safeMatch(PRECACHE, standIn)) || (await safeMatch(PRECACHE, OFFLINE_SHEEP))
+  if (cached) return cached
   const svg =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 288">' +
     '<rect width="100%" height="100%" fill="#e0e0e0"/>' +
