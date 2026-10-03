@@ -235,7 +235,8 @@ this is how it is built.
   `src/dreams/offline/*.test.ts` — fake storage, fake timers, Web Lock stand-ins) and
   `test/e2e/offline.e2e.test.ts` (`page.setOfflineMode`, no worker needed, tolerates dreams
   already on today; covers the outbox round trip, the open edit staying read-only, the refused
-  offline sign-out and the delete dialog). The worker is production-only: `yarn build && yarn start`, DevTools →
+  offline sign-out, the delete dialog, a dream the server rejects getting parked, and sign-out
+  refused while it waits — seeded straight into Local Storage — then discard and a real sign-out). The worker is production-only: `yarn build && yarn start`, DevTools →
   Network → Offline, plain reload. Run the unit suite and the offline spec for any change to
   queries, forms, `Header`/`Layout`, `_app`, the dreams page or `src/*/offline/`.
 - CI runs lint + type-check + unit only (`.github/workflows/test.yml`).

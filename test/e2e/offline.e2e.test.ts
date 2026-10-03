@@ -225,6 +225,37 @@ function deleteDialogState(page: Page) {
   })
 }
 
+// the pending card of a parked dream, found by its description (its title is what the server rejects)
+function parkedCard(page: Page, description: string) {
+  return page.evaluate((description: string) => {
+    const card = [...document.querySelectorAll(".MuiCard-root")].find((candidate) =>
+      candidate.textContent?.includes(description)
+    ) as HTMLElement | undefined
+    const labels = card
+      ? [...card.querySelectorAll("button")].map((b) => b.textContent?.trim())
+      : []
+    return { found: !!card, retry: labels.includes("retry"), discard: labels.includes("discard") }
+  }, description)
+}
+
+async function clickParkedCardButton(page: Page, description: string, label: "retry" | "discard") {
+  const clicked = await page.evaluate(
+    (description: string, label: string) => {
+      const card = [...document.querySelectorAll(".MuiCard-root")].find((candidate) =>
+        candidate.textContent?.includes(description)
+      )
+      const button = [...(card?.querySelectorAll("button") ?? [])].find(
+        (candidate) => candidate.textContent?.trim() === label
+      )
+      ;(button as HTMLElement | undefined)?.click()
+      return !!button
+    },
+    description,
+    label
+  )
+  if (!clicked) throw new Error(`No "${label}" on the parked card`)
+}
+
 function deviceStorage(page: Page): Promise<Record<string, string>> {
   return page.evaluate(() =>
     Object.fromEntries(
@@ -453,5 +484,82 @@ describe("offline dreams: the outbox round trip", () => {
       waitUntil: "networkidle2",
     })
     await waitForText(page, "0 results")
+  })
+
+  // seeded straight into Local Storage, as the device holds a dream after an offline night — with
+  // an empty title, which the server rejects for good: that is how a dream gets parked
+  const parkedDescription = `offline e2e parked dream ${Date.now()}`
+
+  it("a dream the server rejects is parked: banner, retry and discard on its card, lastError stored", async () => {
+    await page.evaluate(
+      (key: string, raw: string) => localStorage.setItem(key, raw),
+      outboxKey,
+      superjson.stringify([
+        {
+          clientId: `e2e-parked-${Date.now()}`,
+          userId: Number(outboxKey.replace("ds.outbox.", "")),
+          values: {
+            dreamAt: new Date().toISOString(),
+            title: "",
+            description: parkedDescription,
+            type: "REGULAR",
+            time: "NIGHT",
+            recall: "N_A",
+            mood: 3,
+            favorite: false,
+            symbols: [],
+          },
+          queuedAt: new Date(),
+        },
+      ])
+    )
+    // a fresh load notices the outbox and syncs at once; the server answers with a ZodError
+    await page.goto(`${BASE}/dreams`, { waitUntil: "networkidle2" })
+    await waitForDay(page, today)
+    const cues = await until(
+      () => offlineCues(page),
+      (cues) => cues.banner !== null && cues.banner.includes("needs a look"),
+      "the parked-dream banner"
+    )
+    expect(cues).toEqual({
+      banner: "1 dream needs a look — open its day to retry or discard",
+      ribbon: false,
+    })
+    const card = await until(
+      () => parkedCard(page, parkedDescription),
+      (card) => card.found && card.retry,
+      "the parked card with its retry"
+    )
+    expect(card).toEqual({ found: true, retry: true, discard: true })
+    const outbox = superjson.parse<{ lastError?: string }[]>(
+      (await deviceStorage(page))[outboxKey] ?? "[]"
+    )
+    expect(outbox).toHaveLength(1)
+    expect(outbox[0]!.lastError).toBeTruthy()
+  })
+
+  it("sign out is refused while a dream is still unsynced; after discarding it, sign out works and the device forgets", async () => {
+    await clickSignOut(page)
+    await until(
+      () => snackbarMessages(page),
+      (messages) => messages.some((message) => message.includes("1 dream still waiting to sync")),
+      "the refused sign-out notice"
+    )
+    expect((await bodyText(page)).toLowerCase()).toContain("zhuangzi")
+    expect(superjson.parse((await deviceStorage(page))[outboxKey] ?? "[]")).toHaveLength(1)
+
+    // the way out the notice names: discard it on its day
+    await clickParkedCardButton(page, parkedDescription, "discard")
+    await until(
+      () => offlineCues(page),
+      (cues) => cues.banner === null,
+      "the banner gone"
+    )
+    expect(superjson.parse((await deviceStorage(page))[outboxKey] ?? "[]")).toEqual([])
+
+    await clickSignOut(page)
+    await page.waitForSelector('input[name="email"]', { timeout: 30_000 })
+    const keys = Object.keys(await deviceStorage(page)).filter((key) => key.startsWith("ds."))
+    expect(keys).toEqual([])
   })
 })
