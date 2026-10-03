@@ -362,8 +362,7 @@ export const Stats = () => {
               </Fragment>
             ) : (
               <Alert severity="info">
-                stats aren&apos;t available offline — your dreams are safe, the charts need the
-                mothership
+                stats aren&apos;t available offline — reconnect to see your charts
               </Alert>
             )}
           </Grid>

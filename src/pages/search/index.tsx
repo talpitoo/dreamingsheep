@@ -174,8 +174,7 @@ const SearchPage: BlitzPage = () => {
               </Fragment>
             ) : (
               <Alert severity="info">
-                search isn&apos;t available offline — your dreams are safe, finding them needs a
-                connection
+                search isn&apos;t available offline — reconnect to find your dreams
               </Alert>
             )}
 

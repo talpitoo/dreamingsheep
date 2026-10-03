@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { IconButton, Snackbar } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import WifiIcon from "@mui/icons-material/Wifi"
+import WifiOffIcon from "@mui/icons-material/WifiOff"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
@@ -25,10 +26,9 @@ import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
 
 function noticeContent(notice: OfflineNotice) {
   if (notice.kind === "saved") {
-    // the same night icon as the bedtime toast in SleepingTimeForm
     return (
       <span className="flex items-center gap-2">
-        <span className="lucidicon-starry-night h-5 w-5 text-lg"></span>
+        <WifiOffIcon fontSize="small" />
         {"saved on this device — it syncs when you're back online"}
       </span>
     )
