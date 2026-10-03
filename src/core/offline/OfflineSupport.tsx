@@ -41,6 +41,14 @@ function noticeContent(notice: OfflineNotice) {
   )
 }
 
+// the user this tab last hydrated for: query keys carry no userId and the QueryClient is a module
+// singleton, so when the cookie user changes under an open tab (a logout, or a login as someone
+// else, in ANOTHER tab — cookies are shared) the previous user's queries must go before anything
+// is hydrated or persisted under the new one. Header clears the cache only in the tab that logged
+// out. Only a transition away from a logged-in user clears: a first login in this tab starts from
+// a cache holding nothing private, and the login flow refreshes it as it always has.
+let hydratedFor: number | null | undefined
+
 // app-wide offline behaviour, mounted once in _app: query-cache hydration and persistence, the
 // outbox sync, the corner ribbon, the offline notification snackbar (the banner lives in Layout)
 export default function OfflineSupport() {
@@ -65,6 +73,8 @@ export default function OfflineSupport() {
     setSyncAuthRequired(false)
     registerServiceWorker()
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
+    if (typeof hydratedFor === "number" && hydratedFor !== userId) getQueryClient().clear()
+    hydratedFor = userId
     if (!userId) return
     // before hydrating, so the replayed queries are built with it: react-query drops a query
     // nobody observes once cacheTime (5 min by default) has passed, which would silently turn a

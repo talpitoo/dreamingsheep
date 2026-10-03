@@ -80,12 +80,28 @@ export async function runSync(
 // The logout path's counterpart to runSync: instead of skipping when busy (runSync's
 // ifAvailable), this WAITS for the same lock — or, without Web Locks, the same per-tab guard —
 // so it can never overlap a run and double-submit an entry. It reads the outbox itself, before
-// requesting anything: an empty outbox means there is nothing worth waiting for. Only the wait
-// for another run is bounded (SYNC_NOW_TIMEOUT_MS; without Web Locks the deadline is checked
-// between hand-offs, not during one run): once syncNow runs itself, its requests take as long
-// as the network does. It never throws — logout must proceed whatever happens here (blocked
-// storage, a timed-out wait, a failed sync, ...).
+// requesting anything: an empty outbox means there is nothing worth waiting for. The whole step
+// is bounded by SYNC_NOW_TIMEOUT_MS, the wait for another run as well as its own requests:
+// rpcFetch has no timeout, so a stalled POST would otherwise hold Sign out hostage. On timeout
+// the caller gets `undefined` and proceeds; a run already granted the lock keeps going in the
+// background (an entry leaves the outbox only on success, and the sender checks the session
+// cookie before every request). It never throws — logout must proceed whatever happens here
+// (blocked storage, a timed-out wait, a failed sync, ...).
 export async function syncNow(userId: number): Promise<SyncResult | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race([
+      syncNowUnbounded(userId),
+      new Promise<undefined>((resolve) => {
+        timer = setTimeout(() => resolve(undefined), SYNC_NOW_TIMEOUT_MS)
+      }),
+    ])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function syncNowUnbounded(userId: number): Promise<SyncResult | undefined> {
   try {
     if (readOutbox(window.localStorage, userId).length === 0) return undefined
 

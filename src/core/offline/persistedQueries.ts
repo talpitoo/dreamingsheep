@@ -26,9 +26,10 @@ export { MAX_PERSISTED_QUERIES, PERSIST_BUDGET_CHARS, PERSIST_ENTRY_MAX_CHARS }
 // CreateInstantSymbolDialog refetches after a create
 export const AUTOCOMPLETE_SYMBOLS_QUERY_KEY = "get-symbols-autocomplete"
 
+// never getUser: that query returns the full user row, hashedPassword included — nothing that
+// may sit in localStorage. getCurrentUser is the limited profile the pages read.
 export const PERSISTED_QUERY_KEYS = [
   "getCurrentUser",
-  "getUser",
   "getDreams",
   "getDreamsByMonth",
   "getSleepingTime",
@@ -41,7 +42,6 @@ export const PERSISTED_QUERY_KEYS = [
 // getDreams/getDreamsByMonth, which can each be most of the journal.
 const PRIORITY_QUERY_KEYS: readonly string[] = [
   "getCurrentUser",
-  "getUser",
   "getSleepingTime",
   "getSymbols",
   AUTOCOMPLETE_SYMBOLS_QUERY_KEY,

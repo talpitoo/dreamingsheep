@@ -181,6 +181,8 @@ the queue forever (controller Ruling R6, 2026-09-27). `retryOutboxEntry(storage,
 - Consumes: `OutboxStorage` type from Task 2 (re-export it from a shared spot or import across — import `{ OutboxStorage }` from `src/dreams/offline/outbox` is fine), `QueryClient` from `@tanstack/react-query`, `superjson`.
 - Produces (used by Tasks 7, 8, 9):
 
+> **Superseded during review (2026-10-03, Copilot):** `getUser` is NOT persisted — it returns the full user row, `hashedPassword` included, which must never sit in localStorage. Settings renders nothing offline anyway. `getCurrentUser` is the limited profile the pages read.
+
 ```ts
 export const PERSISTED_QUERY_KEYS = [
   "getCurrentUser",

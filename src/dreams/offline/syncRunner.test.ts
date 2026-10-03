@@ -89,6 +89,33 @@ describe("syncRunner", () => {
     expect(readOutbox(storage, 1)).toHaveLength(1)
   })
 
+  it("syncNow gives up on a request that never answers once the timeout passes", async () => {
+    vi.useFakeTimers()
+    vi.stubGlobal("navigator", { locks: freeLocks })
+    enqueueDream(storage, 1, { n: 1 })
+    // the lock is free, so the run starts at once — and its POST stalls (rpcFetch has no timeout)
+    let answer: (value: unknown) => void = () => undefined
+    rpcFetch.mockImplementation(() => new Promise((resolve) => (answer = resolve)))
+    let settled = false
+    const pending = syncNow(1).then((result) => {
+      settled = true
+      return result
+    })
+
+    await vi.advanceTimersByTimeAsync(9_999)
+    expect(settled).toBe(false)
+    await vi.advanceTimersByTimeAsync(1)
+
+    expect(await pending).toBeUndefined() // logout proceeds without a result
+    expect(readOutbox(storage, 1)).toHaveLength(1) // the dream is not lost
+    expect(vi.getTimerCount()).toBe(0)
+
+    // the run itself was not cancelled: a late answer still takes the dream home
+    answer({ id: 1 })
+    await vi.advanceTimersByTimeAsync(0)
+    expect(readOutbox(storage, 1)).toEqual([])
+  })
+
   it("runSync reports the result while the session is still the one the run started for", async () => {
     vi.stubGlobal("navigator", {}) // no Web Locks: the per-tab guard alone
     enqueueDream(storage, 1, { n: 1 })

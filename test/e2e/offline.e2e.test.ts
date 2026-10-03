@@ -235,10 +235,10 @@ describe("offline dreams: the outbox round trip", () => {
   })
 
   it("offline, a new dream is saved on the device, pending on its day", async () => {
-    // the seed never files a dream on the current day, so nothing marks today yet
-    expect(await isMarkedInCalendar(page, today), "today already has a dream in this DB").toBe(
-      false
-    )
+    // whatever the DB holds for today (the seed has nothing, a tester may have added dreams), the
+    // assertions below key on this run's unique title — the calendar mark is only proven by the
+    // pending dream when the day started unmarked
+    const markedBefore = await isMarkedInCalendar(page, today)
 
     await clickButtonWithText(page, "New dream")
     await page.waitForSelector('#create-dream input[name="title"]', { timeout: 15_000 })
@@ -262,7 +262,10 @@ describe("offline dreams: the outbox round trip", () => {
     ])
 
     expect(await dreamCards(page, title)).toEqual(["pending"])
-    expect(await isMarkedInCalendar(page, today)).toBe(true)
+    expect(
+      await isMarkedInCalendar(page, today),
+      markedBefore ? "stayed marked" : "pending mark"
+    ).toBe(true)
     expect((await offlineCues(page)).banner).toContain("1 dream")
   })
 

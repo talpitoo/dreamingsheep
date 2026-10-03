@@ -101,8 +101,8 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
                   Stats, search and settings still need the real database and will politely say so.
                   An&#32;
                   <em>offline</em>&#32;ribbon in the corner and a banner tell you which world you
-                  are in — and the offline sheep will keep you company on every page. [MAINTAINER: a
-                  line about the offline sheep once it is drawn]
+                  are in — and whenever a picture did not make it into your pocket in time, the
+                  offline sheep stands in for it. [MAINTAINER: your line about the offline sheep]
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   The fine print: the very first visit in a browser has to happen online (that is
