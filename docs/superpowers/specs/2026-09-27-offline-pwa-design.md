@@ -340,3 +340,31 @@ The heart of the critical scenario.
   covers (two posts) are never cached but get the generic cover when their fetch fails, and the
   blog index / "more from the blog" covers also swap to it on their own error event — the only
   help for a precached page that could not hydrate.
+
+## Security review (2026-10-03, before merge)
+
+What was checked and what changed, so the next reader does not redo it:
+
+- **Nothing new is collected.** Offline adds client-side storage only: `localStorage`
+  `ds.queries.<userId>` (allowlisted react-query results: `getCurrentUser`'s selected fields —
+  id, email, role, username, two settings —, dreams of visited days/months, `getSleepingTime`,
+  symbols) and `ds.outbox.<userId>` (dreams written offline), plus the worker's Cache Storage
+  (data-free page shells, static chunks, same-origin images). Nothing goes to a third party; the
+  Privacy Policy got an "Offline storage" bullet and a security note, the Terms of Service an
+  availability bullet, both dated 3 October 2026.
+- **No cross-user path.** Snapshots and outboxes are keyed by userId and hydrated/read only for
+  the cookie's user; `sendFor` re-checks the cookie before every request so a sync can never post
+  under another session; the QueryClient is cleared when the cookie user changes under an open
+  tab; private pages SSR as static shells (the session store's server snapshot is empty), so the
+  worker never caches user data; `/api/`, `/_next/data/` and `/` are never cached; cross-origin
+  images (the S3 symbol pictures, two blog covers) are never cached.
+- **Gaps closed in this review:** account deletion now purges the device like logout does
+  (`forgetDeviceData`, shared by both); at boot, query snapshots of _other_ users found on the
+  device are dropped (`forgetOtherUsersSnapshots`) — they belong to a session that ended without
+  its logout purge (expired, cookies cleared) and a device another person now uses must not keep
+  a copy of someone else's journal. Outboxes are deliberately kept: those are dreams waiting for
+  that user's next login, and dropping them would be data loss.
+- **Accepted and documented:** the offline copy is plaintext in the browser's storage (the policy
+  says so: lock the device, log out on shared computers); a session that expires without logout
+  leaves the owner's own snapshot on the owner's device until the next boot as someone else, or
+  until site data is cleared; an offline logout drops pending dreams (privacy over data).

@@ -54,7 +54,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </h1>
 
             <Alert severity="info" className="mb-6">
-              <strong>Last updated:</strong> 14 February 2026
+              <strong>Last updated:</strong> 3 October 2026
             </Alert>
 
             <Card className="bg-mui-secondary-light mb-4">
@@ -145,6 +145,11 @@ const TermsOfServicePage: BlitzPage = () => {
                     <li>Features may change or be removed</li>
                     <li>We cannot guarantee 24/7 uptime or immediate bug fixes</li>
                     <li>Backups are performed regularly, but data loss is possible</li>
+                    <li>
+                      Dreams written offline stay on your device until the app reconnects and syncs
+                      them; logging out, deleting your account or clearing the browser&apos;s site
+                      data before that removes them
+                    </li>
                   </ul>
                 </Typography>
                 <Typography variant="body1" className="mt-4">

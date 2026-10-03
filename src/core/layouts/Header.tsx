@@ -2,10 +2,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { useRouter } from "next/router"
-import { getQueryClient, useMutation } from "src/core/rpc-client"
-import { clearPersistedQueries } from "src/core/offline/persistedQueries"
+import { useMutation } from "src/core/rpc-client"
+import { forgetDeviceData } from "src/core/offline/deviceData"
 import { isBrowserOnline } from "src/core/offline/onlineStatus"
-import { clearOutbox } from "src/dreams/offline/outbox"
 import { syncNow } from "src/dreams/offline/syncRunner"
 import {
   AppBar,
@@ -86,18 +85,8 @@ export function Header() {
       await syncNow(userId)
     }
     await logoutMutation()
-    // query keys carry no userId and the QueryClient is a module singleton: without this,
-    // user A's cached dreams would sit in memory for user B and get persisted under B's key
-    getQueryClient().clear()
-    try {
-      if (userId) {
-        clearOutbox(window.localStorage, userId)
-        clearPersistedQueries(window.localStorage, userId)
-      }
-    } catch {
-      // a storage exception here (quota, private mode) must not stop the logout
-    }
-    navigator.serviceWorker?.controller?.postMessage("ds-logout")
+    // the query cache, this user's outbox and snapshot, the worker's page cache (see deviceData)
+    forgetDeviceData(userId)
     if (isAuthenticatedPage(router.pathname)) {
       // full page load instead of a client-side push: the dead session would make the still-mounted
       // authenticated page throw AuthenticationError (issue #10), and a reload also flushes

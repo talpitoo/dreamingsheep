@@ -55,8 +55,8 @@ const PrivacyPolicyPage: BlitzPage = () => {
             </h1>
 
             <Alert severity="info" className="mb-6">
-              <strong>Last updated:</strong> 14 February 2026, <strong> Data Controller:</strong>{" "}
-              Tóth Tamás, Serbia
+              <strong>Last updated:</strong> 3 October 2026, <strong> Data Controller:</strong> Tóth
+              Tamás, Serbia
             </Alert>
 
             {/* ==================== LEGAL SECTION ==================== */}
@@ -217,6 +217,14 @@ const PrivacyPolicyPage: BlitzPage = () => {
                       <strong>Google reCAPTCHA cookies</strong> — Spam protection during signup
                       (loaded only on signup page)
                     </li>
+                    <li>
+                      <strong>Offline storage</strong> — So the journal works without a connection,
+                      this browser keeps a local copy of your profile, your symbols and the dreams
+                      you recently viewed, plus any dreams written offline that are waiting to sync
+                      (essential, localStorage keys <code>ds.*</code>). The app&apos;s pages and
+                      images are cached by a service worker. None of it leaves your device, and it
+                      is removed when you log out or delete your account.
+                    </li>
                   </ul>
                 </Typography>
               </CardContent>
@@ -227,7 +235,9 @@ const PrivacyPolicyPage: BlitzPage = () => {
               <CardContent>
                 <Typography variant="body1">
                   We use HTTPS encryption, secure password hashing, and regular backups. However, no
-                  system is 100% secure. We recommend using a unique password.
+                  system is 100% secure. We recommend using a unique password. The offline copy of
+                  your journal sits unencrypted in your browser&apos;s storage, so lock your device
+                  and log out on shared computers.
                 </Typography>
               </CardContent>
             </Card>

@@ -49,8 +49,29 @@ const PRIORITY_QUERY_KEYS: readonly string[] = [
 
 const ALLOWLIST: readonly string[] = PERSISTED_QUERY_KEYS
 
+const PERSISTED_QUERIES_PREFIX = "ds.queries."
+
 export function persistedQueriesKey(userId: number): string {
-  return `ds.queries.${userId}`
+  return `${PERSISTED_QUERIES_PREFIX}${userId}`
+}
+
+// Snapshots of OTHER users found on this device at boot are dropped: they belong to a session
+// that ended without its logout purge (expired, cookies cleared) and a device another person now
+// uses must not keep a copy of someone else's journal. Logged out (`userId` null) every snapshot
+// goes. The outbox is deliberately left alone: those are dreams waiting for that user's next
+// login, and dropping them would be data loss. Takes a localStorage-shaped object because the
+// purge has to enumerate keys, which KeyValueStorage cannot.
+export function forgetOtherUsersSnapshots(
+  storage: Pick<Storage, "length" | "key" | "removeItem">,
+  userId: number | null
+): void {
+  const own = userId ? persistedQueriesKey(userId) : null
+  const foreign: string[] = []
+  for (let index = 0; index < storage.length; index++) {
+    const key = storage.key(index)
+    if (key && key.startsWith(PERSISTED_QUERIES_PREFIX) && key !== own) foreign.push(key)
+  }
+  for (const key of foreign) storage.removeItem(key)
 }
 
 function isAllowlisted(queryKey: readonly unknown[]): boolean {

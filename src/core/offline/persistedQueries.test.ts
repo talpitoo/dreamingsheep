@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { KeyValueStorage } from "src/core/offline/storage"
 import {
   clearPersistedQueries,
+  forgetOtherUsersSnapshots,
   hydratePersistedQueries,
   MAX_PERSISTED_QUERIES,
   persistedQueriesKey,
@@ -39,7 +40,48 @@ afterEach(() => {
 // querySnapshot.test.ts. These tests cover only what that file can't: the
 // react-query-specific glue — reading real Query/QueryObserver state,
 // debouncing off the real QueryCache, and bridging to/from a real QueryClient.
+// localStorage-shaped: the boot-time purge has to enumerate keys, which KeyValueStorage cannot
+function fakeEnumerableStorage() {
+  const map = new Map<string, string>()
+  return {
+    get length() {
+      return map.size
+    },
+    key: (index: number) => [...map.keys()][index] ?? null,
+    getItem: (key: string) => map.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      map.set(key, value)
+    },
+    removeItem: (key: string) => {
+      map.delete(key)
+    },
+  }
+}
+
 describe("persistedQueries", () => {
+  it("forgetOtherUsersSnapshots drops other users' query snapshots only — never an outbox, never unrelated keys", () => {
+    const storage = fakeEnumerableStorage()
+    storage.setItem(persistedQueriesKey(1), "mine")
+    storage.setItem(persistedQueriesKey(2), "someone else's")
+    storage.setItem(persistedQueriesKey(3), "a third person's")
+    storage.setItem("ds.outbox.2", "their pending dreams")
+    storage.setItem("cookieNoticeAcknowledged", "true")
+
+    forgetOtherUsersSnapshots(storage, 1)
+
+    expect(storage.getItem(persistedQueriesKey(1))).toBe("mine")
+    expect(storage.getItem(persistedQueriesKey(2))).toBeNull()
+    expect(storage.getItem(persistedQueriesKey(3))).toBeNull()
+    expect(storage.getItem("ds.outbox.2")).toBe("their pending dreams")
+    expect(storage.getItem("cookieNoticeAcknowledged")).toBe("true")
+
+    // logged out at boot: every snapshot goes, the rest stays
+    forgetOtherUsersSnapshots(storage, null)
+    expect(storage.getItem(persistedQueriesKey(1))).toBeNull()
+    expect(storage.getItem("ds.outbox.2")).toBe("their pending dreams")
+    expect(storage.length).toBe(2)
+  })
+
   it("persistQueries + hydratePersistedQueries round-trip restores only allowlisted keys with their dataUpdatedAt", () => {
     const storage = fakeStorage()
     const source = new QueryClient()

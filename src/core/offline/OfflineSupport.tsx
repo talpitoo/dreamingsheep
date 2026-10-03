@@ -6,6 +6,7 @@ import WifiOffIcon from "@mui/icons-material/WifiOff"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
+  forgetOtherUsersSnapshots,
   hydratePersistedQueries,
   PERSISTED_QUERY_KEYS,
   subscribeQueryPersistence,
@@ -75,6 +76,12 @@ export default function OfflineSupport() {
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
     if (typeof hydratedFor === "number" && hydratedFor !== userId) getQueryClient().clear()
     hydratedFor = userId
+    // a shared device keeps no other user's journal copy (their outbox stays, see the helper)
+    try {
+      forgetOtherUsersSnapshots(window.localStorage, userId)
+    } catch {
+      // blocked storage: nothing stored, nothing to forget
+    }
     if (!userId) return
     // before hydrating, so the replayed queries are built with it: react-query drops a query
     // nobody observes once cacheTime (5 min by default) has passed, which would silently turn a
