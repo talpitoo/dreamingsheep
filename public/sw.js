@@ -82,7 +82,15 @@ self.addEventListener("fetch", (event) => {
   const { request } = event
   if (request.method !== "GET") return
   const url = new URL(request.url)
-  if (url.origin !== self.location.origin) return
+  if (url.origin !== self.location.origin) {
+    // a few blog covers live on other hosts: never cached or otherwise touched, but when the
+    // fetch fails (offline) they get the same stand-in as our own covers — the only way to
+    // help a precached page that could not hydrate, where the img's own error handler is dead
+    if (request.destination === "image") {
+      event.respondWith(fetch(request).catch(() => offlineImage(event)))
+    }
+    return
+  }
   // RPC, and Next's per-page data (getServerSideProps, sent no-store) must never be served stale
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_next/data/")) return
 
