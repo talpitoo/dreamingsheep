@@ -9,7 +9,7 @@ export interface PendingDream {
   userId: number
   values: Record<string, unknown> // CreateDream-shaped; dreamAt already an ISO string
   queuedAt: Date
-  lastError?: string // set once the server permanently rejects it (4xx / ZodError / Authorization / NotFound)
+  lastError?: string // set once the server permanently rejects it (4xx but 408/429 / ZodError / Authorization / NotFound)
   attempts?: number // counted transient failures; capped at MAX_TRANSIENT_ATTEMPTS
 }
 
@@ -32,12 +32,24 @@ export function outboxKey(userId: number): string {
   return `ds.outbox.${userId}`
 }
 
+// Only what the consumers dereference (PendingDreamList and the calendar read `values.dreamAt`,
+// syncOutbox `clientId` and `values`): an element that lost its shape — a corrupted write, a hand
+// edit, a future schema change — would otherwise throw while /dreams renders, on every load,
+// until the user clears storage. Deliberately minimal: a stricter check could drop a real dream.
+function isPendingDream(value: unknown): value is PendingDream {
+  if (typeof value !== "object" || value === null) return false
+  const entry = value as Partial<PendingDream>
+  return (
+    typeof entry.clientId === "string" && typeof entry.values === "object" && entry.values !== null
+  )
+}
+
 export function readOutbox(storage: OutboxStorage, userId: number): PendingDream[] {
   const raw = storage.getItem(outboxKey(userId))
   if (!raw) return []
   try {
-    const parsed = superjson.parse<PendingDream[]>(raw)
-    return Array.isArray(parsed) ? parsed : []
+    const parsed = superjson.parse<unknown>(raw)
+    return Array.isArray(parsed) ? parsed.filter(isPendingDream) : []
   } catch {
     return []
   }
@@ -162,11 +174,15 @@ export async function syncOutbox(
     }
 
     const statusCode = (error as { statusCode?: number } | null | undefined)?.statusCode
+    // 408 (request timeout) and 429 (too many requests) are 4xx by number only:
+    // the server asks for later, it does not reject the dream — they wait it out
+    // with the gateway outages below instead of parking the entry
+    const askedToWait = statusCode === 408 || statusCode === 429
     const permanent =
       name === "ZodError" ||
       name === "AuthorizationError" ||
       name === "NotFoundError" ||
-      (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500)
+      (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500 && !askedToWait)
     if (permanent) {
       patchEntry(storage, userId, clientId, { lastError: String(error) })
       continue
@@ -174,7 +190,7 @@ export async function syncOutbox(
 
     // A gateway outage (nginx's maintenance page during a deploy) is not this
     // entry's fault: wait it out, however long, without spending its attempts.
-    if (statusCode === 502 || statusCode === 503 || statusCode === 504) {
+    if (askedToWait || statusCode === 502 || statusCode === 503 || statusCode === 504) {
       return { synced, authRequired: false, blocked: true }
     }
 

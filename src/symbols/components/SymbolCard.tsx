@@ -81,12 +81,6 @@ const SymbolCard = (props: SymbolCardProps) => {
     }
   }, [edit])
 
-  // offline is read-only: an edit in progress would only pause its save until reconnect
-  useEffect(() => {
-    if (!online && isEdit) changeEdit(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [online])
-
   return (
     <Fragment>
       <Card
@@ -121,6 +115,10 @@ const SymbolCard = (props: SymbolCardProps) => {
                 schema={UpdateSymbol}
                 initialValues={symbol}
                 onSubmit={async (values) => {
+                  // Enter still submits with Update disabled; offline the mutation would only
+                  // pause and fire on reconnect, behind the user's back
+                  if (!online)
+                    return { [FORM_ERROR]: "you're offline — reconnect to update this symbol" }
                   try {
                     await updateSymbolMutation(values)
                     onAfterUpdate()
@@ -173,10 +171,12 @@ const SymbolCard = (props: SymbolCardProps) => {
             <IconWithUsage type="type" countInfo={symbol.typeInfo} /> */}
             {symbol.description}
           </Box>
-          {/* offline, symbols are read-only — no edit/delete controls */}
-          {online && (
+          {/* offline, symbols are read-only — no edit/delete controls. An edit already open stays,
+              so a connection drop never discards what was typed: Cancel and a disabled Update
+              until reconnect */}
+          {(online || isEdit) && (
             <Box className="flex flex-row ml-0">
-              {!symbol.builtIn && (
+              {online && !symbol.builtIn && (
                 <IconButton
                   color="primary"
                   className="mr-auto ml-0 md:ml-4"
@@ -201,7 +201,7 @@ const SymbolCard = (props: SymbolCardProps) => {
                       variant="contained"
                       type="submit"
                       form={"update-symbol_" + symbol.id}
-                      disabled={isUpdateSymbolLoading}
+                      disabled={isUpdateSymbolLoading || !online}
                       className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                         isUpdateSymbolLoading ? "max-w-[113px]" : "max-w-[89px]"
                       }`}

@@ -61,6 +61,28 @@ describe("outbox", () => {
     expect(readOutbox(storage, 1)).toEqual([])
   })
 
+  it("readOutbox drops an element that lost its shape and keeps the rest, so one bad write cannot brick /dreams", () => {
+    const storage = fakeStorage()
+    const good: PendingDream = {
+      clientId: "ok-1",
+      userId: 1,
+      values: { title: "kept" },
+      queuedAt: NOW,
+    }
+    storage.setItem(
+      outboxKey(1),
+      superjson.stringify([
+        null,
+        "text",
+        { clientId: "no-values", userId: 1, queuedAt: NOW },
+        { userId: 1, values: { title: "no id" }, queuedAt: NOW },
+        good,
+      ])
+    )
+
+    expect(readOutbox(storage, 1)).toEqual([good])
+  })
+
   it("enqueueDream wraps a storage write failure or a non-positive userId in OutboxWriteError", () => {
     const storage = fakeStorage()
     const brokenStorage: OutboxStorage = {
@@ -193,8 +215,8 @@ describe("outbox", () => {
     expect(remaining[1]!.attempts).toBeUndefined()
   })
 
-  it.each([502, 503, 504])(
-    "syncOutbox waits out a gateway outage (%i): blocked, attempts untouched however many runs it lasts",
+  it.each([408, 429, 502, 503, 504])(
+    "syncOutbox waits out a gateway outage or a 'later' answer (%i): blocked, attempts untouched however many runs it lasts",
     async (statusCode) => {
       const storage = fakeStorage()
       const send = vi.fn(async () => {

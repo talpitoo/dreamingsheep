@@ -59,7 +59,15 @@ function isAllowlisted(queryKey: readonly unknown[]): boolean {
 
 export function persistQueries(storage: KeyValueStorage, userId: number, qc: QueryClient): void {
   const key = persistedQueriesKey(userId)
-  const previous = decodeSnapshot(storage.getItem(key), isAllowlisted)
+  // the read is covered too: this runs from the debounced timer below, where a storage throw
+  // would surface as an uncaught exception — and a write without `previous` would drop every
+  // entry the cache no longer holds, so there is nothing sensible to write then
+  let previous: PersistedQueryEntry[]
+  try {
+    previous = decodeSnapshot(storage.getItem(key), isAllowlisted)
+  } catch {
+    return
+  }
 
   const cacheQueries = qc
     .getQueryCache()

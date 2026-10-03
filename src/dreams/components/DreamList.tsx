@@ -120,12 +120,6 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
     }
   }, [edit])
 
-  // offline is read-only: an edit in progress would only pause its save until reconnect
-  useEffect(() => {
-    if (!online && isEdit) changeEdit(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [online])
-
   return (
     <Fragment key={dream.id}>
       <Grid item ref={dreamRef} xs={12}>
@@ -185,6 +179,10 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                 id={"update-dream_" + dream.id}
                 initialValues={dream}
                 onSubmit={async (values) => {
+                  // Enter still submits with Update disabled; offline the mutation would only
+                  // pause and fire on reconnect, behind the user's back
+                  if (!online)
+                    return { [FORM_ERROR]: "you're offline — reconnect to update this dream" }
                   try {
                     await updateDreamMutation({
                       id: dream.id,
@@ -222,16 +220,20 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                 />
               )}
             </Box>
-            {/* offline, dreams can only be added — no edit/delete controls */}
-            {online && (
+            {/* offline, dreams can only be added — no edit/delete controls. An edit already open
+                stays, so a connection drop never discards what was typed: Cancel and a disabled
+                Update until reconnect */}
+            {(online || isEdit) && (
               <Box className="flex flex-row ml-0">
-                <IconButton
-                  color="primary"
-                  className="mr-auto ml-0 md:ml-4"
-                  onClick={() => setDeleteDialogVisibility(true)}
-                >
-                  <span className="lucidicon-trash"></span>
-                </IconButton>
+                {online && (
+                  <IconButton
+                    color="primary"
+                    className="mr-auto ml-0 md:ml-4"
+                    onClick={() => setDeleteDialogVisibility(true)}
+                  >
+                    <span className="lucidicon-trash"></span>
+                  </IconButton>
+                )}
                 {isEdit && (
                   <Fragment>
                     <Button onClick={() => changeEdit(false)} disabled={isUpdateDreamLoading}>
@@ -242,7 +244,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                       variant="contained"
                       type="submit"
                       form={"update-dream_" + dream.id}
-                      disabled={isUpdateDreamLoading}
+                      disabled={isUpdateDreamLoading || !online}
                       className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
                         isUpdateDreamLoading ? "max-w-[113px]" : "max-w-[89px]"
                       }`}

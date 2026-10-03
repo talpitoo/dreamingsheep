@@ -322,7 +322,9 @@ The heart of the critical scenario.
   only for images that are not cached. Offline, every content image gets `filter: grayscale(1)`
   (`html[data-offline] img`) — blog covers, the page sheep, the cookie monster.
 - **Offline is read-only beyond adding dreams.** Dream and symbol cards hide edit/delete offline
-  (an open edit closes); the bedtime/wake-up form renders disabled with cached values
+  (an edit already open stays, with Update disabled and its submit refused until reconnect, so a
+  connection drop never discards typed changes — CodeRabbit review, 2026-10-03; the instant-symbol
+  dialog likewise); the bedtime/wake-up form renders disabled with cached values
   (`getSleepingTime` is persisted) so the day's layout is unchanged.
 - **The maintainer's assets landed (2026-10-03):** `public/assets/sheep-offline.png` (the real
   offline sheep) and `public/assets/blog-offline.png`, a generic blog cover the worker serves for
