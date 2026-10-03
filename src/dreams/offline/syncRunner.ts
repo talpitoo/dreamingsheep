@@ -4,8 +4,8 @@ import { rpcFetch } from "src/core/rpc-client"
 import { readOutbox, syncOutbox } from "src/dreams/offline/outbox"
 import type { SyncResult } from "src/dreams/offline/outbox"
 
-// how long syncNow (below) waits for a run already in progress before logout goes ahead without
-// it. It bounds that wait only — never the run syncNow then makes itself
+// how long syncNow (below) gets in total before logout goes ahead without it: the wait for a run
+// already in progress and the requests of its own run alike
 const SYNC_NOW_TIMEOUT_MS = 10_000
 
 // shared by runSync and syncNow: the one resource name both must lock/reference so a run

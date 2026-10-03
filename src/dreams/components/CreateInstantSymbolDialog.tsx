@@ -13,19 +13,29 @@ import {
 } from "@mui/material"
 import { useInstantDreamDialog } from "src/contexts/CreateInstantSymbolContext"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { AUTOCOMPLETE_SYMBOLS_QUERY_KEY } from "src/core/offline/persistedQueries"
 import { createSymbol } from "src/symbols/client"
-import React from "react"
+import React, { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import sheepSymbol from "public/assets/sheep-symbols.png"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 
 export const CreateInstantSymbolDialog = () => {
   const user = useCurrentUser()
+  const online = useOnlineStatus()
   const { values, closeDialog, dialogOpen, setValues, state } = useInstantDreamDialog()
   const [cb] = state
   const [createSymbolMutation, { isLoading: isCreateSymbolLoading }] = useMutation(createSymbol)
   const queryClient = useQueryClient()
+
+  // offline is read-only: the picker stops offering "create" then (SymbolsAutocomplete), but a
+  // dialog opened online outlives the connection, and its Add would only pause the mutation until
+  // reconnect — creating the symbol behind the user's back. It closes, as a dream edit does.
+  useEffect(() => {
+    if (!online && dialogOpen) closeDialog()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online])
 
   const handleDialogSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -78,7 +88,7 @@ export const CreateInstantSymbolDialog = () => {
           <Button
             type="submit"
             variant="contained"
-            disabled={isCreateSymbolLoading}
+            disabled={isCreateSymbolLoading || !online}
             // same as the deletion dialog: DialogActions' 8px gap wins, the sx never did
             className="w-auto"
             endIcon={isCreateSymbolLoading && <HourglassTopIcon className="opacity-50" />}

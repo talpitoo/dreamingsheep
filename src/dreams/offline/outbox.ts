@@ -51,6 +51,13 @@ function writeOutbox(storage: OutboxStorage, userId: number, entries: PendingDre
 // the shared tail of every partial update (lastError stamp, attempts bump,
 // retry-clear). Re-reading here (not just at the syncOutbox loop's top) keeps
 // this safe no matter how much async work happened since the caller last read.
+// What remains (every writer here, enqueue and remove included) is this one
+// synchronous read→write racing the same in ANOTHER tab — accepted (PR #42
+// review): the writers are a user's tap and a sync run's bookkeeping, which the
+// network state keeps apart except at the instant it flips, and serialising
+// them behind a cross-tab lock would make saving a dream an async step that
+// waits on a running sync. Should that ever matter, one key per entry (no
+// shared array) is the fix, not a lock.
 function patchEntry(
   storage: OutboxStorage,
   userId: number,
