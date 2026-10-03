@@ -155,7 +155,7 @@ async function cacheFirst(event, cacheName, limit) {
     if (response.ok) event.waitUntil(putLimited(cacheName, request, response.clone(), limit))
     return response
   } catch {
-    if (request.destination === "image") return offlineImage(request)
+    if (request.destination === "image") return offlineImage(event)
     return new Response("", { status: 504 })
   }
 }
@@ -175,17 +175,24 @@ async function staleWhileRevalidate(event, cacheName, limit) {
   }
   const response = await network
   if (response) return response
-  if (request.destination === "image") return offlineImage(request)
+  if (request.destination === "image") return offlineImage(event)
   return new Response("", { status: 504 })
 }
 
-async function offlineImage(request) {
-  // every uncached image offline becomes a sheep: blog covers (file names start with "blog-",
-  // whether served from /assets or as content-hashed /_next/static/media imports) get the
-  // generic blog cover, everything else the offline sheep — both precached at install.
-  // The gray SVG only covers a failed precache.
-  const file = new URL(request.url).pathname.split("/").pop() || ""
-  const standIn = file.startsWith("blog-") ? OFFLINE_BLOG_COVER : OFFLINE_SHEEP
+async function offlineImage(event) {
+  // every uncached image offline gets a stand-in, both precached at install: blog covers the
+  // generic cover, everything else the offline sheep — except the app's own handwritten
+  // titles and logo (static imports named title-*/logo-*), which vanish rather than turn into
+  // a tiny sheep. A cover is any /assets image a blog page asks for (index cards, "more from
+  // the blog" — whatever the file is called), any file named blog-*, or a static import on a
+  // blog page that is not the page sheep (sheep-*). The gray SVG only covers a failed precache.
+  const url = new URL(event.request.url)
+  const file = url.pathname.split("/").pop() || ""
+  const isStatic = url.pathname.startsWith("/_next/static/")
+  if (isStatic && (file.startsWith("title-") || file.startsWith("logo-"))) return transparentImage()
+  const pageSheep = isStatic && file.startsWith("sheep-")
+  const cover = file.startsWith("blog-") || (!pageSheep && (await onBlogPage(event)))
+  const standIn = cover ? OFFLINE_BLOG_COVER : OFFLINE_SHEEP
   const cached = (await safeMatch(PRECACHE, standIn)) || (await safeMatch(PRECACHE, OFFLINE_SHEEP))
   if (cached) return cached
   const svg =
@@ -194,6 +201,21 @@ async function offlineImage(request) {
     '<text x="50%" y="50%" fill="#9e9e9e" font-family="sans-serif" font-size="20" text-anchor="middle">offline 🐑</text>' +
     "</svg>"
   return new Response(svg, { headers: { "Content-Type": "image/svg+xml" } })
+}
+
+async function onBlogPage(event) {
+  try {
+    const client = event.clientId && (await self.clients.get(event.clientId))
+    return !!client && new URL(client.url).pathname.startsWith("/blog")
+  } catch {
+    return false
+  }
+}
+
+function transparentImage() {
+  return new Response('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>', {
+    headers: { "Content-Type": "image/svg+xml" },
+  })
 }
 
 async function matchAny(key, cacheNames) {
