@@ -305,3 +305,27 @@ The heart of the critical scenario.
    one more moving part.
 3. **Snackbar copy & banner wording** — maintainer's voice, best written by the
    maintainer.
+
+## Maintainer feedback round (2026-10-03, after testing PR #42 locally)
+
+- **Notifications stay until dismissed.** One notification slot (`src/core/offline/offlineNotice.ts`):
+  "saved on this device — it syncs when you're back online" (the bedtime toast's night icon) and
+  "N offline dreams synced" (MUI `Wifi` icon) replace each other and only close via their ×; the
+  banner keeps counting pending dreams meanwhile. No emoji, no auto-hide.
+- **Banner vs. the hanging logo.** The header's logo stays on top; the banner's content starts to
+  its right (`pl-[150px]`, symmetric on md+) and carries the `WifiOff` icon. Ribbon text re-centered.
+- **Offline pages = sheep + title + notice.** Stats and Settings render nothing else offline (no
+  range/filter controls, no settings cards — a save would only pause and fire on reconnect); the
+  `<div>` wrappers that let the page shrink to the notice's width are gone. Search likewise. The
+  symbols page keeps the cached list read-only (no jump box / filter, no new/edit/delete).
+- **No React-side sheep swap.** Pages show their own sheep; the worker serves the offline sheep
+  only for images that are not cached. Offline, every content image gets `filter: grayscale(1)`
+  (`html[data-offline] img`) — blog covers, the page sheep, the cookie monster.
+- **Offline is read-only beyond adding dreams.** Dream and symbol cards hide edit/delete offline
+  (an open edit closes); the bedtime/wake-up form renders disabled with cached values
+  (`getSleepingTime` is persisted) so the day's layout is unchanged.
+- **The maintainer's assets landed (2026-10-03):** `public/assets/sheep-offline.png` (the real
+  offline sheep) and `public/assets/blog-offline.png`, a generic blog cover the worker serves for
+  every uncached blog cover (file names starting with `blog-`, on article pages, the blog index
+  and "more from the blog"); the announcement post uses it as its own cover and the grayscale
+  placeholder cover is gone.
