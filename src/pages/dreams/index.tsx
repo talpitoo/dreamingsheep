@@ -20,7 +20,6 @@ import React, { Fragment, Suspense, useEffect, useMemo, useState } from "react"
 import { DateTime } from "luxon"
 import titleDreams from "public/assets/title-dreams.png"
 import sheepDreams from "public/assets/sheep-dreamingsheep.png"
-import sheepOffline from "public/assets/sheep-offline.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import SheepLink from "src/core/components/SheepLink"
 import {
@@ -33,7 +32,6 @@ import {
   Grid,
   TextField,
   Box,
-  Snackbar,
 } from "@mui/material"
 import { PickersDayProps, StaticDatePicker } from "@mui/x-date-pickers"
 import { getDreamsByMonth } from "src/dreams/client"
@@ -50,6 +48,7 @@ import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import { enqueueDream, OutboxWriteError } from "src/dreams/offline/outbox"
 import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
 import { clearPersistedQueries } from "src/core/offline/persistedQueries"
+import { showOfflineNotice } from "src/core/offline/offlineNotice"
 
 function getDateTime(date: string | string[] | undefined): DateTime {
   if (typeof date === "string") {
@@ -247,8 +246,6 @@ const DreamsPage: BlitzPage = () => {
   )
   const [showForm, setShowForm] = useState(false)
   const session = useSession()
-  const online = useOnlineStatus()
-  const [offlineSnackbar, setOfflineSnackbar] = useState(false)
 
   // the sheep leads back to today, the journal's home. Null while you are already there — which
   // includes a bare /dreams, since the effect below is about to put today in the URL anyway
@@ -292,7 +289,7 @@ const DreamsPage: BlitzPage = () => {
       return { [FORM_ERROR]: "couldn't save on this device — storage seems unavailable" }
     }
     setShowForm(false)
-    setOfflineSnackbar(true)
+    showOfflineNotice({ kind: "saved", count: 1 })
     return { [FORM_RESET]: true }
   }
 
@@ -320,7 +317,7 @@ const DreamsPage: BlitzPage = () => {
             >
               <SheepLink href={sheepHref}>
                 <Image
-                  src={online ? sheepDreams : sheepOffline}
+                  src={sheepDreams}
                   alt="dreams sheep"
                   width={384}
                   height={384}
@@ -476,13 +473,6 @@ const DreamsPage: BlitzPage = () => {
                 </Card>
               </Grid>
             )}
-
-            <Snackbar
-              open={offlineSnackbar}
-              autoHideDuration={6000}
-              onClose={() => setOfflineSnackbar(false)}
-              message="dream tucked away on this device — it syncs when you're back online 🌙"
-            />
           </Grid>
         </Grid>
       </Container>

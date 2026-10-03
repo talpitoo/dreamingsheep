@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react"
-import { Snackbar } from "@mui/material"
+import { useEffect, useRef, useState } from "react"
+import { IconButton, Snackbar } from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
+import WifiIcon from "@mui/icons-material/Wifi"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import {
@@ -7,6 +9,12 @@ import {
   PERSISTED_QUERY_KEYS,
   subscribeQueryPersistence,
 } from "src/core/offline/persistedQueries"
+import {
+  dismissOfflineNotice,
+  OfflineNotice,
+  showOfflineNotice,
+  useOfflineNotice,
+} from "src/core/offline/offlineNotice"
 import { registerServiceWorker } from "src/core/offline/swRegistration"
 import { setSyncAuthRequired } from "src/core/offline/syncStatus"
 import { getQueryClient, invalidateQuery } from "src/core/rpc-client"
@@ -15,15 +23,35 @@ import type { SyncResult } from "src/dreams/offline/outbox"
 import { runSync } from "src/dreams/offline/syncRunner"
 import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
 
+function noticeContent(notice: OfflineNotice) {
+  if (notice.kind === "saved") {
+    // the same night icon as the bedtime toast in SleepingTimeForm
+    return (
+      <span className="flex items-center gap-2">
+        <span className="lucidicon-starry-night h-5 w-5 text-lg"></span>
+        {"saved on this device — it syncs when you're back online"}
+      </span>
+    )
+  }
+  return (
+    <span className="flex items-center gap-2">
+      <WifiIcon fontSize="small" />
+      {`${notice.count} offline dream${notice.count > 1 ? "s" : ""} synced`}
+    </span>
+  )
+}
+
 // app-wide offline behaviour, mounted once in _app: query-cache hydration and persistence, the
-// outbox sync, the corner ribbon, the "synced" snackbar (the banner lives in Layout)
+// outbox sync, the corner ribbon, the offline notification snackbar (the banner lives in Layout)
 export default function OfflineSupport() {
   const online = useOnlineStatus()
   const session = useSession()
   const pending = usePendingDreams()
-  // open is its own state so the message keeps its count through the snackbar's exit transition
-  const [syncedOpen, setSyncedOpen] = useState(false)
-  const [syncedCount, setSyncedCount] = useState(0)
+  const notice = useOfflineNotice()
+  // the last notice outlives its dismissal so the message stays put through the exit transition
+  const lastNotice = useRef<OfflineNotice | null>(null)
+  if (notice) lastNotice.current = notice
+  const shownNotice = notice ?? lastNotice.current
   const [retryTick, setRetryTick] = useState(0)
 
   // boot per login: SW registration + query-cache hydration + persistence subscription.
@@ -80,8 +108,7 @@ export default function OfflineSupport() {
       if (result.synced > 0) {
         void invalidateQuery(getDreams)
         void invalidateQuery(getDreamsByMonth)
-        setSyncedCount(result.synced)
-        setSyncedOpen(true)
+        showOfflineNotice({ kind: "synced", count: result.synced })
       }
       if (result.blocked && isBrowserOnline()) {
         retry = setTimeout(() => setRetryTick((tick) => tick + 1), 60_000)
@@ -92,6 +119,12 @@ export default function OfflineSupport() {
     return () => clearTimeout(retry)
   }, [online, session.userId, syncable, retryTick])
 
+  // content images go gray while offline (`html[data-offline] img` in index.css): blog covers,
+  // the page sheep, the cookie monster — the offline look without swapping any asset
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-offline", !online)
+  }, [online])
+
   return (
     <>
       {/* a constant cue after the in-flow banner has scrolled away, compact enough to only mark
@@ -101,16 +134,28 @@ export default function OfflineSupport() {
           aria-hidden="true"
           className="fixed top-0 right-0 z-1400 w-16 h-16 overflow-hidden pointer-events-none"
         >
-          <span className="absolute block w-32 text-center rotate-45 top-3 -right-8 bg-mui-primary text-white text-[10px] leading-4 font-bold uppercase tracking-wider shadow">
+          <span className="absolute block w-32 pl-4 text-center rotate-45 top-3 -right-8 bg-mui-primary text-white text-[10px] leading-4 font-bold uppercase tracking-wider shadow">
             offline
           </span>
         </div>
       )}
+      {/* stays until dismissed with its x: no autoHideDuration, and a click elsewhere is not a
+          dismissal — the user should always be able to see what happened */}
       <Snackbar
-        open={syncedOpen}
-        autoHideDuration={6000}
-        onClose={() => setSyncedOpen(false)}
-        message={`${syncedCount} dream${syncedCount > 1 ? "s" : ""} made it home 🐑`}
+        open={notice !== null}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        onClose={(_, reason) => reason !== "clickaway" && dismissOfflineNotice()}
+        message={shownNotice && noticeContent(shownNotice)}
+        action={
+          <IconButton
+            size="small"
+            aria-label="dismiss"
+            color="inherit"
+            onClick={dismissOfflineNotice}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
       />
     </>
   )

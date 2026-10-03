@@ -1,4 +1,5 @@
 import { Alert } from "@mui/material"
+import WifiOffIcon from "@mui/icons-material/WifiOff"
 import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { useSyncAuthRequired } from "src/core/offline/syncStatus"
 import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
@@ -17,9 +18,14 @@ export default function OfflineBanner() {
   if (online && !authPrompt && parked === 0) return null
 
   // one banner, most pressing message first: offline, then the session, then parked dreams.
-  // The header's logo sheep (absolute) hangs ~70px below the bar: stack above its AppBar (1100)
+  // The header's logo sheep (absolute, 150px) hangs ~70px below the bar and stays on top: the
+  // content starts to its right (and keeps centered on md+ with the same padding on both sides)
   return (
-    <Alert severity="info" className="relative z-1101 w-full rounded-none justify-center">
+    <Alert
+      severity="info"
+      icon={!online ? <WifiOffIcon fontSize="inherit" /> : undefined}
+      className="w-full rounded-none justify-center pl-[150px] md:px-[150px]"
+    >
       {!online
         ? pending.length > 0
           ? `you're offline — ${pending.length} dream${

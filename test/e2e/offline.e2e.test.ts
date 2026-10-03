@@ -234,7 +234,7 @@ describe("offline dreams: the outbox round trip", () => {
     expect(cues.banner).toMatch(/^you're offline/)
   })
 
-  it("offline, a new dream is tucked away on the device, pending on its day", async () => {
+  it("offline, a new dream is saved on the device, pending on its day", async () => {
     // the seed never files a dream on the current day, so nothing marks today yet
     expect(await isMarkedInCalendar(page, today), "today already has a dream in this DB").toBe(
       false
@@ -248,8 +248,8 @@ describe("offline dreams: the outbox round trip", () => {
 
     await until(
       () => snackbarMessages(page),
-      (messages) => messages.some((message) => message.includes("tucked away on this device")),
-      "the tucked-away snackbar"
+      (messages) => messages.some((message) => message.includes("saved on this device")),
+      "the saved-on-this-device snackbar"
     )
     const storage = await deviceStorage(page)
     const outboxKeys = Object.keys(storage).filter((key) => key.startsWith("ds.outbox."))
@@ -283,8 +283,8 @@ describe("offline dreams: the outbox round trip", () => {
     await page.setOfflineMode(false)
     await until(
       () => snackbarMessages(page),
-      (messages) => messages.some((message) => message.includes("1 dream made it home")),
-      "the made-it-home snackbar"
+      (messages) => messages.some((message) => message.includes("1 offline dream synced")),
+      "the synced snackbar"
     )
     // the pending card gives way to the synced entry once the day's list refetches
     await until(
