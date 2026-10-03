@@ -12,7 +12,7 @@ import RelatedPosts from "src/core/components/RelatedPosts"
 import { getRelatedBlogs, type Blog } from "src/pages/api/blog/get-blogs"
 import type { GetStaticProps } from "next"
 import Image from "next/image"
-import blogOffline from "public/assets/blog-offline.png"
+import blogOffline from "public/assets/screenshot-use-case-four-dreaming-offline.png"
 import Link from "next/link"
 
 const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({ related }) => {
