@@ -14,6 +14,7 @@ import type { GetStaticProps } from "next"
 import Image from "next/image"
 import blogOffline from "public/assets/screenshot-use-case-four-dreaming-offline.png"
 import Link from "next/link"
+import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 
 const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({ related }) => {
   return (
@@ -57,13 +58,13 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
 
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader title="Use case four: Dreaming offline" className="pb-0" component="h1" />
-              <CardHeader subheader="Sun Sep 27 2026" className="py-0" />
+              <CardHeader subheader="Sat Oct 3 2026" className="py-0" />
               <CardContent>
                 <Image
                   src={blogOffline}
-                  alt="the offline sheep"
-                  width={900}
-                  height={692}
+                  alt="dreamingsheep offline: the corner ribbon, the banner and the offline sheep"
+                  width={768}
+                  height={768}
                   className="w-full h-auto"
                 />
                 <Typography variant="body1" className="mb-4">
@@ -73,52 +74,45 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
                   </Link>
                   ? Phone by the pillow, airplane mode, a few keywords scribbled at 3 a.m. There was
                   a catch hiding in the parentheses: <em>(for this, you need to be online)</em>.
-                  Consider the parentheses removed. <em>dreamingsheep</em>&#32;now works offline:
-                  open the app without a signal, land on your journal instead of a sad browser
-                  dinosaur, write the dream down and go back to sleep. The dream waits on your
-                  device and quietly finds its way home the next time you are connected — in ten
-                  minutes, or after a week in the mountains.
+                  Consider the parentheses removed. <em>dreamingsheep</em>&#32;now works{" "}
+                  <span className="uppercase">offline</span>.
                 </Typography>
                 <Typography variant="body1" className="mb-4">
-                  No cloud magic involved{" "}
-                  <span className="lucidicon lucidicon-smiley-smiley"></span>. Dreams written
-                  offline sit in your browser&apos;s storage, marked <em>waiting to sync</em>
-                  &#32;with a little hourglass, one per morning if that is how the week goes. When
-                  the connection returns they are sent in the order you dreamt them. Nothing is ever
-                  overwritten: offline you can only <em>add</em>&#32;dreams, never edit old ones —
-                  so if you also logged one from your laptop in the meantime, both simply end up in
-                  the journal. Delete the twin if you managed to dream the same dream twice.
+                  Open the app without a signal, land on your journal instead of a sad browser
+                  dinosaur, write the dream down and go back to sleep. The dream sits in your
+                  browser&apos;s storage, <em>waiting to sync</em>{" "}
+                  <HourglassTopIcon className="opacity-50 align-text-bottom" fontSize="small" /> the
+                  next time you are connected, be it in ten minutes or after a week in the
+                  mountains. Offline, you can only <em>add</em>&#32;dreams, never edit old ones
+                  (nothing is ever overwritten). So if you also logged one from your laptop in the
+                  meantime, both simply end up in the journal. Delete the twin if you managed to
+                  dream the same dream twice.
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   What works without a signal:
                 </Typography>
                 <ul>
-                  <li>the journal — your recent days, the calendar, and a brand new dream;</li>
-                  <li>attaching the symbols you already have (new ones need the mothership);</li>
+                  <li>the journal: your recent days, the calendar, and a brand-new dream;</li>
+                  <li>
+                    attaching the symbols you already have (creating new ones needs you online);
+                  </li>
                   <li>the FAQ and this entire blog, cover images optional.</li>
                 </ul>
                 <Typography variant="body1" className="mb-4">
-                  Stats, search and settings still need the real database and will politely say so.
-                  An&#32;
-                  <em>offline</em>&#32;ribbon in the corner and a banner tell you which world you
-                  are in — and whenever a picture did not make it into your pocket in time, the
-                  offline sheep stands in for it. [MAINTAINER: your line about the offline sheep]
+                  Stats, search and settings still need the real database.
                 </Typography>
                 <Typography variant="body1" className="mb-4">
                   The fine print: the very first visit in a browser has to happen online (that is
-                  when the app packs its offline bag), private windows forget everything, and phones
-                  — iPhones in particular — may spring-clean an app that has not been opened for
-                  about a week, so on a long trip do open it now and then. Your dreams are only ever
-                  on your device until they sync; nothing new is collected, as the{" "}
-                  <Link href={Routes.PrivacyPolicyPage()} passHref={true}>
-                    Privacy policy
-                  </Link>
-                  &#32;still promises.
+                  when the app packs its offline bag), private windows forget everything, and
+                  phones, iPhones in particular, may spring-clean an app that has not been opened
+                  for about a week, so on a long trip do open it now and then. Until they sync,
+                  offline dreams exist only in this browser&apos;s storage on this device. Clearing
+                  the site data or the browser cache before then deletes them for good, so reconnect
+                  first.
                 </Typography>
                 <Typography variant="body1">
-                  Happy offline dreaming — and if your dreams turn out to have no signal in the
-                  mountains either, well, that is rather the point. Long time no sleep!{" "}
-                  <span className="lucidicon lucidicon-device"></span>
+                  If you happen to be without a signal in the mountains, well, that is rather the
+                  point. Long time no sleep! <span className="lucidicon lucidicon-device"></span>
                 </Typography>
               </CardContent>
             </Card>
