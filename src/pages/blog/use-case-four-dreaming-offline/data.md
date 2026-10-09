@@ -1,6 +1,6 @@
 ---
 title: "Use case four: Dreaming offline"
-date: "Sat Oct 3 2026."
+date: "Fri Oct 9 2026."
 imageUrl: "/assets/screenshot-use-case-four-dreaming-offline.png"
 related:
   - "use-case-two-add-to-home-screen"

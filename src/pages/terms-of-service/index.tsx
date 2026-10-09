@@ -54,7 +54,7 @@ const TermsOfServicePage: BlitzPage = () => {
             </h1>
 
             <Alert severity="info" className="mb-6">
-              <strong>Last updated:</strong> 3 October 2026
+              <strong>Last updated:</strong> 9 October 2026
             </Alert>
 
             <Card className="bg-mui-secondary-light mb-4">

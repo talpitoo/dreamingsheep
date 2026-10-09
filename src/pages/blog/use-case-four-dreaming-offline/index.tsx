@@ -58,7 +58,7 @@ const ArticlePageUseCaseFourDreamingOffline: BlitzPage<{ related: Blog[] }> = ({
 
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader title="Use case four: Dreaming offline" className="pb-0" component="h1" />
-              <CardHeader subheader="Sat Oct 3 2026" className="py-0" />
+              <CardHeader subheader="Fri Oct 9 2026" className="py-0" />
               <CardContent>
                 <Image
                   src={blogOffline}
