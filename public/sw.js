@@ -20,11 +20,13 @@ const OFFLINE_BLOG_COVER = "/assets/blog-offline.png"
 // background layers per breakpoint, mobile below `sm` and desktop from `sm`, ~25 KB each — the
 // ~300 KB progressive layer above them is left to fail offline, a failed layer does not paint and
 // the placeholder shows through) and the icon font (src/styles/fonts.css lists the ttf first,
-// which every browser picks; 80 KB). Keyed by pathname: the font's cache-busting query is ignored
+// which every browser picks; 80 KB). Keyed and looked up by pathname, so the cache-busting query
+// fonts.css puts on the font (hand-written there, not a build artefact: public/ is served as is)
+// never has to be repeated or kept in sync here
 const OFFLINE_ASSETS = [
   "/assets/background-canvas-mobile-blur-double-height.jpg",
   "/assets/background-canvas-blur.jpg",
-  "/fonts/lucidicon.ttf?4vhl77",
+  "/fonts/lucidicon.ttf",
 ]
 const MANIFEST = "/sw-precache.json"
 const NAV_TIMEOUT_MS = 4000
