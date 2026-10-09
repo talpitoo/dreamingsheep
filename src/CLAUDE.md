@@ -190,7 +190,9 @@ this is how it is built.
 - **Service worker** (`public/sw.js`, registered by `swRegistration.ts` in production only):
   `ds-precache-v2` (`/dreams`, `/faq`, `/blog`, every post and cover name from
   `public/sw-precache.json` — written by `scripts/generate-sw-precache.mjs` at build time,
-  git-ignored —, `sheep-offline.png`, `blog-offline.png`); `ds-pages-v2` (visited same-origin
+  git-ignored —, `sheep-offline.png`, `blog-offline.png`, the body's two blur placeholders and
+  the icon font `lucidicon.ttf` — `OFFLINE_ASSETS`, served on an asset-cache miss by pathname);
+  `ds-pages-v2` (visited same-origin
   pages, pathname-keyed, `ok && !redirected` only, wiped on `ds-logout` — sent by logout, account
   deletion and by `AuthGuard` whenever an authenticated page renders to nobody, so it only ever
   holds a logged-in session's shells and is the only cache the slow-link race reads); `ds-static`
@@ -202,7 +204,10 @@ this is how it is built.
   development `swRegistration` unregisters any worker left by a local production run. Never cached: `/api/`, `/_next/data/`, `/` (a 307 for logged-in users),
   anything cross-origin (images only get a stand-in when their fetch fails). Stand-ins for
   uncached images: a cover name from the manifest or `blog-*` → `blog-offline.png`,
-  `title-*`/`logo-*` → transparent 1×1, everything else → `sheep-offline.png`.
+  `title-*`/`logo-*` → transparent 1×1, everything else → `sheep-offline.png` — except CSS
+  backgrounds (`background-*`, `button.jpg`; a worker cannot tell them from an `<img>`): the body's
+  two blur placeholders are precached, anything else fails so the layer does not paint and the
+  `background-color` shows (v6.0.0 painted the sheep across the canvas).
 - **Known limits**: the first visit must be online; private windows forget everything; iOS may
   purge storage after ~7 days unused; sign-out is refused offline with a notice (the session
   cookie is HttpOnly, only the server can end a session — pending dreams stay); a

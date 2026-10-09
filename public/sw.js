@@ -14,6 +14,20 @@ const FALLBACK_PATH = "/dreams"
 const OFFLINE_SHEEP = "/assets/sheep-offline.png"
 // blog covers (article pages, the blog index cards, "more from the blog") get their own stand-in
 const OFFLINE_BLOG_COVER = "/assets/blog-offline.png"
+// assets a page needs to look like itself offline, precached at install and never evicted (the
+// asset cache drops its oldest entries past ASSET_LIMIT — the icon font was among the first in
+// and the first out): the body's blur placeholders (src/styles/index.css: the lower of the two
+// background layers per breakpoint, mobile below `sm` and desktop from `sm`, ~25 KB each — the
+// ~300 KB progressive layer above them is left to fail offline, a failed layer does not paint and
+// the placeholder shows through) and the icon font (src/styles/fonts.css lists the ttf first,
+// which every browser picks; 80 KB). Keyed and looked up by pathname, so the cache-busting query
+// fonts.css puts on the font (hand-written there, not a build artefact: public/ is served as is)
+// never has to be repeated or kept in sync here
+const OFFLINE_ASSETS = [
+  "/assets/background-canvas-mobile-blur-double-height.jpg",
+  "/assets/background-canvas-blur.jpg",
+  "/fonts/lucidicon.ttf",
+]
 const MANIFEST = "/sw-precache.json"
 const NAV_TIMEOUT_MS = 4000
 const PAGES_LIMIT = 50
@@ -49,7 +63,7 @@ function pageKey(url) {
 async function refreshPrecache() {
   try {
     const cache = await caches.open(PRECACHE)
-    let urls = [FALLBACK_PATH, OFFLINE_SHEEP, OFFLINE_BLOG_COVER]
+    let urls = [FALLBACK_PATH, OFFLINE_SHEEP, OFFLINE_BLOG_COVER, ...OFFLINE_ASSETS]
     try {
       const res = await fetch("/sw-precache.json", { cache: "no-cache" })
       if (res.ok) {
@@ -207,6 +221,10 @@ async function staleWhileRevalidate(event, cacheName, limit) {
   }
   const response = await network
   if (response) return response
+  // the precache keeps the few assets a page needs to look like itself offline (OFFLINE_ASSETS),
+  // keyed by pathname like the pages, so a query string on the request does not matter
+  const precached = await safeMatch(PRECACHE, new URL(request.url).pathname)
+  if (precached) return precached
   if (request.destination === "image") return offlineImage(event)
   return new Response("", { status: 504 })
 }
@@ -222,6 +240,12 @@ async function offlineImage(event) {
   // follow in-app navigation. The gray SVG only covers a failed precache.
   const url = new URL(event.request.url)
   const file = url.pathname.split("/").pop() || ""
+  // a CSS background is an "image" request too, but a stand-in for one is painted across the
+  // whole canvas (the sheep stretched to 600×1920 on phones, to `cover` on desktops — v6.0.0).
+  // The precached placeholders were already served by staleWhileRevalidate; anything else fails,
+  // which is what the browser does without a worker: the layer does not paint, what is under it
+  // shows
+  if (isCssBackground(file)) return new Response("", { status: 504 })
   const isStatic = url.pathname.startsWith("/_next/static/")
   if (isStatic && (file.startsWith("title-") || file.startsWith("logo-"))) return transparentImage()
   const name = file.split(".")[0]
@@ -248,6 +272,14 @@ async function coverNames() {
   } catch {
     return []
   }
+}
+
+// every url() the stylesheets reference: the body canvas layers (src/styles/index.css) and the
+// contained button texture (src/styles/Theme.ts, and public/styles/noscript.css for visitors
+// without JavaScript — a build may hash that one into button.<hash>.jpg). By name, as a worker
+// cannot tell a CSS background from an <img> — both arrive as destination "image"
+function isCssBackground(file) {
+  return file.startsWith("background-") || file.startsWith("button.")
 }
 
 function transparentImage() {

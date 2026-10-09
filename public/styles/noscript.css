@@ -63,7 +63,7 @@ body {
 .MuiButton-containedPrimary {
   --tw-bg-opacity: 1;
   background-color: rgb(232 65 34);
-  background-image: url(/_next/static/media/button.17b4aa09050e6f41336f346c56bf4d54.jpg);
+  background-image: url("/assets/button.jpg");
   background-repeat: no-repeat;
 }
 
