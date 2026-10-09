@@ -24,9 +24,11 @@ describe("public pages", () => {
   it("blog lists articles, newest first", async () => {
     await page.goto(`${BASE}/blog`, { waitUntil: "networkidle2" })
     await sleep(1500)
-    const text = await bodyText(page)
-    expect(text).toContain("Use case three: Off the charts")
-    expect(text).toContain("Backstory - the beginnings")
+    expect(await bodyText(page)).toContain("Use case four: Dreaming offline")
+    // 12 posts per page (ITEMS_PER_PAGE): the oldest one has moved on to page 2
+    await page.goto(`${BASE}/blog?page=2`, { waitUntil: "networkidle2" })
+    await sleep(1500)
+    expect(await bodyText(page)).toContain("Backstory - the beginnings")
   })
 
   it("a blog article renders with its footnotes", async () => {

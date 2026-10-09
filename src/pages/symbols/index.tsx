@@ -18,6 +18,7 @@ import SheepLink from "src/core/components/SheepLink"
 import { SymbolsList } from "src/symbols/components/SymbolsList"
 import { SymbolJumpAutocomplete } from "src/symbols/components/SymbolJumpAutocomplete"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 
 const SymbolsPage: BlitzPage = () => {
   const router = useRouter()
@@ -25,6 +26,7 @@ const SymbolsPage: BlitzPage = () => {
   const [showForm, setShowForm] = useState(false)
   const [customOnly, setCustomOnly] = useState(false)
   const user = useCurrentUser()
+  const online = useOnlineStatus()
 
   // the sheep leads back to the start of the section — the first page, with any ?id= dropped.
   // `id` has to count too, not just the page: a deep link from a dream opens that symbol's card
@@ -80,19 +82,24 @@ const SymbolsPage: BlitzPage = () => {
               : "All symbols"}
           </Typography> */}
           <Suspense fallback={<LoadingSpiral />}>
-            {/* quick jump — the list below is paginated, this finds a symbol directly */}
-            <SymbolJumpAutocomplete
-              customOnly={customOnly}
-              onCustomOnlyChange={onCustomOnlyChange}
-            />
+            {/* quick jump — the list below is paginated, this finds a symbol directly. Offline the
+                list is read-only from the cache: no jump box or filter (they query), no new symbol */}
+            {online && (
+              <SymbolJumpAutocomplete
+                customOnly={customOnly}
+                onCustomOnlyChange={onCustomOnlyChange}
+              />
+            )}
             <SymbolsList customOnly={customOnly} />
           </Suspense>
-          <p className="mt-6 text-right">
-            <Button variant="contained" onClick={() => setShowForm(true)}>
-              New symbol
-            </Button>
-          </p>
-          {showForm && (
+          {online && (
+            <p className="mt-6 text-right">
+              <Button variant="contained" onClick={() => setShowForm(true)}>
+                New symbol
+              </Button>
+            </p>
+          )}
+          {online && showForm && (
             <Grid className="mt-4">
               <Card className="-mx-4">
                 <CardContent>

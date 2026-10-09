@@ -3,30 +3,30 @@ import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
-import { useQuery } from "src/core/rpc-client"
+import { getQueryClient, queryKeyFor, useQuery } from "src/core/rpc-client"
 import { useRouter } from "next/router"
 import React, { Fragment, Suspense, useEffect } from "react"
 import Layout from "src/core/layouts/Layout"
 import { getUser } from "src/users/client"
 import { UpdateUserForm } from "src/users/components/UpdateUserForm"
-import { Container, Grid, Box } from "@mui/material"
+import { Alert, Container, Grid, Box } from "@mui/material"
 import titleSettings from "public/assets/title-settings.png"
 import sheepSettings from "public/assets/sheep-settings.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 
 export const Settings = () => {
   const router = useRouter()
   const session = useSession()
-  const [user, { refetch }] = useQuery(
-    getUser,
-    { id: session.userId! },
-    {
-      // NOTE: `staleTime: Infinity` was a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110 —
-      // it ensured the query never refreshes and overwrites the form data while the user is editing
-      // staleTime: Infinity,
-      enabled: !!session.userId,
-    }
-  )
+  const online = useOnlineStatus()
+  const params = { id: session.userId! }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getUser, params))
+  const [user, { refetch }] = useQuery(getUser, params, {
+    // NOTE: `staleTime: Infinity` was a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110 —
+    // it ensured the query never refreshes and overwrites the form data while the user is editing
+    // staleTime: Infinity,
+    enabled: !!session.userId && (online || hasCached),
+  })
 
   useEffect(() => {
     if (!session.userId) router.push(Routes.Home())
@@ -57,15 +57,23 @@ export const Settings = () => {
         </Grid>
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
-          <Grid item md={8}>
+          <Grid item xs={12} md={8}>
             <h1 className="heading">
               <Image src={titleSettings} alt="Settings" width="130" height="55" />
               <span className="sr-only">Settings</span>
             </h1>
-            {/* NOTE: reload instead of refetch is a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110.
-                TODO (future-feature): debug further and restore the refetch variant */}
-            {/* <UpdateUserForm initialValues={{ ...user }} onSuccess={refetch} /> */}
-            <UpdateUserForm initialValues={{ ...user }} onSuccess={router.reload} />
+            {/* offline the page is sheep + title + notice — nothing here can be changed without
+                the server, so nothing is shown (a settings save would only pause until reconnect) */}
+            {online && user ? (
+              // NOTE: reload instead of refetch is a fix for https://gitlab.com/talpitoo/dreamingsheep/-/issues/110.
+              // TODO (future-feature): debug further and restore the refetch variant
+              // <UpdateUserForm initialValues={{ ...user }} onSuccess={refetch} />
+              <UpdateUserForm initialValues={{ ...user }} onSuccess={router.reload} />
+            ) : (
+              <Alert severity="info">
+                settings aren&apos;t available offline — reconnect to change anything here
+              </Alert>
+            )}
           </Grid>
         </Grid>
       </Container>
@@ -73,13 +81,13 @@ export const Settings = () => {
   )
 }
 
+// no wrapping <div>: inside Layout's centered flex column a plain div shrinks to its content, and
+// offline the content is one Alert — the Container must stay the flex item, like every other page
 const SettingsPage: BlitzPage = () => {
   return (
-    <div>
-      <Suspense fallback={<LoadingSpiral />}>
-        <Settings />
-      </Suspense>
-    </div>
+    <Suspense fallback={<LoadingSpiral />}>
+      <Settings />
+    </Suspense>
   )
 }
 

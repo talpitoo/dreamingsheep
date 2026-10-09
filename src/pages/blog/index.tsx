@@ -1,6 +1,7 @@
 import { GetServerSideProps } from "next"
 import Link from "next/link"
 import Image from "next/image"
+import { fallbackToOfflineCover } from "src/core/offline/coverFallback"
 import { InferGetServerSidePropsType } from "next"
 import { useRouter } from "next/router"
 import { AppPage as BlitzPage } from "src/core/types"
@@ -91,6 +92,7 @@ const BlogPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
                             width={184}
                             height={184}
                             className="object-cover cursor-pointer w-full h-auto aspect-square mb-2 sm:mb-0"
+                            onError={fallbackToOfflineCover}
                             // fill
                           />
                         </div>

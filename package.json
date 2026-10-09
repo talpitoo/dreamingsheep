@@ -46,7 +46,7 @@
   ],
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/generate-sw-precache.mjs && next build",
     "start": "next start",
     "studio": "node --env-file=.env.local node_modules/.bin/prisma studio",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts,.tsx .",

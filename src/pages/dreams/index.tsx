@@ -1,10 +1,19 @@
 import Image from "next/image"
 import { useRouter } from "next/router"
-import { usePaginatedQuery, useMutation, useQuery, invalidateQuery } from "src/core/rpc-client"
+import {
+  getQueryClient,
+  invalidateQuery,
+  queryKeyFor,
+  rpcFetch,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "src/core/rpc-client"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
 import Layout from "src/core/layouts/Layout"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import { useSession } from "src/auth/client"
 import { getDreams } from "src/dreams/client"
 import { CreateDream } from "src/dreams/validations"
 import { createDream } from "src/dreams/client"
@@ -15,6 +24,7 @@ import sheepDreams from "public/assets/sheep-dreamingsheep.png"
 import LoadingSpiral from "src/core/components/LoadingSpiral"
 import SheepLink from "src/core/components/SheepLink"
 import {
+  Alert,
   Button,
   Card,
   CardContent,
@@ -28,12 +38,22 @@ import { PickersDayProps, StaticDatePicker } from "@mui/x-date-pickers"
 import { getDreamsByMonth } from "src/dreams/client"
 import { renderDreamDay } from "src/dreams/components/DreamCalendarDay"
 import { DreamItemFooter, DreamList } from "src/dreams/components/DreamList"
+import { PendingDreamList } from "src/dreams/components/PendingDreamList"
 import { DreamForm, FORM_ERROR, FORM_RESET } from "src/dreams/components/DreamForm"
 import { SleepingTimeForm } from "src/sleepingTimes/components/SleepingTimeForm"
 import { DreamTime, DreamType, RecallTime } from "db"
 import { ITEMS_PER_PAGE } from "src/core/constants/general"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
 import classnames from "src/utils/classnames"
+import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
+import { enqueueDream, OutboxWriteError } from "src/dreams/offline/outbox"
+import { usePendingDreams } from "src/dreams/offline/usePendingDreams"
+import { autocompleteSymbolsParams } from "src/dreams/components/SymbolsAutocomplete"
+import {
+  AUTOCOMPLETE_SYMBOLS_QUERY_KEY,
+  clearPersistedQueries,
+} from "src/core/offline/persistedQueries"
+import { showOfflineNotice } from "src/core/offline/offlineNotice"
 
 function getDateTime(date: string | string[] | undefined): DateTime {
   if (typeof date === "string") {
@@ -73,26 +93,49 @@ const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 export const DreamsCalendar = () => {
   const router = useRouter()
+  const online = useOnlineStatus()
+  const pending = usePendingDreams()
   const today = useMemo(() => getParamDateOrDefault(router.query.date), [router.query.date]) // today will be the date set on param (default: current date)
   const paramDate = useMemo(() => getParamDateOrDefault(router.query.date), [router.query.date]) // paramDate will be the date set on param (default: current month)
   const month = useMemo(() => getCurrentMonthRange(paramDate), [paramDate]) // current month will be based on the value of paramDate
   const debugParam = router.query.debug?.toString()
 
-  const [dreamsByMonth] = useQuery(getDreamsByMonth, {
+  const params = {
     where: { dreamAt: { gt: month[0], lt: month[1] } },
     userTimezone: userTimezone, // add userTimezone as a parameter
-  })
+  }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getDreamsByMonth, params))
+  // offline, a month never fetched on this device renders unmarked (data undefined, no suspense)
+  const [dreamsByMonth] = useQuery(getDreamsByMonth, params, { enabled: online || hasCached })
 
   if (debugParam === "true") {
     console.debug(`userTimezone ${userTimezone}`)
     console.debug("[dreamsByMonth] " + JSON.stringify(dreamsByMonth, null, 2))
   }
 
+  // dreams still waiting in the outbox mark their days too
+  const merged = useMemo(() => {
+    const result: Record<string, { count: number; dreams: string[] }> = {
+      ...(dreamsByMonth ?? {}),
+    }
+    for (const entry of pending) {
+      const iso = DateTime.fromISO(entry.values.dreamAt as string)
+        .setZone(userTimezone)
+        .toISODate()
+      const existing = result[iso]
+      result[iso] = {
+        count: (existing?.count ?? 0) + 1,
+        dreams: [...(existing?.dreams ?? []), "pending sync"],
+      }
+    }
+    return result
+  }, [dreamsByMonth, pending])
+
   const renderWeekPickerDay = (
     day: DateTime,
     selectedDates: Array<DateTime | null>,
     pickersDayProps: PickersDayProps<DateTime>
-  ) => renderDreamDay(day, dreamsByMonth, DateTime.fromJSDate(today), pickersDayProps, debugParam)
+  ) => renderDreamDay(day, merged, DateTime.fromJSDate(today), pickersDayProps, debugParam)
 
   return (
     <StaticDatePicker<DateTime>
@@ -105,6 +148,9 @@ export const DreamsCalendar = () => {
         value < DateTime.fromFormat("yyyy-MM-dd", "2020-01-01").startOf("day")
       }
       onMonthChange={(value) => {
+        // the picker also reports a month change when `value` itself moves to another month (the
+        // sheep link, browser Back): only a switch away from the URL's own month navigates
+        if (value.hasSame(DateTime.fromJSDate(paramDate), "month")) return
         router.push(Routes.DreamsPage({ date: value.toFormat("yyyy-MM-dd") }))
       }}
       onChange={(newValue) => {
@@ -128,33 +174,57 @@ export const DreamsCalendar = () => {
 
 export const DreamsList = () => {
   const router = useRouter()
+  const online = useOnlineStatus()
   const query = router.query.q as string | undefined
   const today = useMemo(() => getParamDateOrDefault(router.query.date), [router.query.date]) // today will be the date set on param (default: current date)
   const tomorrow = useMemo(() => getTomorrow(today), [today])
+  const dateIso = DateTime.fromJSDate(today).setZone(userTimezone).toISODate()
 
   // convert today and tomorrow to local timezone before the DB query // NOTE: possible UTC/local timezone conflict, double-check
   const localToday = DateTime.fromJSDate(today).setZone(userTimezone).toJSDate()
   const localTomorrow = DateTime.fromJSDate(tomorrow).setZone(userTimezone).toJSDate()
 
-  const [{ dreams, count }, { isLoading, refetch }] = usePaginatedQuery(getDreams, {
+  const params = {
     orderBy: { id: "asc" },
     skip: 0,
     take: ITEMS_PER_PAGE,
     ...(query
       ? { where: { OR: [{ title: { contains: query } }, { description: { contains: query } }] } }
       : { where: { dreamAt: { gte: localToday, lt: localTomorrow } } }),
+  }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getDreams, params))
+  const [data, { isLoading, refetch }] = usePaginatedQuery(getDreams, params, {
+    enabled: online || hasCached,
   })
 
+  // offline, a day never fetched on this device has no data: `undefined` (no suspense), or — after
+  // navigating from another day — that day's dreams, which keepPreviousData passes off as this one's
+  if (!data || (!online && !hasCached))
+    return (
+      <>
+        <PendingDreamList dateIso={dateIso} />
+        <Alert severity="info">
+          you&apos;re offline and this day isn&apos;t cached on this device yet
+        </Alert>
+      </>
+    )
+
   return (
-    <DreamList
-      isLoading={isLoading}
-      dreams={dreams}
-      count={count}
-      refetchList={refetch}
-      noDreamMessage={query ? "No dreams matching your query." : "No dreams on this day yet."}
-    />
+    <>
+      <PendingDreamList dateIso={dateIso} />
+      <DreamList
+        isLoading={isLoading}
+        dreams={data.dreams}
+        count={data.count}
+        refetchList={refetch}
+        noDreamMessage={query ? "No dreams matching your query." : "No dreams on this day yet."}
+      />
+    </>
   )
 }
+
+// the symbol picker's list, prefetched once per session and user (see autocompleteSymbolsParams)
+let symbolsPrefetchedFor: number | null = null
 
 const DreamsPage: BlitzPage = () => {
   const router = useRouter()
@@ -183,6 +253,20 @@ const DreamsPage: BlitzPage = () => {
     createDreamFormInitialValues
   )
   const [showForm, setShowForm] = useState(false)
+  const session = useSession()
+
+  // online, warm the symbol picker's query once per session so symbols can be attached offline
+  // even if the picker (behind the form's "More") was never opened online on this device; the
+  // result is persisted like the picker's own fetch
+  useEffect(() => {
+    const userId = user?.id
+    if (!userId || symbolsPrefetchedFor === userId || !isBrowserOnline()) return
+    symbolsPrefetchedFor = userId
+    void getQueryClient().prefetchQuery({
+      queryKey: [AUTOCOMPLETE_SYMBOLS_QUERY_KEY],
+      queryFn: () => rpcFetch("getAutocompleteSymbols", autocompleteSymbolsParams(userId)),
+    })
+  }, [user?.id])
 
   // the sheep leads back to today, the journal's home. Null while you are already there — which
   // includes a bare /dreams, since the effect below is about to put today in the URL anyway
@@ -208,6 +292,36 @@ const DreamsPage: BlitzPage = () => {
       )
     }
   }, [router])
+
+  const queueOffline = (values: any) => {
+    if (!session.userId) return { [FORM_ERROR]: "please log in to save dreams" }
+    try {
+      try {
+        enqueueDream(window.localStorage, session.userId, values)
+      } catch (error) {
+        if (!(error instanceof OutboxWriteError)) throw error
+        // the dream outranks the offline read cache: free its space and try once more
+        clearPersistedQueries(window.localStorage, session.userId)
+        enqueueDream(window.localStorage, session.userId, values)
+      }
+    } catch {
+      // any throw while queueing (a blocked localStorage throws SecurityError on access, a
+      // failing read throws before the write) must still reach the form, never escape onSubmit
+      return { [FORM_ERROR]: "couldn't save on this device — storage seems unavailable" }
+    }
+    setShowForm(false)
+    showOfflineNotice({ kind: "saved", count: 1 })
+    return { [FORM_RESET]: true }
+  }
+
+  // the calendar and the list read ?date= while rendering, and /dreams is statically optimized: on
+  // a direct load the query stays empty until router.isReady — rendered before that, they would
+  // show (and fetch) today first, then jump to the URL's day
+  const calendarFallback = (
+    <Box className="h-full flex min-h-84">
+      <LoadingSpiral />
+    </Box>
+  )
 
   return (
     <Fragment>
@@ -242,16 +356,14 @@ const DreamsPage: BlitzPage = () => {
             className="overflow-x-hidden mb-8 sm:mb-0 rounded-sm"
           >
             {!query && (
-              <Suspense
-                fallback={
-                  <Box className="h-full flex min-h-84">
-                    <LoadingSpiral />
+              <Suspense fallback={calendarFallback}>
+                {router.isReady ? (
+                  <Box className="xsmax:-mx-8">
+                    <DreamsCalendar />
                   </Box>
-                }
-              >
-                <Box className="xsmax:-mx-8">
-                  <DreamsCalendar />
-                </Box>
+                ) : (
+                  calendarFallback
+                )}
               </Suspense>
             )}
           </Grid>
@@ -278,7 +390,7 @@ const DreamsPage: BlitzPage = () => {
             )}
 
             <Suspense fallback={<LoadingSpiral />}>
-              <DreamsList />
+              {router.isReady ? <DreamsList /> : <LoadingSpiral />}
             </Suspense>
 
             <p className="mt-4 text-right">
@@ -296,46 +408,47 @@ const DreamsPage: BlitzPage = () => {
                       schema={CreateDream}
                       initialValues={createDreamFormInitialValues}
                       onSubmit={async (values) => {
+                        const nowDate = DateTime.now()
+                          .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+                          .toISO()
+
+                        // add the current hours/minutes/seconds... to currentDate so that the difference is exactly 24 hours
+                        const currentDateTimestampUtc = DateTime.fromISO(currentDate)
+                          .set({
+                            hour: DateTime.now().hour,
+                            minute: DateTime.now().minute,
+                            second: DateTime.now().second,
+                          })
+                          .toUTC()
+                          .toISO()
+
+                        if (debugParam === "true") {
+                          console.debug(
+                            `currentDate/currentDateTimestampUtc ${currentDate}/${currentDateTimestampUtc}`
+                          )
+                          console.debug(
+                            `currentDate/nowDate/equal? ${currentDate}/${nowDate}/${
+                              currentDate === nowDate
+                            }`
+                          )
+                        }
+
+                        values.dreamAt =
+                          currentDate === nowDate
+                            ? DateTime.now().toUTC().toISO()
+                            : currentDateTimestampUtc // NOTE: possible UTC/local timezone conflict, double-check
+
+                        if (!isBrowserOnline()) return queueOffline(values)
                         try {
-                          const nowDate = DateTime.now()
-                            .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-                            .toISO()
-
-                          // add the current hours/minutes/seconds... to currentDate so that the difference is exactly 24 hours
-                          const currentDateTimestampUtc = DateTime.fromISO(currentDate)
-                            .set({
-                              hour: DateTime.now().hour,
-                              minute: DateTime.now().minute,
-                              second: DateTime.now().second,
-                            })
-                            .toUTC()
-                            .toISO()
-
-                          if (debugParam === "true") {
-                            console.debug(
-                              `currentDate/currentDateTimestampUtc ${currentDate}/${currentDateTimestampUtc}`
-                            )
-                            console.debug(
-                              `currentDate/nowDate/equal? ${currentDate}/${nowDate}/${
-                                currentDate === nowDate
-                              }`
-                            )
-                          }
-
-                          values.dreamAt =
-                            currentDate === nowDate
-                              ? DateTime.now().toUTC().toISO()
-                              : currentDateTimestampUtc // NOTE: possible UTC/local timezone conflict, double-check
-
                           await createDreamMutation(values)
                           invalidateQuery(getDreams)
                           invalidateQuery(getDreamsByMonth)
                           setShowForm(false)
                           return { [FORM_RESET]: true }
                         } catch (error: any) {
-                          return {
-                            [FORM_ERROR]: error.toString(),
-                          }
+                          // navigator.onLine lied (flaky network): fetch itself failed — fall back to the outbox
+                          if (error instanceof TypeError) return queueOffline(values)
+                          return { [FORM_ERROR]: error.toString() }
                         }
                       }}
                       onValuesChange={(values) => setCreateDreamFormValues(values)}

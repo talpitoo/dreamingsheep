@@ -14,6 +14,7 @@ import {
 import sheepDelete from "public/assets/sheep-delete.png"
 import { Fragment, ReactNode, useRef, useState } from "react"
 import HourglassTopIcon from "@mui/icons-material/HourglassTop"
+import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 
 export interface DeletionConfirmationDialogProps {
   open: boolean
@@ -37,9 +38,12 @@ export function DeletionConfirmationDialog({
   // clicks that land before React re-renders the disabled state
   const [isBusy, setIsBusy] = useState(false)
   const isDeletingRef = useRef(false)
+  // offline is read-only: a dialog opened online outlives the connection, and its delete would
+  // only pause the mutation until reconnect — with Cancel locked behind isBusy meanwhile
+  const online = useOnlineStatus()
 
   async function handleDelete() {
-    if (isDeletingRef.current) return
+    if (isDeletingRef.current || !isBrowserOnline()) return
     isDeletingRef.current = true
     setIsBusy(true)
     try {
@@ -70,6 +74,11 @@ export function DeletionConfirmationDialog({
             className="w-full h-auto max-w-[300px]"
           />
         </Box>
+        {!online && (
+          <DialogContentText className="mt-4">
+            {"you're offline — deleting needs a connection"}
+          </DialogContentText>
+        )}
       </DialogContent>
       <DialogActions className="mx-4 mb-4">
         <Button onClick={onCancel} disabled={isBusy}>
@@ -82,7 +91,7 @@ export function DeletionConfirmationDialog({
         <Button
           variant="contained"
           onClick={handleDelete}
-          disabled={isBusy}
+          disabled={isBusy || !online}
           // no ml-*: DialogActions' own `> :not(style) ~ :not(style)` rule is more specific than
           // the sx that used to sit here, so its 8px gap is what has always rendered
           className="w-auto"

@@ -25,12 +25,16 @@ export const useUpload: UseUpload = ({ onSuccess }) => {
       if (file.size <= MAX_FILE_SIZE) {
         setSize(undefined)
         setLoading(true)
-        const response = await uploadFile(file?.file)
-        setSize(
-          typeof response?.size === "number" ? response.size + (file?.size || 0) : response?.size
-        )
-        onSuccess(response?.key)
-        setLoading(false)
+        try {
+          const response = await uploadFile(file?.file)
+          setSize(
+            typeof response?.size === "number" ? response.size + (file?.size || 0) : response?.size
+          )
+          onSuccess(response?.key)
+        } finally {
+          // a failed upload (the connection dropped mid-way) must not leave the hourglass on
+          setLoading(false)
+        }
       } else {
         setSize(file.size)
       }

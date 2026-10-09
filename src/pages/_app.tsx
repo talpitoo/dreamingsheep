@@ -19,12 +19,15 @@ import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles"
 import { LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon"
 import Layout from "src/core/layouts/Layout"
-import { Alert, Container, Grid, Box } from "@mui/material"
+import { Alert, Button, Container, Grid, Box } from "@mui/material"
 import sheepSignup from "public/assets/sheep-signup.png"
+import sheepOffline from "public/assets/sheep-offline.png"
 import titleDreamingsheep from "public/assets/title-dreamingsheep.png"
 import CustomErrorContainer from "src/core/components/CustomErrorContainer"
 import { AuthenticationError, AuthorizationError } from "src/core/errors"
 import { getQueryClient } from "src/core/rpc-client"
+import OfflineSupport from "src/core/offline/OfflineSupport"
+import { isBrowserOnline } from "src/core/offline/onlineStatus"
 import { readPublicDataFromCookie, useSession } from "src/auth/client"
 import { ErrorStatus } from "src/core/components/ErrorStatus"
 import type { AppPage } from "src/core/types"
@@ -85,6 +88,10 @@ export default function App({
                 <CssBaseline />
                 <AppErrorBoundary>
                   <CreateInstantSymbolProvider>
+                    {/* outside AuthGuard and ahead of the page: it mounts in the very first commit,
+                        so its query-cache hydration is done before a private page body first
+                        renders; outside getLayout, so it is identical on every page */}
+                    <OfflineSupport />
                     {getLayout(
                       <AuthGuard Component={Component}>
                         <Component {...pageProps} />
@@ -130,6 +137,11 @@ function AuthGuard({ Component, children }: { Component: AppPage; children: Reac
     // fallback for perfectly logged-in visitors on a full page load
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
     if (Component.authenticate === true && !userId) {
+      // the worker's runtime page cache is for logged-in sessions only: this shell was just
+      // stored by a navigation nobody is logged in for (a bookmark to /dreams after a logout, an
+      // expired session), and it must not be what a slow-link "/" is answered with later —
+      // same message as logout; the precache (public shells) is untouched
+      navigator.serviceWorker?.controller?.postMessage("ds-logout")
       setAuthError(new AuthenticationError())
     } else if (authError && userId) {
       setAuthError(null)
@@ -210,6 +222,47 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
             title="Sorry, you are not authorized to access this"
           />
         </CustomErrorContainer>
+      </Layout>
+    )
+  }
+
+  // a query with no cached data destructured offline throws a plain TypeError (not one
+  // of our own error classes) — caught here instead of falling through to the generic
+  // "unexpected failure" branch below, so a dropped connection doesn't look like a bug.
+  // Built on the AuthenticationError branch's own Container/Grid layout, not
+  // CustomErrorContainer: that component always renders its own generic error sheep +
+  // title regardless of what's passed as children, which would put two sheep on the
+  // page here — and it needs its own noindex tag for the same reason that branch does
+  if (error instanceof TypeError && !isBrowserOnline()) {
+    return (
+      <Layout>
+        <Container>
+          <Head>
+            <meta name="robots" content="noindex" />
+          </Head>
+          <Grid container>
+            <Grid item md={2} className="grid-spacer-md-2" />
+            <Grid item xs={12} sm={6} md={4}>
+              <Box className="w-1/2 sm:w-full mt-0 mx-auto -mb-8 sm:m-auto">
+                <Image
+                  src={sheepOffline}
+                  alt="offline sheep"
+                  width={384}
+                  height={384}
+                  className="w-full h-auto"
+                />
+              </Box>
+            </Grid>
+            <Grid item sm={6} md={4} className="text-center w-full">
+              <Alert severity="info" className="mb-4">
+                this page needs a connection — your dreams are safe on this device
+              </Alert>
+              <Button variant="contained" onClick={resetErrorBoundary}>
+                try again
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
       </Layout>
     )
   }

@@ -1,6 +1,7 @@
 import SymbolName from "src/symbols/components/SymbolName"
 import Link from "next/link"
 import { useMutation } from "src/core/rpc-client"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { useRouter } from "next/router"
 import { Routes } from "src/routes"
 import {
@@ -92,6 +93,7 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
   const dreamRef = useRef<null | HTMLDivElement>(null)
   const isDreamPage = Routes.DreamsPage().pathname === router.pathname
   const [formValues, setFormValues] = useState<any>(dream)
+  const online = useOnlineStatus()
   const [isEdit, setEdit] = useState(false)
   const [updateDreamMutation, { isLoading: isUpdateDreamLoading }] = useMutation(updateDream)
   const [deleteDreamMutation] = useMutation(deleteDream)
@@ -177,6 +179,10 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                 id={"update-dream_" + dream.id}
                 initialValues={dream}
                 onSubmit={async (values) => {
+                  // Enter still submits with Update disabled; offline the mutation would only
+                  // pause and fire on reconnect, behind the user's back
+                  if (!online)
+                    return { [FORM_ERROR]: "you're offline — reconnect to update this dream" }
                   try {
                     await updateDreamMutation({
                       id: dream.id,
@@ -214,40 +220,47 @@ const DreamItem = ({ dream, onAfterUpdate, edit, onChangeEdit }: DreamItemProps)
                 />
               )}
             </Box>
-            <Box className="flex flex-row ml-0">
-              <IconButton
-                color="primary"
-                className="mr-auto ml-0 md:ml-4"
-                onClick={() => setDeleteDialogVisibility(true)}
-              >
-                <span className="lucidicon-trash"></span>
-              </IconButton>
-              {isEdit && (
-                <Fragment>
-                  <Button onClick={() => changeEdit(false)} disabled={isUpdateDreamLoading}>
-                    Cancel
-                  </Button>
-                  <Button
+            {/* offline, dreams can only be added — no edit/delete controls. An edit already open
+                stays, so a connection drop never discards what was typed: Cancel and a disabled
+                Update until reconnect */}
+            {(online || isEdit) && (
+              <Box className="flex flex-row ml-0">
+                {online && (
+                  <IconButton
                     color="primary"
-                    variant="contained"
-                    type="submit"
-                    form={"update-dream_" + dream.id}
-                    disabled={isUpdateDreamLoading}
-                    className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
-                      isUpdateDreamLoading ? "max-w-[113px]" : "max-w-[89px]"
-                    }`}
-                    endIcon={isUpdateDreamLoading && <HourglassTopIcon className="opacity-50" />}
+                    className="mr-auto ml-0 md:ml-4"
+                    onClick={() => setDeleteDialogVisibility(true)}
                   >
-                    Update
-                  </Button>
-                </Fragment>
-              )}
-              {!isEdit && (
-                <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
-                  <span className="lucidicon-pencil"></span>
-                </IconButton>
-              )}
-            </Box>
+                    <span className="lucidicon-trash"></span>
+                  </IconButton>
+                )}
+                {isEdit && (
+                  <Fragment>
+                    <Button onClick={() => changeEdit(false)} disabled={isUpdateDreamLoading}>
+                      Cancel
+                    </Button>
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      form={"update-dream_" + dream.id}
+                      disabled={isUpdateDreamLoading || !online}
+                      className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
+                        isUpdateDreamLoading ? "max-w-[113px]" : "max-w-[89px]"
+                      }`}
+                      endIcon={isUpdateDreamLoading && <HourglassTopIcon className="opacity-50" />}
+                    >
+                      Update
+                    </Button>
+                  </Fragment>
+                )}
+                {!isEdit && (
+                  <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
+                    <span className="lucidicon-pencil"></span>
+                  </IconButton>
+                )}
+              </Box>
+            )}
           </CardActions>
         </Card>
       </Grid>

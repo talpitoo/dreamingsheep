@@ -6,6 +6,7 @@ import LabeledTextField from "src/core/components/LabeledTextField"
 import { Fragment } from "react"
 import classnames from "src/utils/classnames"
 import FileUpload from "src/core/components/FileUpload"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 
 export interface SymbolFormProps<S extends z.ZodType<any, any>> extends FormProps<S> {
   builtInSymbol?: boolean
@@ -17,6 +18,9 @@ export function SymbolForm<S extends z.ZodType<any, any>>({
   onAfterUpdate,
   ...props
 }: SymbolFormProps<S>) {
+  // the picture upload saves on its own (S3 + updateSymbol), outside the form's disabled Update:
+  // offline it is not offered at all
+  const online = useOnlineStatus()
   return (
     <Fragment>
       <Form<S> {...props}>
@@ -54,7 +58,7 @@ export function SymbolForm<S extends z.ZodType<any, any>>({
         </Grid>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            {!builtInSymbol && (
+            {!builtInSymbol && online && (
               <FileUpload
                 name="picture"
                 initialValues={props?.initialValues}

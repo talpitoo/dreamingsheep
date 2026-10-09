@@ -1,5 +1,5 @@
 import classnames from "src/utils/classnames"
-import { useQuery } from "src/core/rpc-client"
+import { getQueryClient, useQuery } from "src/core/rpc-client"
 import { useRouter } from "next/router"
 import { Routes } from "src/routes"
 import {
@@ -14,6 +14,8 @@ import {
 import { Symbol } from "db"
 import React from "react"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
+import { AUTOCOMPLETE_SYMBOLS_QUERY_KEY } from "src/core/offline/persistedQueries"
 import { getAutocompleteSymbols } from "src/symbols/client"
 
 interface SymbolJumpAutocompleteProps {
@@ -33,7 +35,13 @@ export const SymbolJumpAutocomplete = ({
 }: SymbolJumpAutocompleteProps) => {
   const user = useCurrentUser()
   const router = useRouter()
-  const [{ symbols }, { isLoading }] = useQuery(
+  const online = useOnlineStatus()
+  // the explicit key must include the filter, or toggling it would serve stale options
+  const queryKey = [AUTOCOMPLETE_SYMBOLS_QUERY_KEY, customOnly]
+  const hasCached = !!getQueryClient().getQueryData(queryKey)
+  // offline and never cached on this device: no options (and no "Loading…") instead of a crash —
+  // the list below carries the notice
+  const [symbolsResult, { isLoading }] = useQuery(
     getAutocompleteSymbols,
     {
       orderBy: { name: "asc" },
@@ -42,9 +50,9 @@ export const SymbolJumpAutocomplete = ({
         : { OR: [{ relatedTo: { some: { id: user?.id } } }, { authorId: user?.id }] },
       take: 200,
     },
-    // the explicit key must include the filter, or toggling it would serve stale options
-    { queryKey: ["get-symbols-autocomplete", customOnly] }
+    { queryKey, enabled: online || hasCached }
   )
+  const symbols = symbolsResult?.symbols ?? []
 
   return (
     <Paper className="mb-14 p-2 px-[14px] flex flex-wrap items-center">
@@ -53,7 +61,7 @@ export const SymbolJumpAutocomplete = ({
         options={symbols as Symbol[]}
         autoHighlight
         handleHomeEndKeys
-        loading={isLoading}
+        loading={isLoading && online}
         // stays empty after a pick — it's a navigation box, not a filter
         value={null}
         blurOnSelect

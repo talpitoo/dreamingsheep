@@ -3,6 +3,11 @@ import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { useRouter } from "next/router"
 import { useMutation } from "src/core/rpc-client"
+import { forgetDeviceData } from "src/core/offline/deviceData"
+import { showOfflineNotice } from "src/core/offline/offlineNotice"
+import { isBrowserOnline } from "src/core/offline/onlineStatus"
+import { readOutbox } from "src/dreams/offline/outbox"
+import { syncNow } from "src/dreams/offline/syncRunner"
 import {
   AppBar,
   Box,
@@ -71,7 +76,53 @@ export function Header() {
   }, [router.events])
 
   async function handleLogout() {
-    await logoutMutation()
+    // captured before the mutation resolves: the session cookie carrying it is gone the
+    // moment logout succeeds, and everything purged below is keyed by this id
+    const userId = session.userId
+    // the session cookie is HttpOnly: only the server can end a session, so there is no honest
+    // offline sign-out — a local purge alone would leave the device logged in on the next load,
+    // and react-query would hold the mutation paused until reconnect with nothing to show for it
+    if (!isBrowserOnline()) {
+      collapseMobileMenu()
+      showOfflineNotice({ kind: "signOutOffline" })
+      return
+    }
+    if (userId) {
+      // runs while the session is still valid, ahead of the mutation and the outbox purge
+      // below — the only remaining chance to hand offline-queued dreams to the server
+      // instead of dropping them. syncNow reads the outbox, never throws and gives up after
+      // SYNC_NOW_TIMEOUT_MS whatever it is waiting on
+      await syncNow(userId)
+      // whatever it could not deliver — parked after a rejection, blocked by the server, or
+      // slower than its bound — would go with the outbox purge below: refuse instead. The
+      // dream's day offers retry and discard; a sign-out must never lose a dream silently
+      let unsynced = 0
+      try {
+        unsynced = readOutbox(window.localStorage, userId).length
+      } catch {
+        // unreadable storage (access itself throws; a corrupt entry reads as []): nothing can be
+        // waiting there — the same storage refused the enqueue, and forgetDeviceData cannot
+        // remove what it cannot read. Refusing here would lock such a browser out of signing out
+      }
+      if (unsynced > 0) {
+        collapseMobileMenu()
+        showOfflineNotice({ kind: "signOutPending", count: unsynced })
+        return
+      }
+    }
+    try {
+      await logoutMutation()
+    } catch (error) {
+      // navigator.onLine lied (flaky network): the session is still valid, so nothing is purged
+      if (error instanceof TypeError) {
+        collapseMobileMenu()
+        showOfflineNotice({ kind: "signOutOffline" })
+        return
+      }
+      throw error
+    }
+    // the query cache, this user's outbox and snapshot, the worker's page cache (see deviceData)
+    forgetDeviceData(userId)
     if (isAuthenticatedPage(router.pathname)) {
       // full page load instead of a client-side push: the dead session would make the still-mounted
       // authenticated page throw AuthenticationError (issue #10), and a reload also flushes

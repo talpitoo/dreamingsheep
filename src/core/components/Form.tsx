@@ -83,7 +83,14 @@ export function Form<S extends z.ZodType<any, any>>({
 
   return (
     <FormProvider {...ctx}>
-      <form onSubmit={submitFn} onReset={resetForm} className="form" {...props}>
+      <form
+        onSubmit={submitFn}
+        onReset={resetForm}
+        className="form"
+        // unhydrated, the browser submits natively: POST keeps credentials out of URLs and logs
+        method="post"
+        {...props}
+      >
         {/* Form fields supplied as children are rendered here */}
         {children}
 

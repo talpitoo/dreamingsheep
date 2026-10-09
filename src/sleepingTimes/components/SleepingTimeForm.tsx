@@ -1,4 +1,5 @@
-import { rpcFetch, useMutation, useQuery } from "src/core/rpc-client"
+import { getQueryClient, queryKeyFor, rpcFetch, useMutation, useQuery } from "src/core/rpc-client"
+import { isBrowserOnline, useOnlineStatus } from "src/core/offline/onlineStatus"
 import { Form } from "src/core/components/Form"
 export { FORM_ERROR } from "src/core/components/Form"
 import { Button, Grid, Snackbar, TextField, TextFieldProps } from "@mui/material"
@@ -149,8 +150,12 @@ export interface SleepingTimeFormProps {
 }
 
 export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
-  const [sleepingTime, { isLoading, refetch }] = useQuery(getSleepingTime, {
-    where: { sleepingAt: currentDate },
+  const online = useOnlineStatus()
+  const params = { where: { sleepingAt: currentDate } }
+  const hasCached = !!getQueryClient().getQueryData(queryKeyFor(getSleepingTime, params))
+  // offline, a night never fetched on this device stays empty (data undefined, no suspense)
+  const [sleepingTime, { isLoading, refetch }] = useQuery(getSleepingTime, params, {
+    enabled: online || hasCached,
   })
   const [createSleepingTimeMutation] = useMutation(createSleepingTime)
   const [updateSleepingTimeMutation] = useMutation(updateSleepingTime)
@@ -161,6 +166,9 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
   // value files to the previous day's row. Returns true when handled here so
   // the viewed day's field stays untouched.
   async function saveBedtimeToNight(value: Date): Promise<boolean> {
+    // offline is read-only: the picker dialog is a portal outside the disabled fieldset, so its
+    // "now" button and its close still reach here — "handled" with nothing saved, field untouched
+    if (!isBrowserOnline()) return true
     const targetDay = bedtimeNightTarget(value)
     if (!targetDay || targetDay === currentDate) return false
     try {
@@ -193,95 +201,112 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
     return true
   }
 
+  // a disabled query reports isLoading until it has data: offline the form renders regardless,
+  // so the day's layout stays as it is online
+  const ready = !isLoading || !online
+
   return (
     <Fragment>
-      {!isLoading && (
-        <Form
-          id="sleepingTime"
-          initialValues={!sleepingTime ? { bedtime: null, wakeUpTime: null } : sleepingTime}
+      {ready && (
+        // offline the night's times are read-only: a disabled fieldset disables both pickers and
+        // their "now" buttons (a save would only pause and fire on reconnect); min-w-0 neutralises
+        // fieldset's own min-content sizing, the dimming is the cue
+        <fieldset
+          disabled={!online}
+          aria-disabled={!online}
+          className="border-0 p-0 m-0 min-w-0 aria-disabled:opacity-60 aria-disabled:pointer-events-none"
         >
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TimePickerField
-                label="wake-up time"
-                name="wakeUpTime"
-                className="translate-x-0 translate-y-0 transform-gpu"
-                minutesStep={5}
-                nowRounding="floor"
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="wake-up time"
-                    InputLabelProps={{ shrink: true, disableAnimation: true }}
-                    fullWidth
-                    className="text-outline translate-x-0 translate-y-0 transform-gpu"
-                  />
-                )}
-                onChangeSubmit={async (value) => {
-                  try {
-                    if (!sleepingTime) {
-                      await createSleepingTimeMutation({
-                        bedtime: null,
-                        wakeUpTime: getISODateString(value),
-                        sleepingAt: currentDate,
-                      })
-                    } else {
-                      await updateSleepingTimeMutation({
-                        bedtime: getISODateString(sleepingTime.bedtime),
-                        wakeUpTime: getISODateString(value),
-                        sleepingAt: currentDate,
-                        id: sleepingTime.id,
-                      })
+          <Form
+            id="sleepingTime"
+            initialValues={!sleepingTime ? { bedtime: null, wakeUpTime: null } : sleepingTime}
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TimePickerField
+                  label="wake-up time"
+                  name="wakeUpTime"
+                  className="translate-x-0 translate-y-0 transform-gpu"
+                  minutesStep={5}
+                  nowRounding="floor"
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="wake-up time"
+                      InputLabelProps={{ shrink: true, disableAnimation: true }}
+                      fullWidth
+                      className="text-outline translate-x-0 translate-y-0 transform-gpu"
+                    />
+                  )}
+                  onChangeSubmit={async (value) => {
+                    // see saveBedtimeToNight: offline the mutation would only pause until reconnect
+                    if (!isBrowserOnline()) return
+                    try {
+                      if (!sleepingTime) {
+                        await createSleepingTimeMutation({
+                          bedtime: null,
+                          wakeUpTime: getISODateString(value),
+                          sleepingAt: currentDate,
+                        })
+                      } else {
+                        await updateSleepingTimeMutation({
+                          bedtime: getISODateString(sleepingTime.bedtime),
+                          wakeUpTime: getISODateString(value),
+                          sleepingAt: currentDate,
+                          id: sleepingTime.id,
+                        })
+                      }
+                      refetch()
+                    } catch (error: any) {
+                      return { [FORM_ERROR]: error.toString() }
                     }
-                    refetch()
-                  } catch (error: any) {
-                    return { [FORM_ERROR]: error.toString() }
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TimePickerField
-                label="bedtime"
-                name="bedtime"
-                className="translate-x-0 translate-y-0 transform-gpu"
-                minutesStep={5}
-                nowRounding="ceil"
-                onNowPressed={saveBedtimeToNight}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="bedtime"
-                    InputLabelProps={{ shrink: true, disableAnimation: true }}
-                    fullWidth
-                    className="text-outline translate-x-0 translate-y-0 transform-gpu"
-                  />
-                )}
-                onChangeSubmit={async (value) => {
-                  try {
-                    if (!sleepingTime) {
-                      await createSleepingTimeMutation({
-                        bedtime: getISODateString(value),
-                        wakeUpTime: null,
-                        sleepingAt: currentDate,
-                      })
-                    } else {
-                      await updateSleepingTimeMutation({
-                        bedtime: getISODateString(value),
-                        wakeUpTime: getISODateString(sleepingTime.wakeUpTime),
-                        sleepingAt: currentDate,
-                        id: sleepingTime.id,
-                      })
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TimePickerField
+                  label="bedtime"
+                  name="bedtime"
+                  className="translate-x-0 translate-y-0 transform-gpu"
+                  minutesStep={5}
+                  nowRounding="ceil"
+                  onNowPressed={saveBedtimeToNight}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="bedtime"
+                      InputLabelProps={{ shrink: true, disableAnimation: true }}
+                      fullWidth
+                      className="text-outline translate-x-0 translate-y-0 transform-gpu"
+                    />
+                  )}
+                  onChangeSubmit={async (value) => {
+                    // see saveBedtimeToNight: offline the mutation would only pause until reconnect
+                    if (!isBrowserOnline()) return
+                    try {
+                      if (!sleepingTime) {
+                        await createSleepingTimeMutation({
+                          bedtime: getISODateString(value),
+                          wakeUpTime: null,
+                          sleepingAt: currentDate,
+                        })
+                      } else {
+                        await updateSleepingTimeMutation({
+                          bedtime: getISODateString(value),
+                          wakeUpTime: getISODateString(sleepingTime.wakeUpTime),
+                          sleepingAt: currentDate,
+                          id: sleepingTime.id,
+                        })
+                      }
+                      refetch()
+                    } catch (error: any) {
+                      return { [FORM_ERROR]: error.toString() }
                     }
-                    refetch()
-                  } catch (error: any) {
-                    return { [FORM_ERROR]: error.toString() }
-                  }
-                }}
-              />
+                  }}
+                />
+              </Grid>
             </Grid>
-          </Grid>
-        </Form>
+          </Form>
+        </fieldset>
       )}
       <Snackbar
         open={!!toast}

@@ -9,6 +9,7 @@ import React, { Fragment, Suspense, useEffect, useMemo, useState } from "react"
 import { useCurrentUser } from "src/core/hooks/useCurrentUser"
 import Layout from "src/core/layouts/Layout"
 import {
+  Alert,
   Button,
   Collapse,
   Container,
@@ -22,6 +23,7 @@ import { KeyboardArrowDown, Settings } from "@mui/icons-material"
 import { DateTime } from "luxon"
 import titleStats from "public/assets/title-stats.png"
 import sheepStats from "public/assets/sheep-stats.png"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { getDreams } from "src/dreams/client"
 import { StatGoogleChart } from "src/stats/components/StatGoogleChart"
 import { StatSymbolChart } from "src/stats/components/StatSymbolChart"
@@ -95,6 +97,7 @@ export const Stats = () => {
   const router = useRouter()
   const session = useSession()
   const user = useCurrentUser()
+  const online = useOnlineStatus()
   // const theme = useTheme()
   // const breakpointSm = useMediaQuery(theme.breakpoints.down("sm"))
   const [range, setRange] = useState<Range>(DEFAULT_RANGE)
@@ -204,141 +207,163 @@ export const Stats = () => {
               <Image src={titleStats} alt="Stats" width="77" height="55" />
               <span className="sr-only">Stats</span>
             </h1>
-            <Box className="flex justify-between items-start flex-wrap gap-4">
-              <Card className="bg-white inline-block">
-                <ToggleButtonGroup
-                  value={range}
-                  // NOTE: wrapping via a class instead of orientation={breakpointSm ? "vertical" : "horizontal"}
-                  color="primary"
-                  exclusive
-                  className="flex-wrap"
-                  onChange={(_, value) => {
-                    if (value !== null) {
-                      changeRange(value)
-                    }
-                  }}
-                >
-                  {/* day/week/month — [from–to] — all: the custom toggle is a direct child
+            {/* offline the page is sheep + title + notice: the range and filter controls would
+                drive charts that are not rendered */}
+            {online && (
+              <Box className="flex justify-between items-start flex-wrap gap-4">
+                <Card className="bg-white inline-block">
+                  <ToggleButtonGroup
+                    value={range}
+                    // NOTE: wrapping via a class instead of orientation={breakpointSm ? "vertical" : "horizontal"}
+                    color="primary"
+                    exclusive
+                    className="flex-wrap"
+                    onChange={(_, value) => {
+                      if (value !== null) {
+                        changeRange(value)
+                      }
+                    }}
+                  >
+                    {/* day/week/month — [from–to] — all: the custom toggle is a direct child
                       of the group (Fragments would break MUI's child cloning) so it stays
                       between month and all; its label becomes the chosen span once set */}
-                  {[
-                    ...RANGE_BUTTONS.filter((button) => button.value !== "all"),
-                    { value: "custom" as Range, label: customLabel, shortLabel: customShortLabel },
-                    ...RANGE_BUTTONS.filter((button) => button.value === "all"),
-                  ].map(({ value, label, shortLabel }) => (
-                    <ToggleButton
-                      key={value}
-                      value={value}
-                      // the xs value is !important, so it outranks the sm media rule at EVERY
-                      // width and these buttons stay 48px wide even on desktop. Pre-existing and
-                      // preserved: min-w-[48px]! reproduces it exactly (the contracts pin it)
-                      className="min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]"
-                    >
-                      <Box component="span" className="hidden sm:inline">
-                        {label}
-                      </Box>
-                      <Box component="span" className="inline sm:hidden">
-                        {shortLabel}
-                      </Box>
-                    </ToggleButton>
-                  ))}
-                </ToggleButtonGroup>
-              </Card>
-              {/* range buttons left — gap — Filters toggle (search-page pattern);
-                  the filter panel expands above all charts */}
-              {user?.advancedCharting && (
-                <Card className="bg-white inline-block">
-                  <Button
-                    size="large"
-                    onClick={toggleAdvanced}
-                    aria-expanded={advancedOpen}
-                    aria-controls="advanced-stats-panel"
-                    className="px-4 py-[11px]"
-                    endIcon={
-                      // arbitrary values, not rotate-180/transition-transform: v4's rotate-*
-                      // drives the `rotate` property while this transition names `transform`
-                      <KeyboardArrowDown
-                        className={classnames(
-                          "[transition:transform_0.2s]",
-                          advancedOpen && "[transform:rotate(180deg)]"
-                        )}
-                      />
-                    }
-                  >
-                    <Settings className="inline sm:hidden" />
-                    <Box component="span" className="hidden sm:inline">
-                      Filters
-                    </Box>
-                  </Button>
+                    {[
+                      ...RANGE_BUTTONS.filter((button) => button.value !== "all"),
+                      {
+                        value: "custom" as Range,
+                        label: customLabel,
+                        shortLabel: customShortLabel,
+                      },
+                      ...RANGE_BUTTONS.filter((button) => button.value === "all"),
+                    ].map(({ value, label, shortLabel }) => (
+                      <ToggleButton
+                        key={value}
+                        value={value}
+                        // the xs value is !important, so it outranks the sm media rule at EVERY
+                        // width and these buttons stay 48px wide even on desktop. Pre-existing and
+                        // preserved: min-w-[48px]! reproduces it exactly (the contracts pin it)
+                        className="min-w-[48px]! sm:min-w-[86px] px-[7px] sm:px-[11px]"
+                      >
+                        <Box component="span" className="hidden sm:inline">
+                          {label}
+                        </Box>
+                        <Box component="span" className="inline sm:hidden">
+                          {shortLabel}
+                        </Box>
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
                 </Card>
-              )}
-            </Box>
+                {/* range buttons left — gap — Filters toggle (search-page pattern);
+                  the filter panel expands above all charts */}
+                {user?.advancedCharting && (
+                  <Card className="bg-white inline-block">
+                    <Button
+                      size="large"
+                      onClick={toggleAdvanced}
+                      aria-expanded={advancedOpen}
+                      aria-controls="advanced-stats-panel"
+                      className="px-4 py-[11px]"
+                      endIcon={
+                        // arbitrary values, not rotate-180/transition-transform: v4's rotate-*
+                        // drives the `rotate` property while this transition names `transform`
+                        <KeyboardArrowDown
+                          className={classnames(
+                            "[transition:transform_0.2s]",
+                            advancedOpen && "[transform:rotate(180deg)]"
+                          )}
+                        />
+                      }
+                    >
+                      <Settings className="inline sm:hidden" />
+                      <Box component="span" className="hidden sm:inline">
+                        Filters
+                      </Box>
+                    </Button>
+                  </Card>
+                )}
+              </Box>
+            )}
 
             {/* the from–to window for the "custom" range — expands (same Collapse animation
-                as the Filters panel) with two dream-highlighted date pickers */}
-            <Collapse in={range === "custom"}>
-              <Card className="bg-white mt-4 p-4">
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <DreamDatePicker
-                      label="from"
-                      value={custom?.from ? DateTime.fromISO(custom.from) : null}
-                      onChange={(value) =>
-                        value?.isValid && changeCustom({ from: value.toISODate()! })
-                      }
-                      disableFuture
-                      maxDate={custom?.to ? DateTime.fromISO(custom.to) : undefined}
-                    />
+                as the Filters panel) with two dream-highlighted date pickers.
+                DreamDatePicker fires its own getDreamsByMonth query as soon as it mounts
+                (the Collapse above keeps it mounted whatever `range` is), so it only
+                renders online — offline it would query a month that was never cached and
+                index into `undefined` for the day tint */}
+            {online && (
+              <Collapse in={range === "custom"}>
+                <Card className="bg-white mt-4 p-4">
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <DreamDatePicker
+                        label="from"
+                        value={custom?.from ? DateTime.fromISO(custom.from) : null}
+                        onChange={(value) =>
+                          value?.isValid && changeCustom({ from: value.toISODate()! })
+                        }
+                        disableFuture
+                        maxDate={custom?.to ? DateTime.fromISO(custom.to) : undefined}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <DreamDatePicker
+                        label="to"
+                        value={custom?.to ? DateTime.fromISO(custom.to) : null}
+                        onChange={(value) =>
+                          value?.isValid && changeCustom({ to: value.toISODate()! })
+                        }
+                        disableFuture
+                        minDate={custom?.from ? DateTime.fromISO(custom.from) : undefined}
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <DreamDatePicker
-                      label="to"
-                      value={custom?.to ? DateTime.fromISO(custom.to) : null}
-                      onChange={(value) =>
-                        value?.isValid && changeCustom({ to: value.toISODate()! })
-                      }
-                      disableFuture
-                      minDate={custom?.from ? DateTime.fromISO(custom.from) : undefined}
-                    />
-                  </Grid>
-                </Grid>
-              </Card>
-            </Collapse>
+                </Card>
+              </Collapse>
+            )}
           </Grid>
         </Grid>
 
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
-            {/* opted in: everything centers around the filtered advanced chart + its facets;
-                the sleep chart (range-driven, independent of the filters) slots in between
-                the filter panel and the charts */}
-            {user?.advancedCharting ? (
-              <Suspense fallback={<LoadingSpiral />}>
-                <AdvancedStats range={range} custom={custom} filtersOpen={advancedOpen}>
-                  {user?.trackSleepingTime && (
-                    <Box className="mb-6">
-                      <Suspense fallback={<LoadingSpiral />}>
-                        <SleepChart range={range} custom={custom} />
-                      </Suspense>
-                    </Box>
-                  )}
-                </AdvancedStats>
-              </Suspense>
-            ) : (
+            {online ? (
+              // opted in: everything centers around the filtered advanced chart + its facets;
+              // the sleep chart (range-driven, independent of the filters) slots in between
+              // the filter panel and the charts
               <Fragment>
-                {/* 7th stat: full-width sleep pattern, only when bedtime/wake-up tracking is on */}
-                {user?.trackSleepingTime && (
-                  <Box className="mb-6">
+                {user?.advancedCharting ? (
+                  <Suspense fallback={<LoadingSpiral />}>
+                    <AdvancedStats range={range} custom={custom} filtersOpen={advancedOpen}>
+                      {user?.trackSleepingTime && (
+                        <Box className="mb-6">
+                          <Suspense fallback={<LoadingSpiral />}>
+                            <SleepChart range={range} custom={custom} />
+                          </Suspense>
+                        </Box>
+                      )}
+                    </AdvancedStats>
+                  </Suspense>
+                ) : (
+                  <Fragment>
+                    {/* 7th stat: full-width sleep pattern, only when bedtime/wake-up tracking is on */}
+                    {user?.trackSleepingTime && (
+                      <Box className="mb-6">
+                        <Suspense fallback={<LoadingSpiral />}>
+                          <SleepChart range={range} custom={custom} />
+                        </Suspense>
+                      </Box>
+                    )}
                     <Suspense fallback={<LoadingSpiral />}>
-                      <SleepChart range={range} custom={custom} />
+                      <StaticStatsCharts range={range} custom={custom} />
                     </Suspense>
-                  </Box>
+                  </Fragment>
                 )}
-                <Suspense fallback={<LoadingSpiral />}>
-                  <StaticStatsCharts range={range} custom={custom} />
-                </Suspense>
               </Fragment>
+            ) : (
+              <Alert severity="info">
+                stats aren&apos;t available offline — reconnect to see your charts
+              </Alert>
             )}
           </Grid>
         </Grid>
@@ -347,13 +372,13 @@ export const Stats = () => {
   )
 }
 
+// no wrapping <div>: inside Layout's centered flex column a plain div shrinks to its content, and
+// offline the content is one Alert — the Container must stay the flex item, like every other page
 const StatsPage: BlitzPage = () => {
   return (
-    <div>
-      <Suspense fallback={<LoadingSpiral />}>
-        <Stats />
-      </Suspense>
-    </div>
+    <Suspense fallback={<LoadingSpiral />}>
+      <Stats />
+    </Suspense>
   )
 }
 

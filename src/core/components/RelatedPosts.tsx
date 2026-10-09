@@ -3,6 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, Grid, Typography } from "@mui/material"
 import type { Blog } from "src/pages/api/blog/get-blogs"
+import { fallbackToOfflineCover } from "src/core/offline/coverFallback"
 
 export interface RelatedPostsProps {
   blogs: Blog[]
@@ -46,6 +47,7 @@ export const RelatedPosts = ({ blogs }: RelatedPostsProps) => {
                     width={184}
                     height={184}
                     className="object-cover cursor-pointer w-full h-auto aspect-square"
+                    onError={fallbackToOfflineCover}
                   />
                 </Link>
               </CardContent>

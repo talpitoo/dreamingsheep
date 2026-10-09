@@ -88,6 +88,12 @@
     scroll-behavior: smooth;
   }
 
+  /* offline (OfflineSupport sets the attribute): content images go gray — blog covers, the page
+     sheep, the cookie monster — the offline look without swapping assets */
+  html[data-offline] img {
+    filter: grayscale(1);
+  }
+
   body {
     scroll-behavior: smooth;
     background-color: #0097a7 !important; /* cyan[500] = #00bcd4 */

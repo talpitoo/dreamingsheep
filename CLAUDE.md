@@ -75,6 +75,51 @@ until explicitly started.
   most icons originally from thenounproject.com.
 - Prettier: no semicolons, printWidth 100. Husky + lint-staged on commit.
 
+## Offline mode (PWA) — a first-class feature, never a side effect
+
+Logged-in users can use the app without a connection (the "add to home screen" use case, shipped
+2026-10, PR #42; design in
+[docs/superpowers/specs/2026-09-27-offline-pwa-design.md](docs/superpowers/specs/2026-09-27-offline-pwa-design.md)).
+Hand-rolled under the frozen-deps policy — no next-pwa/workbox/@tanstack persist: a service worker
+in `public/sw.js`, the data layer in `src/core/offline/` and `src/dreams/offline/`. Architecture and
+gotchas live in [src/CLAUDE.md](src/CLAUDE.md#offline-srccoreoffline-srcdreamsoffline-publicswjs);
+the rules every change must keep:
+
+- **Offline is create-only.** Only new dreams can be written offline (queued in a localStorage
+  outbox, sent in order on reconnect → no conflicts to resolve). Everything else is read-only
+  offline: dream/symbol cards hide edit/delete, an edit already open keeps its typed text with
+  Update disabled, settings/stats/search show a notice. Every secondary write — a dialog, a
+  picker that saves on close, an upload — checks `isBrowserOnline()` itself, because a
+  react-query mutation started offline does not fail, it pauses and fires on reconnect. Do not
+  add an offline mutation without reopening the conflict question.
+- **Persist only allowlisted, never sensitive data.** `PERSISTED_QUERY_KEYS` in
+  `src/core/offline/persistedQueries.ts` is the entire list of react-query results mirrored to
+  `localStorage`; `getUser` (the full row, `hashedPassword` included) must never be on it. A new
+  query is not persisted unless added there on purpose, with its offline consumers guarded
+  (`enabled: online || hasCached`, data may be `undefined`).
+- **The device forgets on logout and on account deletion** through `forgetDeviceData()`
+  (`src/core/offline/deviceData.ts`): query cache, `ds.outbox.<userId>`, `ds.queries.<userId>`,
+  the worker's page cache. At boot, snapshots of _other_ users are dropped too
+  (`forgetOtherUsersSnapshots`), never their outboxes. Sign-out is refused offline (the session
+  cookie is HttpOnly) and while any dream is still unsynced after the pre-logout sync — a
+  logout never drops a dream. Any new per-user client-side storage must be cleared in both
+  places.
+- **The worker never caches `/api/`, `/_next/data/` or `/`**, stores only `ok` same-origin GET
+  responses (pages additionally `!redirected`), and private pages are cached as data-free static
+  shells (they SSR without user data — keep it that way). On a slow link it serves a cached shell
+  only from the runtime page cache, never the install-day precache (whose chunks are gone after a
+  deploy); the precache is for offline. Bump `VERSION` in `public/sw.js` only when its caching
+  logic changes; `npm run build` regenerates the git-ignored `public/sw-precache.json` first.
+- **Regression testing is mandatory** for changes touching queries, forms, `Header`/`Layout`,
+  `_app`, the dreams page or anything under `src/*/offline/`: `npm test` (outbox, syncRunner,
+  persistedQueries, querySnapshot) and `test/e2e/offline.e2e.test.ts` (headless Chromium,
+  `setOfflineMode`, runs on the dev server). The worker only registers in production: verify it on
+  `yarn build && yarn start` with DevTools → Network → Offline and a plain reload (Ctrl+Shift+R
+  bypasses service workers).
+- **User-facing descriptions to keep in sync**: the blog post
+  `src/pages/blog/use-case-four-dreaming-offline/`, the Privacy Policy "Offline storage" bullet
+  and the Terms of Service availability bullet.
+
 ## Commands
 
 ```sh
@@ -122,6 +167,7 @@ DNS, backups) outside this repo — ask rather than guess for infra details.
 ## Roadmap (see ROADMAP.md)
 
 Phase 1: Tailwind-v4 migration of `sx={{}}` (maintainer-led), tests, TS strict (#3, now unblocked).
-Phase 2: Blitz removal **done** (2026-08); the Next.js App Router move remains (**not now**).
+Phase 2: Blitz removal **done** (2026-08); offline/PWA mode **done** (2026-10, PR #42); the
+Next.js App Router move remains (**not now**).
 Phase 3: interactive charts (in progress — issues #6/#7), AI dream interpreter,
 public export API.

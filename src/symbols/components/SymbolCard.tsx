@@ -3,6 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import { useMutation } from "src/core/rpc-client"
+import { useOnlineStatus } from "src/core/offline/onlineStatus"
 import { Routes } from "src/routes"
 import type { SymbolWithUsage } from "src/symbols/queries/getSymbolsWithUsage"
 import classnames from "src/utils/classnames"
@@ -42,6 +43,7 @@ const SymbolCard = (props: SymbolCardProps) => {
   const router = useRouter()
   const symbolRef = useRef<null | HTMLDivElement>(null)
   const { symbol, onAfterUpdate, edit, onChangeEdit } = props
+  const online = useOnlineStatus()
   const [isEdit, setEdit] = useState(false)
   const [updateSymbolMutation, { isLoading: isUpdateSymbolLoading }] = useMutation(updateSymbol)
   const [deleteSymbolMutation] = useMutation(deleteSymbol)
@@ -113,6 +115,10 @@ const SymbolCard = (props: SymbolCardProps) => {
                 schema={UpdateSymbol}
                 initialValues={symbol}
                 onSubmit={async (values) => {
+                  // Enter still submits with Update disabled; offline the mutation would only
+                  // pause and fire on reconnect, behind the user's back
+                  if (!online)
+                    return { [FORM_ERROR]: "you're offline — reconnect to update this symbol" }
                   try {
                     await updateSymbolMutation(values)
                     onAfterUpdate()
@@ -165,44 +171,49 @@ const SymbolCard = (props: SymbolCardProps) => {
             <IconWithUsage type="type" countInfo={symbol.typeInfo} /> */}
             {symbol.description}
           </Box>
-          <Box className="flex flex-row ml-0">
-            {!symbol.builtIn && (
-              <IconButton
-                color="primary"
-                className="mr-auto ml-0 md:ml-4"
-                onClick={() => setDeleteDialogVisibility(true)}
-              >
-                <span className="lucidicon-trash"></span>
-              </IconButton>
-            )}
-            {!isEdit && (
-              <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
-                <span className="lucidicon-pencil"></span>
-              </IconButton>
-            )}
-            {isEdit && (
-              <Fragment>
-                <Button onClick={() => changeEdit(false)} disabled={isUpdateSymbolLoading}>
-                  Cancel
-                </Button>
-                {!symbol.builtIn && (
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    form={"update-symbol_" + symbol.id}
-                    disabled={isUpdateSymbolLoading}
-                    className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
-                      isUpdateSymbolLoading ? "max-w-[113px]" : "max-w-[89px]"
-                    }`}
-                    endIcon={isUpdateSymbolLoading && <HourglassTopIcon className="opacity-50" />}
-                  >
-                    Update
+          {/* offline, symbols are read-only — no edit/delete controls. An edit already open stays,
+              so a connection drop never discards what was typed: Cancel and a disabled Update
+              until reconnect */}
+          {(online || isEdit) && (
+            <Box className="flex flex-row ml-0">
+              {online && !symbol.builtIn && (
+                <IconButton
+                  color="primary"
+                  className="mr-auto ml-0 md:ml-4"
+                  onClick={() => setDeleteDialogVisibility(true)}
+                >
+                  <span className="lucidicon-trash"></span>
+                </IconButton>
+              )}
+              {!isEdit && (
+                <IconButton color="primary" onClick={() => changeEdit(true)} className="ml-4">
+                  <span className="lucidicon-pencil"></span>
+                </IconButton>
+              )}
+              {isEdit && (
+                <Fragment>
+                  <Button onClick={() => changeEdit(false)} disabled={isUpdateSymbolLoading}>
+                    Cancel
                   </Button>
-                )}
-              </Fragment>
-            )}
-          </Box>
+                  {!symbol.builtIn && (
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      form={"update-symbol_" + symbol.id}
+                      disabled={isUpdateSymbolLoading || !online}
+                      className={`w-auto ml-4 transition-all ease-in-out duration-300 ${
+                        isUpdateSymbolLoading ? "max-w-[113px]" : "max-w-[89px]"
+                      }`}
+                      endIcon={isUpdateSymbolLoading && <HourglassTopIcon className="opacity-50" />}
+                    >
+                      Update
+                    </Button>
+                  )}
+                </Fragment>
+              )}
+            </Box>
+          )}
         </CardActions>
       </Card>
       <DeletionConfirmationDialog

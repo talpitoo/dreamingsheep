@@ -137,6 +137,79 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   `getSleepingTimes` (fetched one extra day before the window so the first night
   finds its bedtime).
 
+## Offline (src/core/offline/, src/dreams/offline/, public/sw.js)
+
+Design and every review ruling:
+[docs/superpowers/specs/2026-09-27-offline-pwa-design.md](../docs/superpowers/specs/2026-09-27-offline-pwa-design.md).
+Rules of the road are in the root [CLAUDE.md](../CLAUDE.md#offline-mode-pwa--a-first-class-feature-never-a-side-effect);
+this is how it is built.
+
+- **Online status**: `useOnlineStatus()` / `isBrowserOnline()` (`onlineStatus.ts`) mirror
+  `navigator.onLine` and the `online`/`offline` events — the only signal there is.
+  `OfflineSupport` (mounted once in `_app`) toggles `html[data-offline]` (→ `img { filter: grayscale(1) }` in `index.css`), renders the corner ribbon and the one-slot notification
+  snackbar (`offlineNotice.ts`); `OfflineBanner` renders in-flow under the header via `Layout`,
+  `syncStatus.ts` carries the "log in again" state between them.
+- **Query persistence** (`persistedQueries.ts`; pure encode/select/decode in `querySnapshot.ts`):
+  allowlisted react-query results are mirrored into `localStorage` `ds.queries.<userId>` (budget
+  1.5 MB, 256 KB per entry, newest 50, priority keys first, debounced 1 s, written only while the
+  cookie still names that user) and hydrated at boot from the **cookie's** userId — not
+  `useSession()`, whose store lags one render behind. Allowlisted keys get `cacheTime: Infinity`
+  so a cached day never silently expires offline, and `OfflineSupport` clears the QueryClient when
+  the cookie user changes under an open tab. `getDreams` is kept only in its paginated form
+  (`take` in the params): the whole-journal stats/search variants are never shown offline. The
+  dreams page prefetches the symbol picker's list once per session so symbols can be attached
+  offline even if the picker was never opened online. **react-query v4 offline semantics**: a paused query
+  returns `data: undefined` WITHOUT suspending — every `useQuery` reachable offline needs the
+  `hasCached` / `enabled: online || hasCached` guard and must tolerate `undefined`;
+  `keepPreviousData` passes another day's data off as this one's (see `DreamsList`).
+- **Outbox + sync** (`src/dreams/offline/`): `outbox.ts` keeps `ds.outbox.<userId>` (a superjson
+  array of `PendingDream`; every write re-reads storage first; elements that lost their shape are
+  dropped on read). Error classification in `syncOutbox`: `TypeError` → blocked;
+  Authentication/CSRF → authRequired; Zod/403/404/other 4xx → parked with `lastError` (retry
+  button on the pending card); 408/429/502–504 and a non-JSON 2xx/3xx (captive portal, proxy
+  page) → blocked without spending attempts; anything else → up to 10 counted attempts. `syncRunner.ts`: `runSync` (per-tab guard + Web Lock
+  `ds.outbox.sync.<userId>`, `ifAvailable`, 60 s retry while blocked online) and `syncNow`
+  (pre-logout: waits for the lock, whole step bounded by 10 s). `sendFor` re-checks the cookie
+  before every request, so a run can never post under another user's session.
+  `usePendingDreams` + `PendingDreamList` render queued dreams on their day, `DreamsCalendar`
+  merges their marks. The dreams page queues on `!isBrowserOnline()` and on a fetch `TypeError`.
+- **Read-only offline**: `DreamList`/`SymbolCard` hide edit/delete; an edit already open stays,
+  Update disabled, `onSubmit` refused; `CreateInstantSymbolDialog` the same with Add;
+  `DeletionConfirmationDialog` disables its delete offline (a dialog opened online outlives the
+  drop); `SymbolForm` hides the picture upload offline (it saves on its own); `SymbolsAutocomplete`
+  offers no "create"; `SleepingTimeForm` is a disabled fieldset over cached values and its picker
+  handlers (a portal, outside the fieldset) check `isBrowserOnline()`; the symbols page hides jump
+  box/filter/new; stats, settings and search render sheep + title + notice only.
+- **Forgetting**: `forgetDeviceData(userId)` (`deviceData.ts`) clears the QueryClient, both
+  localStorage keys and tells the worker (`postMessage("ds-logout")`); used by `Header` logout
+  (after a best-effort `syncNow`; refused offline, and refused with a notice while any dream is
+  still unsynced — the dream's day offers retry/discard) and by account deletion in
+  `UpdateUserForm` (only once the server confirmed). At boot,
+  `forgetOtherUsersSnapshots` drops `ds.queries.*` of every other user (a session that ended
+  without its logout purge) — outboxes stay, they are dreams waiting for that user's next login.
+- **Service worker** (`public/sw.js`, registered by `swRegistration.ts` in production only):
+  `ds-precache-v2` (`/dreams`, `/faq`, `/blog`, every post and cover name from
+  `public/sw-precache.json` — written by `scripts/generate-sw-precache.mjs` at build time,
+  git-ignored —, `sheep-offline.png`, `blog-offline.png`); `ds-pages-v2` (visited same-origin
+  pages, pathname-keyed, `ok && !redirected` only, wiped on `ds-logout` — sent by logout, account
+  deletion and by `AuthGuard` whenever an authenticated page renders to nobody, so it only ever
+  holds a logged-in session's shells and is the only cache the slow-link race reads); `ds-static`
+  (content-hashed `/_next/static`, cache-first, unversioned on purpose); `ds-assets-v2`
+  (stale-while-revalidate, cap 100). Navigations are network-first with a non-aborting 4 s race
+  to the shell in `ds-pages-v2` only — a shell from a real navigation, whose chunks went through
+  `cacheFirst`; the install-day precache is served offline only (after a deploy its chunks are
+  gone from the server). The precache catch-up for new posts runs once per worker start. In
+  development `swRegistration` unregisters any worker left by a local production run. Never cached: `/api/`, `/_next/data/`, `/` (a 307 for logged-in users),
+  anything cross-origin (images only get a stand-in when their fetch fails). Stand-ins for
+  uncached images: a cover name from the manifest or `blog-*` → `blog-offline.png`,
+  `title-*`/`logo-*` → transparent 1×1, everything else → `sheep-offline.png`.
+- **Known limits**: the first visit must be online; private windows forget everything; iOS may
+  purge storage after ~7 days unused; sign-out is refused offline with a notice (the session
+  cookie is HttpOnly, only the server can end a session — pending dreams stay); a
+  crash between the server's success and the outbox removal can duplicate a dream (a
+  `clientId @unique` column would close it); the outbox's synchronous read→write is not locked
+  across tabs (accepted, see `outbox.ts`).
+
 ## Testing
 
 - **Unit** (`npm test`, Vitest, config `vitest.config.mts`): colocated
@@ -160,6 +233,14 @@ create a symbol on the fly via `CreateInstantSymbolContext`).
   fails its first compare run ("A snapshot doesn't exist … writing actual"), writes the file and
   passes on the next — so new states announce themselves. Re-baseline only the shots you approve,
   by name, never in bulk.
+- **Offline** has both: unit tests next to the code (`src/core/offline/*.test.ts`,
+  `src/dreams/offline/*.test.ts` — fake storage, fake timers, Web Lock stand-ins) and
+  `test/e2e/offline.e2e.test.ts` (`page.setOfflineMode`, no worker needed, tolerates dreams
+  already on today; covers the outbox round trip, the open edit staying read-only, the refused
+  offline sign-out, the delete dialog, a dream the server rejects getting parked, and sign-out
+  refused while it waits — seeded straight into Local Storage — then discard and a real sign-out). The worker is production-only: `yarn build && yarn start`, DevTools →
+  Network → Offline, plain reload. Run the unit suite and the offline spec for any change to
+  queries, forms, `Header`/`Layout`, `_app`, the dreams page or `src/*/offline/`.
 - CI runs lint + type-check + unit only (`.github/workflows/test.yml`).
 
 ## Gotchas
