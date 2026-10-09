@@ -275,10 +275,11 @@ async function coverNames() {
 }
 
 // every url() the stylesheets reference: the body canvas layers (src/styles/index.css) and the
-// contained button texture (src/styles/Theme.ts). By name, as a worker cannot tell a CSS
-// background from an <img> — both arrive as destination "image"
+// contained button texture (src/styles/Theme.ts, and public/styles/noscript.css for visitors
+// without JavaScript — a build may hash that one into button.<hash>.jpg). By name, as a worker
+// cannot tell a CSS background from an <img> — both arrive as destination "image"
 function isCssBackground(file) {
-  return file.startsWith("background-") || file === "button.jpg"
+  return file.startsWith("background-") || file.startsWith("button.")
 }
 
 function transparentImage() {
