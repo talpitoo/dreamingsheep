@@ -81,8 +81,10 @@ self.addEventListener("activate", (event) => {
   )
 })
 
-// logout hygiene — runtime-cached shells hold no private data, but leave nothing behind.
-// The precache (public shells, the sheep) stays.
+// logout hygiene — runtime-cached shells hold no private data, but leave nothing behind, and
+// only a logged-in session's shells may stand in for a slow "/" (AuthGuard sends the same
+// message when an authenticated page renders to nobody). The precache (public shells, the
+// sheep) stays.
 self.addEventListener("message", (event) => {
   if (event.data === "ds-logout") event.waitUntil(caches.delete(PAGES_CACHE))
 })
@@ -121,9 +123,10 @@ async function navigationHandler(event) {
   const key = pageKey(request.url)
   // a logged-in "/" is always a redirect and never gets its own cache entry — look up the
   // shell as "/"'s offline stand-in instead of falling through to the network's own TCP
-  // timeout on an up-but-dead connection. Only the runtime cache can stand in for "/": a
-  // logged-out visitor has no /dreams there (wiped at logout, never put without a login), so
-  // a slow landing page is waited for instead of being replaced by the journal's shell
+  // timeout on an up-but-dead connection (the installed app launches at "/"). Only the runtime
+  // cache can stand in for "/": a logged-out visitor has no /dreams there — it is wiped at
+  // logout and whenever an authenticated page renders to nobody (AuthGuard in _app) — so a slow
+  // landing page is waited for instead of being replaced by the journal's shell
   const lookupKey = key === "/" ? FALLBACK_PATH : key
   const network = fetch(request)
   // whatever the network eventually returns refreshes the shell — even after the timeout

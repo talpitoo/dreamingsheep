@@ -191,7 +191,9 @@ this is how it is built.
   `ds-precache-v2` (`/dreams`, `/faq`, `/blog`, every post and cover name from
   `public/sw-precache.json` — written by `scripts/generate-sw-precache.mjs` at build time,
   git-ignored —, `sheep-offline.png`, `blog-offline.png`); `ds-pages-v2` (visited same-origin
-  pages, pathname-keyed, `ok && !redirected` only, wiped on `ds-logout`); `ds-static`
+  pages, pathname-keyed, `ok && !redirected` only, wiped on `ds-logout` — sent by logout, account
+  deletion and by `AuthGuard` whenever an authenticated page renders to nobody, so it only ever
+  holds a logged-in session's shells and is the only cache the slow-link race reads); `ds-static`
   (content-hashed `/_next/static`, cache-first, unversioned on purpose); `ds-assets-v2`
   (stale-while-revalidate, cap 100). Navigations are network-first with a non-aborting 4 s race
   to the shell in `ds-pages-v2` only — a shell from a real navigation, whose chunks went through

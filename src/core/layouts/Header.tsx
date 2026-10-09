@@ -100,7 +100,9 @@ export function Header() {
       try {
         unsynced = readOutbox(window.localStorage, userId).length
       } catch {
-        // unreadable storage: nothing can be waiting there
+        // unreadable storage (access itself throws; a corrupt entry reads as []): nothing can be
+        // waiting there — the same storage refused the enqueue, and forgetDeviceData cannot
+        // remove what it cannot read. Refusing here would lock such a browser out of signing out
       }
       if (unsynced > 0) {
         collapseMobileMenu()

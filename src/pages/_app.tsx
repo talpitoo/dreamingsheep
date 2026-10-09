@@ -137,6 +137,11 @@ function AuthGuard({ Component, children }: { Component: AppPage; children: Reac
     // fallback for perfectly logged-in visitors on a full page load
     const userId = (readPublicDataFromCookie().userId as number | undefined) ?? null
     if (Component.authenticate === true && !userId) {
+      // the worker's runtime page cache is for logged-in sessions only: this shell was just
+      // stored by a navigation nobody is logged in for (a bookmark to /dreams after a logout, an
+      // expired session), and it must not be what a slow-link "/" is answered with later —
+      // same message as logout; the precache (public shells) is untouched
+      navigator.serviceWorker?.controller?.postMessage("ds-logout")
       setAuthError(new AuthenticationError())
     } else if (authError && userId) {
       setAuthError(null)

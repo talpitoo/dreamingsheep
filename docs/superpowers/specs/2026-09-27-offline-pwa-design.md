@@ -404,6 +404,14 @@ After several rounds of local fixes the whole branch was reviewed as one object.
   no longer names sign-out as a way to lose pending dreams, the post says "the days you opened
   while online"
 - e2e: the open edit, the refused sign-out and the delete dialog are pinned
+- follow-up (2026-10-09, CodeRabbit): an anonymous direct navigation to an authenticated page
+  (a bookmark to `/dreams` after a logout) stored that shell in the runtime page cache, which the
+  slow-link race then handed to a logged-out `/`. Closed at the source — `AuthGuard` sends the
+  worker the logout message whenever an authenticated page renders to nobody — rather than by
+  dropping the `/` stand-in, which the installed app (`start_url: "/"`) needs on an up-but-dead
+  connection. Rejected: failing closed when the outbox cannot be read at sign-out — storage that
+  throws on read refused the enqueue and refuses the purge too, so nothing can be lost, and the
+  refusal would lock a storage-blocked browser out of signing out.
 
 Left as documented trade-offs: "discard" on a pending card has no confirmation; a deep link can
 open an edit offline (consistent: Cancel + disabled Update); the "log in again" banner is
