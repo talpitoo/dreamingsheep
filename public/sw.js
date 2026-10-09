@@ -14,6 +14,14 @@ const FALLBACK_PATH = "/dreams"
 const OFFLINE_SHEEP = "/assets/sheep-offline.png"
 // blog covers (article pages, the blog index cards, "more from the blog") get their own stand-in
 const OFFLINE_BLOG_COVER = "/assets/blog-offline.png"
+// the body's blur placeholders (src/styles/index.css: the lower of the two background layers per
+// breakpoint, mobile below `sm`, desktop from `sm`), ~25 KB each, precached so the bluish canvas
+// shows offline. The progressive layer above them is ~300 KB each and is left to fail offline: a
+// failed layer does not paint, the placeholder and the background-color under it show through
+const CSS_BACKGROUND_PLACEHOLDERS = [
+  "/assets/background-canvas-mobile-blur-double-height.jpg",
+  "/assets/background-canvas-blur.jpg",
+]
 const MANIFEST = "/sw-precache.json"
 const NAV_TIMEOUT_MS = 4000
 const PAGES_LIMIT = 50
@@ -49,7 +57,7 @@ function pageKey(url) {
 async function refreshPrecache() {
   try {
     const cache = await caches.open(PRECACHE)
-    let urls = [FALLBACK_PATH, OFFLINE_SHEEP, OFFLINE_BLOG_COVER]
+    let urls = [FALLBACK_PATH, OFFLINE_SHEEP, OFFLINE_BLOG_COVER, ...CSS_BACKGROUND_PLACEHOLDERS]
     try {
       const res = await fetch("/sw-precache.json", { cache: "no-cache" })
       if (res.ok) {
@@ -222,6 +230,13 @@ async function offlineImage(event) {
   // follow in-app navigation. The gray SVG only covers a failed precache.
   const url = new URL(event.request.url)
   const file = url.pathname.split("/").pop() || ""
+  // a CSS background is an "image" request too, but a stand-in for one is painted across the
+  // whole canvas (the sheep stretched to 600×1920 on phones, to `cover` on desktops — v6.0.0).
+  // Serve the precached placeholder when this is one; otherwise fail the request, which is what
+  // the browser does without a worker: the layer does not paint, what is under it shows
+  if (isCssBackground(file)) {
+    return (await safeMatch(PRECACHE, url.pathname)) || new Response("", { status: 504 })
+  }
   const isStatic = url.pathname.startsWith("/_next/static/")
   if (isStatic && (file.startsWith("title-") || file.startsWith("logo-"))) return transparentImage()
   const name = file.split(".")[0]
@@ -248,6 +263,13 @@ async function coverNames() {
   } catch {
     return []
   }
+}
+
+// every url() the stylesheets reference: the body canvas layers (src/styles/index.css) and the
+// contained button texture (src/styles/Theme.ts). By name, as a worker cannot tell a CSS
+// background from an <img> — both arrive as destination "image"
+function isCssBackground(file) {
+  return file.startsWith("background-") || file === "button.jpg"
 }
 
 function transparentImage() {

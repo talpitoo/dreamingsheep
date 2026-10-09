@@ -202,7 +202,10 @@ this is how it is built.
   development `swRegistration` unregisters any worker left by a local production run. Never cached: `/api/`, `/_next/data/`, `/` (a 307 for logged-in users),
   anything cross-origin (images only get a stand-in when their fetch fails). Stand-ins for
   uncached images: a cover name from the manifest or `blog-*` → `blog-offline.png`,
-  `title-*`/`logo-*` → transparent 1×1, everything else → `sheep-offline.png`.
+  `title-*`/`logo-*` → transparent 1×1, everything else → `sheep-offline.png` — except CSS
+  backgrounds (`background-*`, `button.jpg`; a worker cannot tell them from an `<img>`): the body's
+  two blur placeholders are precached, anything else fails so the layer does not paint and the
+  `background-color` shows (v6.0.0 painted the sheep across the canvas).
 - **Known limits**: the first visit must be online; private windows forget everything; iOS may
   purge storage after ~7 days unused; sign-out is refused offline with a notice (the session
   cookie is HttpOnly, only the server can end a session — pending dreams stay); a
