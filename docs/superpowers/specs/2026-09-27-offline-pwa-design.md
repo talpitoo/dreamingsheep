@@ -418,7 +418,11 @@ After several rounds of local fixes the whole branch was reviewed as one object.
   asset cache, because the first online load installs the worker but is not yet controlled by it.
   Now CSS backgrounds (`background-*`, `button.jpg`) never get a stand-in: the two blur
   placeholders (~25 KB each) are precached and serve offline, the ~300 KB progressive layers and
-  the button texture fail as they would without a worker, and the `background-color` shows.
+  the button texture fail as they would without a worker, and the `background-color` shows. The
+  icon font went the same way on the phone (never cached on the uncontrolled first load, or
+  evicted from the 100-entry asset cache by blog covers): `lucidicon.ttf` (80 KB, the format every
+  browser picks from `fonts.css`) is precached too, and the asset miss path now consults the
+  precache by pathname before any stand-in.
 
 Left as documented trade-offs: "discard" on a pending card has no confirmation; a deep link can
 open an edit offline (consistent: Cancel + disabled Update); the "log in again" banner is

@@ -190,7 +190,9 @@ this is how it is built.
 - **Service worker** (`public/sw.js`, registered by `swRegistration.ts` in production only):
   `ds-precache-v2` (`/dreams`, `/faq`, `/blog`, every post and cover name from
   `public/sw-precache.json` — written by `scripts/generate-sw-precache.mjs` at build time,
-  git-ignored —, `sheep-offline.png`, `blog-offline.png`); `ds-pages-v2` (visited same-origin
+  git-ignored —, `sheep-offline.png`, `blog-offline.png`, the body's two blur placeholders and
+  the icon font `lucidicon.ttf` — `OFFLINE_ASSETS`, served on an asset-cache miss by pathname);
+  `ds-pages-v2` (visited same-origin
   pages, pathname-keyed, `ok && !redirected` only, wiped on `ds-logout` — sent by logout, account
   deletion and by `AuthGuard` whenever an authenticated page renders to nobody, so it only ever
   holds a logged-in session's shells and is the only cache the slow-link race reads); `ds-static`
