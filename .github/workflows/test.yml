@@ -13,7 +13,11 @@ on:
 jobs:
   test:
     name: Lint, types & unit tests
-    runs-on: ubuntu-latest
+    # NOTE: pinned, not ubuntu-latest. GitHub moved that label from Ubuntu 24.04 to 26.04
+    # (rollout 2026-10-19..11-19), whose OpenSSL 3.5 the frozen Prisma 3.13 has no engine
+    # for ("Unknown binaryTarget debian-openssl-3.5.x"). 24.04 ships OpenSSL 3.0.x, the
+    # same target as the production box. Lift the pin only together with a Prisma bump.
+    runs-on: ubuntu-24.04
 
     steps:
       # NOTE: pinned to the first releases that run on node24 (actions declare their
