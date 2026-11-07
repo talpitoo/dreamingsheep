@@ -1,4 +1,5 @@
 import Link from "next/link"
+import PageTitle from "src/core/components/PageTitle"
 import Image from "next/image"
 import { AppPage as BlitzPage } from "src/core/types"
 import { Routes } from "src/routes"
@@ -55,10 +56,7 @@ const FaqPage: BlitzPage = () => {
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
-            <h1 className="heading">
-              <Image src={titleFaq} alt="FAQ" width="68" height="55" />
-              <span className="sr-only">FAQ</span>
-            </h1>
+            <PageTitle image={titleFaq} text="FAQ" width={68} height={55} />
 
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader title="Who?" className="pb-0" component="h2" />

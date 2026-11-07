@@ -423,6 +423,13 @@ After several rounds of local fixes the whole branch was reviewed as one object.
   evicted from the 100-entry asset cache by blog covers): `lucidicon.ttf` (80 KB, the format every
   browser picks from `fonts.css`) is precached too, and the asset miss path now consults the
   precache by pathname before any stand-in.
+- follow-up (issues #44/#45): the transparent stand-in for `title-*` images left uncached pages
+  headless offline — fixed in the markup, not the cache: every page title is a `PageTitle`, the
+  image plus its words for screen readers as before, and the words shown instead whenever the
+  image fails or arrives as the 1×1 stand-in. And the after-midnight bedtime (saved to
+  yesterday's night) now also lands in the client cache under yesterday's key: every fetched
+  night stays cached for the session since the offline work, and the form reads its initial
+  values once at mount, so yesterday kept showing the stale night until a reload.
 
 Left as documented trade-offs: "discard" on a pending card has no confirmation; a deep link can
 open an edit offline (consistent: Cancel + disabled Update); the "log in again" banner is

@@ -1,4 +1,5 @@
 import { Routes } from "src/routes"
+import PageTitle from "src/core/components/PageTitle"
 import { Fragment, Suspense } from "react"
 import Layout from "src/core/layouts/Layout"
 import { Card, CardContent, CardHeader, Container, Grid, Typography } from "@mui/material"
@@ -51,9 +52,7 @@ const ArticlePageUseCaseTwoAddToHomeScreen: BlitzPage<{ related: Blog[] }> = ({ 
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
-            <div className="heading">
-              <Image src={titleBlog} alt="Blog" width="63" height="55" />
-            </div>
+            <PageTitle as="div" image={titleBlog} text="Blog" width={63} height={55} />
 
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader

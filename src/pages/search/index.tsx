@@ -1,4 +1,5 @@
 import classnames from "src/utils/classnames"
+import PageTitle from "src/core/components/PageTitle"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -149,10 +150,7 @@ const SearchPage: BlitzPage = () => {
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
-            <h1 className="heading">
-              <Image src={titleSearch} alt="Search" width="100" height="55" />
-              <span className="sr-only">Search</span>
-            </h1>
+            <PageTitle image={titleSearch} text="Search" width={100} height={55} />
 
             {online ? (
               // the collapsible filter panel keeps SymbolsAutocomplete mounted underneath

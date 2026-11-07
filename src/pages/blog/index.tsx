@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next"
+import PageTitle from "src/core/components/PageTitle"
 import Link from "next/link"
 import Image from "next/image"
 import { fallbackToOfflineCover } from "src/core/offline/coverFallback"
@@ -66,10 +67,7 @@ const BlogPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
-            <h1 className="heading">
-              <Image src={titleBlog} alt="Blog" width={63} height={55} />
-              <span className="sr-only">Blog</span>
-            </h1>
+            <PageTitle image={titleBlog} text="Blog" width={63} height={55} />
 
             {blogs.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).map((blog, index) => (
               <Card key={index} className="bg-mui-secondary-light mb-4">

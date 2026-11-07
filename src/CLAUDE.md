@@ -49,8 +49,11 @@ See root [CLAUDE.md](../CLAUDE.md) for the frozen-deps policy.
   client-only (server-side query data is `undefined` by design). Route helpers
   come from `src/routes.ts` (hand-written manifest, tested against the pages dir).
 - Shared visual pattern: sheep PNG (`public/assets/sheep-<page>.png`) in a
-  `md={2}/md={8}` MUI Grid, then an `<h1 className="heading">` with a
-  handwritten title PNG (`title-<page>.png`) + `sr-only` text.
+  `md={2}/md={8}` MUI Grid, then `<PageTitle image={title<Page>} text="…" />`
+  (`src/core/components/PageTitle.tsx`): an `h1.heading` (or a `div` on blog
+  articles) with the handwritten title PNG (`title-<page>.png`) + `sr-only` text,
+  and the text shown instead whenever the image fails or arrives as the offline
+  worker's 1×1 stand-in — a title that cannot draw itself writes itself.
 - Key pages: `dreams/` (journal + calendar), `search/` (advanced search),
   `stats/` (charts), `settings/`, `symbols/`, `blog/` + `faq/` (hardcoded TSX
   content, playful lowercase-"i" copy).
@@ -204,7 +207,8 @@ this is how it is built.
   development `swRegistration` unregisters any worker left by a local production run. Never cached: `/api/`, `/_next/data/`, `/` (a 307 for logged-in users),
   anything cross-origin (images only get a stand-in when their fetch fails). Stand-ins for
   uncached images: a cover name from the manifest or `blog-*` → `blog-offline.png`,
-  `title-*`/`logo-*` → transparent 1×1, everything else → `sheep-offline.png` — except CSS
+  `title-*`/`logo-*` → transparent 1×1 (page titles then write themselves as text, see
+  `PageTitle`), everything else → `sheep-offline.png` — except CSS
   backgrounds (`background-*`, `button.jpg`; a worker cannot tell them from an `<img>`): the body's
   two blur placeholders are precached, anything else fails so the layer does not paint and the
   `background-color` shows (v6.0.0 painted the sheep across the canvas).

@@ -1,4 +1,5 @@
 import classnames from "src/utils/classnames"
+import PageTitle from "src/core/components/PageTitle"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { AppPage as BlitzPage } from "src/core/types"
@@ -58,10 +59,7 @@ export const Settings = () => {
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
-            <h1 className="heading">
-              <Image src={titleSettings} alt="Settings" width="130" height="55" />
-              <span className="sr-only">Settings</span>
-            </h1>
+            <PageTitle image={titleSettings} text="Settings" width={130} height={55} />
             {/* offline the page is sheep + title + notice — nothing here can be changed without
                 the server, so nothing is shown (a settings save would only pause until reconnect) */}
             {online && user ? (

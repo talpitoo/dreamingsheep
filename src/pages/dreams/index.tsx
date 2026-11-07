@@ -1,4 +1,5 @@
 import Image from "next/image"
+import PageTitle from "src/core/components/PageTitle"
 import { useRouter } from "next/router"
 import {
   getQueryClient,
@@ -372,11 +373,13 @@ const DreamsPage: BlitzPage = () => {
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
-            <h1 className="heading inline-flex items-center">
-              <Image src={titleDreams} alt="Dreams" width="100" height="55" />{" "}
-              {/* <span className="text-base font-normal ml-4"> May 18, 2022</span> */}
-              <span className="sr-only">Dreams</span>
-            </h1>
+            <PageTitle
+              image={titleDreams}
+              text="Dreams"
+              width={100}
+              height={55}
+              className="inline-flex items-center"
+            />
 
             {user?.trackSleepingTime && (
               <Grid container className="-mt-8 sm:-mt-22 mb-4" spacing={2}>
