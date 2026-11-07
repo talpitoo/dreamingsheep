@@ -173,20 +173,26 @@ export function SleepingTimeForm({ currentDate }: SleepingTimeFormProps) {
     if (!targetDay || targetDay === currentDate) return false
     try {
       const existing = await rpcFetch("getSleepingTime", { where: { sleepingAt: targetDay } })
-      if (!existing) {
-        await createSleepingTimeMutation({
-          bedtime: getISODateString(value),
-          wakeUpTime: null,
-          sleepingAt: targetDay,
-        })
-      } else {
-        await updateSleepingTimeMutation({
-          bedtime: getISODateString(value),
-          wakeUpTime: getISODateString(existing.wakeUpTime),
-          sleepingAt: targetDay,
-          id: existing.id,
-        })
-      }
+      const saved = !existing
+        ? await createSleepingTimeMutation({
+            bedtime: getISODateString(value),
+            wakeUpTime: null,
+            sleepingAt: targetDay,
+          })
+        : await updateSleepingTimeMutation({
+            bedtime: getISODateString(value),
+            wakeUpTime: getISODateString(existing.wakeUpTime),
+            sleepingAt: targetDay,
+            id: existing.id,
+          })
+      // the saved night belongs to another day's form: that day's query is cached for the whole
+      // session (the offline cache keeps every fetched night in memory), and the form reads its
+      // initial values once, at mount — so the row goes into the cache now, under the key that
+      // day's form will use, or yesterday keeps showing the stale night until a reload (issue #45)
+      getQueryClient().setQueryData(
+        queryKeyFor(getSleepingTime, { where: { sleepingAt: targetDay } }),
+        saved
+      )
       const prefix =
         DateTime.fromJSDate(value).hour < BEDTIME_NIGHT_CUTOFF_HOUR ? "after midnight — " : ""
       setToast(

@@ -78,7 +78,30 @@ async function refreshPrecache() {
       if ((await safeMatch(PRECACHE, pageKey(url))) === undefined) missing.push(url)
     }
     await Promise.allSettled(missing.map((url) => precache(cache, url)))
+    await precacheTitles(cache, urls)
   } catch {}
+}
+
+// a shell's handwritten title (`title-*`, a content-hashed static import, a few KB) travels
+// with the shell: without it a never-visited page is headless offline, and a page that could
+// not hydrate (its chunks were never loaded) cannot write its title as text the way PageTitle
+// does. Learned from the cached HTML — no network unless a title is missing — so existing
+// installs catch up on their next worker start, and a title a page stops using is never fetched
+async function precacheTitles(cache, pageUrls) {
+  const wanted = new Set()
+  for (const url of pageUrls) {
+    if (/\.[a-z0-9]+(\?|$)/i.test(url)) continue // an asset, not a page
+    const shell = await safeMatch(PRECACHE, pageKey(url))
+    if (!shell) continue
+    const html = await shell.clone().text()
+    for (const match of html.matchAll(/src="(\/_next\/static\/media\/title-[^"\s]+)"/g))
+      wanted.add(match[1])
+  }
+  const missing = []
+  for (const url of wanted) {
+    if ((await safeMatch(PRECACHE, url)) === undefined) missing.push(url)
+  }
+  await Promise.allSettled(missing.map((url) => precache(cache, url)))
 }
 
 // no network I/O here: until activate settles, every fetch of the pages this worker controls
@@ -201,6 +224,9 @@ async function cacheFirst(event, cacheName, limit) {
     if (response.ok) event.waitUntil(putLimited(cacheName, request, response.clone(), limit))
     return response
   } catch {
+    // the precached titles (precacheTitles), keyed by pathname like everything in the precache
+    const precached = await safeMatch(PRECACHE, new URL(request.url).pathname)
+    if (precached) return precached
     if (request.destination === "image") return offlineImage(event)
     return new Response("", { status: 504 })
   }
@@ -233,7 +259,8 @@ async function offlineImage(event) {
   // every uncached image offline gets a stand-in, both precached at install: blog covers the
   // generic cover, everything else the offline sheep — except the app's own handwritten
   // titles and logo (static imports named title-*/logo-*), which vanish rather than turn into
-  // a tiny sheep. A cover is recognised by name: the build lists every post's cover in the
+  // a tiny sheep (a page title then writes itself as text, see PageTitle; the precached
+  // titles never get this far). A cover is recognised by name: the build lists every post's cover in the
   // manifest (they are called anything — blog-*, sheep-matrix, a pexels photo), and the name
   // is the same whether the file comes from /assets, as a content-hashed static import or
   // from another host. Pages cannot tell: a client's URL is its creation URL and does not

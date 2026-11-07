@@ -1,4 +1,5 @@
 import Head from "next/head"
+import PageTitle from "src/core/components/PageTitle"
 import Link from "next/link"
 import Image from "next/image"
 import { AppPage as BlitzPage } from "src/core/types"
@@ -48,10 +49,12 @@ const TermsOfServicePage: BlitzPage = () => {
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
-            <h1 className="heading">
-              <Image src={titleTermsOfService} alt="Terms of Service" width="221" height="55" />
-              <span className="sr-only">Terms of Service</span>
-            </h1>
+            <PageTitle
+              image={titleTermsOfService}
+              text="Terms of Service"
+              width={221}
+              height={55}
+            />
 
             <Alert severity="info" className="mb-6">
               <strong>Last updated:</strong> 9 October 2026

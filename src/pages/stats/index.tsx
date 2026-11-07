@@ -1,4 +1,5 @@
 import classnames from "src/utils/classnames"
+import PageTitle from "src/core/components/PageTitle"
 import Image from "next/image"
 import { useSession } from "src/auth/client"
 import { AppPage as BlitzPage } from "src/core/types"
@@ -203,10 +204,7 @@ export const Stats = () => {
         <Grid container className="mb-4">
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item xs={12} md={8}>
-            <h1 className="heading">
-              <Image src={titleStats} alt="Stats" width="77" height="55" />
-              <span className="sr-only">Stats</span>
-            </h1>
+            <PageTitle image={titleStats} text="Stats" width={77} height={55} />
             {/* offline the page is sheep + title + notice: the range and filter controls would
                 drive charts that are not rendered */}
             {online && (

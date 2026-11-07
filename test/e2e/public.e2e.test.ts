@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { Browser, Page } from "puppeteer"
+import { Browser, HTTPRequest, Page } from "puppeteer"
 import { BASE, bodyText, launchBrowser, newPage, sleep } from "./helpers"
 
 // public pages: no login required
@@ -45,6 +45,37 @@ describe("public pages", () => {
       const response = await page.goto(`${BASE}${path}`, { waitUntil: "domcontentloaded" })
       expect(response?.status(), path).toBe(200)
     }
+  })
+
+  it("a page title writes itself as text when its image cannot load (issue #44)", async () => {
+    // the handwritten FAQ title is a static import: block it, and the words must take its place
+    await page.setRequestInterception(true)
+    const block = (request: HTTPRequest) => {
+      if (/\/title-[^/]*\.png/.test(request.url())) void request.abort()
+      else void request.continue()
+    }
+    page.on("request", block)
+    try {
+      await page.goto(`${BASE}/faq`, { waitUntil: "networkidle2" })
+      await sleep(1000)
+      const heading = await page.$eval("h1.heading", (h1) => ({
+        img: !!h1.querySelector("img"),
+        spanVisible: !h1.querySelector("span")?.classList.contains("sr-only"),
+        text: (h1 as HTMLElement).innerText.trim(),
+      }))
+      expect(heading).toEqual({ img: false, spanVisible: true, text: "FAQ" })
+    } finally {
+      page.off("request", block)
+      await page.setRequestInterception(false)
+    }
+    // with the image reachable, the words stay for screen readers only, as before
+    await page.goto(`${BASE}/faq`, { waitUntil: "networkidle2" })
+    await sleep(1000)
+    const heading = await page.$eval("h1.heading", (h1) => ({
+      img: !!h1.querySelector("img"),
+      spanVisible: !h1.querySelector("span")?.classList.contains("sr-only"),
+    }))
+    expect(heading).toEqual({ img: true, spanVisible: false })
   })
 
   it("protected pages don't leak content to anonymous visitors", async () => {

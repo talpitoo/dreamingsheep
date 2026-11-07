@@ -1,4 +1,5 @@
 import classnames from "src/utils/classnames"
+import PageTitle from "src/core/components/PageTitle"
 import Image from "next/image"
 import { useMutation } from "src/core/rpc-client"
 import { useRouter } from "next/router"
@@ -72,10 +73,7 @@ const SymbolsPage: BlitzPage = () => {
       <Grid container>
         <Grid item md={2} className="grid-spacer-md-2" />
         <Grid item xs={12} md={8}>
-          <h1 className="heading">
-            <Image src={titleSymbols} alt="Symbols" width="151" height="55" />
-            <span className="sr-only">Symbols</span>
-          </h1>
+          <PageTitle image={titleSymbols} text="Symbols" width={151} height={55} />
           {/* <Typography variant="h2" sx={{ color: "white" }} gutterBottom>
             {user?.role === Role.USER
               ? "My symbols"

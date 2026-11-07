@@ -1,4 +1,5 @@
 import { Routes } from "src/routes"
+import PageTitle from "src/core/components/PageTitle"
 import Image from "next/image"
 import Link from "next/link"
 import { Fragment, Suspense } from "react"
@@ -51,9 +52,7 @@ const ArticlePageLifePurposeMilestoneOne: BlitzPage<{ related: Blog[] }> = ({ re
         <Grid container>
           <Grid item md={2} className="grid-spacer-md-2" />
           <Grid item md={8}>
-            <div className="heading">
-              <Image src={titleBlog} alt="Blog" width="63" height="55" />
-            </div>
+            <PageTitle as="div" image={titleBlog} text="Blog" width={63} height={55} />
 
             <Card className="bg-mui-secondary-light mb-4">
               <CardHeader title="Life purpose, milestone #1" className="pb-0" component="h1" />
